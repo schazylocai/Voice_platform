@@ -95,6 +95,7 @@ if file_to_upload := st.sidebar.file_uploader(
         if st.button("Submit"):
             st.write("Query submitted. This may take a minute while we search the database!")
             st.write("---------------------------------------------------------------------")
+            docs = Vector_store.similarity_search(query=user_input, k=3)
             st.write(run_model(user_input, llm, retriever))
 
             return user_input
