@@ -8,6 +8,7 @@ secret_key = os.environ['OPENAI_API_KEY']
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import RetrievalQA
+from langchain.chains.question_answering import load_qa_chain
 from langchain.chat_models import ChatOpenAI
 from langchain.vectorstores import FAISS
 from langchain.embeddings import OpenAIEmbeddings
@@ -95,7 +96,6 @@ if file_to_upload := st.sidebar.file_uploader(
         if st.button("Submit"):
             st.write("Query submitted. This may take a minute while we search the database!")
             st.write("---------------------------------------------------------------------")
-            docs = Vector_store.similarity_search(query=user_input, k=3)
             st.write(run_model(user_input, llm, retriever))
 
             return user_input
