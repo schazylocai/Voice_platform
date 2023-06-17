@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="JupyterPersistentConnectionParameters">
+    <option name="moduleParameters">
+      <map>
+        <entry key="$PROJECT_DIR$/../../../.idea/ML_files_X.iml">
+          <value>
+            <JupyterConnectionParameters>
+              <option name="managed" value="true" />
+              <option name="sdkHomePath" value="$PROJECT_DIR$/../../../venv_3.10/bin/python" />
+            </JupyterConnectionParameters>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../../Competitions/.idea/Competitions.iml">
+          <value>
+            <JupyterConnectionParameters>
+              <option name="managed" value="true" />
+            </JupyterConnectionParameters>
+          </value>
+        </entry>
+        <entry key="$PROJECT_DIR$/../openai-cookbook-main/.idea/openai-cookbook-main.iml">
+          <value>
+            <JupyterConnectionParameters>
+              <option name="managed" value="true" />
+              <option name="sdkHomePath" value="$PROJECT_DIR$/../../../venv_3.10/bin/python" />
+            </JupyterConnectionParameters>
+          </value>
+        </entry>
+        <entry key="/var/folders/cs/rts2lxdx2zz7bxvdpydjswvm0000gn/T/MMM_lightweight.ipynb15617119259315132290/.idea/MMM_lightweight.ipynb15617119259315132290.iml">
+          <value>
+            <JupyterConnectionParameters>
+              <option name="managed" value="true" />
+              <option name="sdkHomePath" value="$PROJECT_DIR$/../../../venv_3.10/bin/python" />
+            </JupyterConnectionParameters>
+          </value>
+        </entry>
+        <entry key="/var/folders/cs/rts2lxdx2zz7bxvdpydjswvm0000gn/T/Stable_Diffusion.ipynb17607015271823570756/.idea/Stable_Diffusion.ipynb17607015271823570756.iml">
+          <value>
+            <JupyterConnectionParameters>
+              <option name="managed" value="true" />
+              <option name="sdkHomePath" value="$PROJECT_DIR$/../../../venv_3.10/bin/python" />
+            </JupyterConnectionParameters>
+          </value>
+        </entry>
+        <entry key="/var/folders/cs/rts2lxdx2zz7bxvdpydjswvm0000gn/T/Stable_Diffusion.ipynb3277899140720268752/.idea/Stable_Diffusion.ipynb3277899140720268752.iml">
+          <value>
+            <JupyterConnectionParameters>
+              <option name="managed" value="true" />
+            </JupyterConnectionParameters>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
