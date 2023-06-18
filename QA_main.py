@@ -16,9 +16,10 @@ import PyPDF2
 
 st.set_page_config(layout="wide")
 
-st.title("GPT PDF Analyzer")
-st.sidebar.caption("www.samuelchazy.com")
-st.sidebar.caption("Developed & managed by Samuel Chazy")
+st.title("GPT Document Analyzer")
+st.caption('This application harnesses the power of Large Language Models (GPT) to enable you to seamlessly upload PDF documents and engage with them. In the query section, you can pose any question or request GPT to extract information, analyze content, or generate summaries from the uploaded document.')
+st.caption('*************** Simply upload your PDF file from the menu on the left and start querying the document. ***************')
+st.caption("Developed & managed by Samuel Chazy: www.samuelchazy.com")
 st.sidebar.caption('')
 
 if file_to_upload := st.sidebar.file_uploader(
@@ -79,15 +80,16 @@ if file_to_upload := st.sidebar.file_uploader(
 
     def input_query():
         # Create a text area
-        user_input = st.text_area("What is your query?",placeholder='Enter your text...')
+        st.subheader("What is your query?")
+        user_input = st.text_area("", value="",placeholder='Enter your text...')
 
         # Create a submit button
         if st.button("Submit"):
-            st.write("Query submitted. This may take a minute while we search the database!")
-            st.write("---------------------------------------------------------------------")
+            st.write("Query submitted. This may take a minute while we search the database............")
+            st.write("--------------------------------------------------------------------------------")
             st.write(run_model(user_input, llm, retriever))
 
-            return user_input
+        return user_input
 
     query = input_query()
 
