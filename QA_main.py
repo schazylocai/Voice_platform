@@ -17,8 +17,8 @@ import PyPDF2
 st.set_page_config(layout="wide")
 
 st.title("GPT Document Analyzer")
-st.caption('This application harnesses the power of Large Language Models (GPT) to enable you to seamlessly upload PDF documents and engage with them. In the query section, you can pose any question or request GPT to extract information, analyze content, or generate summaries from the uploaded document.')
-st.caption('*************** Simply upload your PDF file from the menu on the left and start querying the document. ***************')
+st.write('This application harnesses the power of Large Language Models (GPT) to enable you to seamlessly upload PDF documents and engage with them. In the query section, you can pose any question or request GPT to extract information, analyze content, or generate summaries from the uploaded document.')
+st.write('*************** Simply upload your PDF file from the menu on the left and start querying the document. ***************')
 st.caption("Developed & managed by Samuel Chazy: www.samuelchazy.com")
 st.sidebar.caption('')
 
