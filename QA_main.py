@@ -8,9 +8,8 @@ secret_key = os.environ['OPENAI_API_KEY']
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import RetrievalQA
-from langchain.chains.question_answering import load_qa_chain
 from langchain.chat_models import ChatOpenAI
-from langchain.vectorstores import FAISS
+from langchain.vectorstores import FAISS,DocArrayInMemorySearch,Chroma
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
 import PyPDF2
@@ -33,19 +32,9 @@ if file_to_upload := st.sidebar.file_uploader(
         chunks = text_splitter.split_text(text=text)
 
         llm = ChatOpenAI(temperature=0.3, model='gpt-3.5-turbo')
-
-        store_name = file.name[:-4]
-
-        if os.path.exists(f'{store_name}.pkl'):
-            with open(f'{store_name}.pkl','rb') as f:
-                Vector_store = pickle.load(f)
-                retriever = Vector_store.as_retriever()
-        else:
-            embedding = OpenAIEmbeddings(openai_api_key=secret_key)
-            Vector_store = FAISS.from_texts(chunks,embedding=embedding)
-            retriever = Vector_store.as_retriever()
-            with open(f'{store_name}.pkl','wb') as f:
-                pickle.dump(Vector_store,f)
+        embedding = OpenAIEmbeddings(openai_api_key=secret_key)
+        my_database = Chroma.from_texts(chunks, embedding)
+        retriever = my_database.as_retriever()
 
     ########## RetrievalQA from chain type ##########
 
