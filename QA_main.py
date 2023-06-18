@@ -37,8 +37,6 @@ if file_to_upload := st.sidebar.file_uploader(
         retriever = my_database.as_retriever()
 
     ########## RetrievalQA from chain type ##########
-
-    @st.cache
     def run_model(question,main_llm,main_retriever):
 
         response_template = """
@@ -78,7 +76,6 @@ if file_to_upload := st.sidebar.file_uploader(
 
         return query_model.run(question)
 
-    @st.cache
     def input_query():
         # Create a text area
         st.subheader("What is your query?")
