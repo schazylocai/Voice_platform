@@ -53,7 +53,7 @@ if file_to_upload := st.sidebar.file_uploader(
         • What is the question.
         • What did you read in the document to analyze the question.
         • What is your answer to the question.
-        • • Add citations from the document that supports the answer in bullet points at the end of you answer
+        • Add citations from the document that supports the answer in bullet points at the end of you answer
         • What made you come up with this conclusion or reply.
         • Add references related to question from the given documents only, in bullet points, each one separately, at the end of you answer.
 
