@@ -16,22 +16,23 @@ st.set_page_config(layout="wide")
 def change_language():
 
     st.caption("Developed & managed by Samuel Chazy: www.samuelchazy.com")
-    language = st.selectbox("Chose a Language", ("English", "Français", "عربي"))
+    st.sidebar.subheader("Chose a Language")
+    language = st.sidebar.selectbox("", ("English", "Français", "عربي"))
 
     if language == 'English':
         st.empty()
         st.title("Topic Knowledge Base")
-        st.write("This application harnesses the power of Large Language Models to enable you to extract knowledge about specific topics. In the query section, you can ask any question that is only related to your topic.")
+        st.sidebar.write("This application harnesses the power of Large Language Models to enable you to extract knowledge about specific topics. In the query section, you can ask any question that is only related to your topic.")
 
     elif language == 'Français':
         st.empty()
         st.title("Base de connaissances sur les sujets")
-        st.write("Cette application exploite la puissance des modèles de langage avancés pour vous permettre d'extraire des connaissances sur des sujets spécifiques. Dans la section de requête, vous pouvez poser des questions uniquement liées à votre sujet.")
+        st.sidebar.write("Cette application exploite la puissance des modèles de langage avancés pour vous permettre d'extraire des connaissances sur des sujets spécifiques. Dans la section de requête, vous pouvez poser des questions uniquement liées à votre sujet.")
 
     elif language == 'عربي':
         st.empty()
         st.title("قاعدة المعرفة للمواضيع")
-        st.write("تستخدم هذه التطبيقات قوة نماذج اللغة الكبيرة لتمكينك من استخلاص المعرفة حول مواضيع محددة. في قسم الاستعلامات، يمكنك طرح أي سؤال يتعلق فقط بموضوعك", font_family="Kufi")
+        st.sidebar.write("تستخدم هذه التطبيقات قوة نماذج اللغة الكبيرة لتمكينك من استخلاص المعرفة حول مواضيع محددة. في قسم الاستعلامات، يمكنك طرح أي سؤال يتعلق فقط بموضوعك")
 
     return language
 
@@ -41,19 +42,19 @@ llm = ChatOpenAI(temperature=0)
 def Choose_Topic(language):
 
     if language == 'English':
-        st.empty()
-        user_topic = st.selectbox("Choose a topic", ('Art', 'Math', 'History'))
-        #change_language('English')
+        st.sidebar.empty()
+        st.sidebar.header("Choose a topic")
+        user_topic = st.sidebar.selectbox("", ('Art', 'Math', 'History'))
 
     elif language == 'Français':
-        st.empty()
-        user_topic = st.selectbox("Choisissez un thème", ('Art', 'Mathématiques', 'Histoire'))
-        #change_language('Français')
+        st.sidebar.empty()
+        st.sidebar.header("Choisissez un thème")
+        user_topic = st.sidebar.selectbox("", ('Art', 'Mathématiques', 'Histoire'))
 
     elif language == 'عربي':
-        st.empty()
-        user_topic = st.selectbox("اختر موضوعًا", ("الفن", "الرياضيات", "التاريخ"))
-        #change_language('عربي')
+        st.sidebar.empty()
+        st.sidebar.header("اختر موضوعًا")
+        user_topic = st.sidebar.selectbox("", ("الفن", "الرياضيات", "التاريخ"))
 
     return user_topic,language
 
@@ -217,95 +218,100 @@ def Router_chains(router_prompt,destination_chains,default_chain):
 
     return chain
 
-# #################################### Input Question ####################################
-# def Input_Question(topic,language):
-#
-#     if language.strip().lower() == 'english':
-#         user_input = input("Provide a question that is relevant to the specific topic that you chose!")
-#     elif language.strip().lower() == 'french':
-#         user_input = input("donner une question pertinente sur le sujet spécifique que vous avez choisi!")
-#     elif language.strip().lower() == 'arabic':
-#         user_input = input("قدم سؤالًا ذا صلة بالموضوع الذي اخترته")
-#
-#     relevance_question = f"is {user_input} a {topic} topic?"
-#     format_instructions = f"""
-#     Make sure that {user_input} is a {topic} topic
-#     Reply by Yes or No only
-#
-#     << OUTPUT >>
-#     """
-#     chat = ChatOpenAI(temperature=0)
-#     relevance_chat = ChatPromptTemplate.from_template(template=format_instructions)
-#     relevance_format = relevance_chat.format_messages(text=relevance_question, format_instructions=format_instructions)
-#     response = chat(relevance_format).content.split('\n')
-#
-#     if user_input.strip().lower() == 'quit':
-#         user_quit = True
-#         topic_relevance = False
-#         return user_input,topic_relevance,user_quit
-#
-#     if response[0] == 'No':
-#         topic_relevance = False
-#         user_quit = False
-#         return user_input,topic_relevance,user_quit
-#
-#     else:
-#         topic_relevance = True
-#         user_quit = False
-#         return user_input,topic_relevance,user_quit
-#
-#
-# #################################### Response ####################################
-# def Question_reply(language,question):
-#
-#     if language.strip().lower() == 'english':
-#         print(f"The answer to your question '{question}' is:")
-#         print('-'*120)
-#     elif language.strip().lower() == 'french':
-#         print(f"La réponse a votre question '{question}' est:")
-#         print('-'*120)
-#     elif language.strip().lower() == 'arabic':
-#         print(f"{question}الجواب على سوآلك : ")
-#         print('-'*120)
-#
-#
-# #################################### Run Chain ####################################
-# def Run_Chain(question,chain):
-#     answer = chain.run(question)
-#     return answer
-#
-#
+#################################### Input Question ####################################
+def Input_Question(topic,language):
+
+    if language == 'English':
+        st.subheader("Provide a question that is relevant to the specific topic that you chose!")
+        user_input = st.text_input("")
+    elif language == 'Français':
+        st.subheader("Donner une question pertinente sur le sujet spécifique que vous avez choisi!")
+        user_input = st.text_input("Donner une question pertinente sur le sujet spécifique que vous avez choisi!")
+    elif language == 'عربي':
+        st.subheader("قدم سؤالًا ذا صلة بالموضوع الذي اخترته")
+        user_input = st.text_input("")
+
+    relevance_question = f"is {user_input} a {topic} topic?"
+    format_instructions = f"""
+    Make sure that {user_input} is a {topic} topic
+    Reply by Yes or No only
+
+    << OUTPUT >>
+    """
+
+    # Create a submit button
+    if st.button("Submit"):
+        st.write("Query submitted. This may take a minute while we search the database............")
+        st.write("--------------------------------------------------------------------------------")
+        chat = ChatOpenAI(temperature=0)
+        relevance_chat = ChatPromptTemplate.from_template(template=format_instructions)
+        relevance_format = relevance_chat.format_messages(text=relevance_question,
+                                                          format_instructions=format_instructions)
+        response = chat(relevance_format).content.split('\n')
+
+        if response[0] == 'No':
+            topic_relevance = False
+
+            if language == 'English':
+                st.subheader("Please write a question that is relevant to the topic you chose!")
+                st.write("Try again!")
+            elif language == 'Français':
+                st.subheader("Veuillez écrire une question pertinente par rapport au sujet que vous avez choisi!")
+                st.write("Essayez à nouveau!")
+            elif language == 'عربي':
+                st.subheader("يرجى كتابة سؤال متعلق بالموضوع الذي اخترته")
+                st.write("حاول مرة أخرى")
+
+            return user_input,topic_relevance,language
+
+        else:
+            topic_relevance = True
+            return user_input,topic_relevance,language
+    else:
+        topic_relevance = False
+        return user_input,topic_relevance,language
+
+#################################### Response ####################################
+def Question_reply(language,question):
+
+    if language == 'English':
+        st.write(f"The answer to your question '{question}' is:")
+        st.caption('-'*120)
+    elif language == 'Français':
+        print(f"La réponse a votre question '{question}' est:")
+        st.caption('-'*120)
+    elif language == 'عربي':
+        print(f"{question}الجواب على سوآلك : ")
+        st.caption('-'*120)
+
+#################################### Run Chain ####################################
+def Run_Chain(question,chain):
+    answer = chain.run(question)
+    return answer
+
+
 #################################### Run module ####################################
 def Run_module():
+    def Question_relevance():
+
+        art_template, math_template, history_template = Topic_Template(language)
+        prompt_infos = Define_Topic(art_template, math_template, history_template)
+        destination_chains,destinations = Destination_Chains(prompt_infos)
+
+        default_chain = Default_Prompt()
+        router_prompt = Router_Templates(destinations)
+        chain = Router_chains(router_prompt,destination_chains,default_chain)
+        answer = Run_Chain(question,chain)
+        Question_reply(language, question)
+        st.write(answer)
+        st.caption('-'*120)
 
     language = change_language()
-    topic = Choose_Topic(language)
-#     user_quit = False
-#     topic_relevance = False
-#
-#     while True:
-#         question,topic_relevance,user_quit = Input_Question(topic,language)
-#         if topic_relevance or user_quit:
-#                 break
-#
-#     def Question_relevance():
-#         reply = Question_reply(language,question)
-#
-#         art_template, math_template, history_template = Topic_Template(language)
-#         prompt_infos = Define_Topic(art_template, math_template, history_template)
-#         destination_chains,destinations = Destination_Chains(prompt_infos)
-#
-#         default_chain = Default_Prompt()
-#         router_prompt = Router_Templates(destinations)
-#         chain = Router_chains(router_prompt,destination_chains,default_chain)
-#         answer = Run_Chain(question,chain)
-#         print(answer)
-#         print('-'*120)
-#         return reply
-#
-#     if topic_relevance:
-#         Question_relevance()
-#
-#
+    topic,language = Choose_Topic(language)
+    topic_relevance = False
+    question,topic_relevance,language = Input_Question(topic,language)
+    if topic_relevance:
+        Question_relevance()
+
 #################################### Execute model ####################################
 Run_module()
