@@ -175,12 +175,12 @@ def Default_Prompt():
 def Router_Templates(destinations):
 
     MULTI_PROMPT_ROUTER_TEMPLATE = """
-    Given a raw text input to a language model, select the model prompt that is best suited for the input.
-    You will be given the names of the available prompts and a description of what the prompt is best suited for.
-    You may also revise the original input if you think that revising it will ultimately lead to a better response from the language model.
+    • Given a raw text input to a language model, select the model prompt that is best suited for the input.
+    • You will be given the names of the available prompts and a description of what the prompt is best suited for.
+    • You may also revise the original input if you think that revising it will ultimately lead to a better response from the language model.
 
-    REMEMBER: "destination" MUST be one of the candidate prompt names specified below OR it can be "DEFAULT" if the input is not well suited for any of the candidate prompts.
-    REMEMBER: "next_inputs" can just be the original input if you don't think any modifications are needed.
+    • REMEMBER: "destination" MUST be one of the candidate prompt names specified below OR it can be "DEFAULT" if the input is not well suited for any of the candidate prompts.
+    • REMEMBER: "next_inputs" can just be the original input if you don't think any modifications are needed.
 
     << FORMATTING >>
     Return a markdown code snippet with a JSON object formatted to look like:
@@ -210,7 +210,7 @@ def Router_Templates(destinations):
 #################################### Define a Router Chain & Chain ####################################
 def Router_chains(router_prompt,destination_chains,default_chain):
 
-    llm_api = ChatOpenAI(temperature=0)
+    llm_api = ChatOpenAI(temperature=0.5, model='gpt-3.5-turbo') # gpt-4 or gpt-3.5-turbo
     router_chain = LLMRouterChain.from_llm(llm_api, router_prompt)
     chain = MultiPromptChain(router_chain=router_chain,
                              destination_chains=destination_chains,
@@ -222,12 +222,15 @@ def Router_chains(router_prompt,destination_chains,default_chain):
 def Input_Question(topic,language):
 
     if language == 'English':
+        st.write("=> Please pick a topic from the menu to the right.")
         st.subheader("Provide a question that is relevant to the specific topic that you chose!")
         user_input = st.text_input("")
     elif language == 'Français':
+        st.write("=> Veuillez choisir un sujet dans le menu à droite.")
         st.subheader("Donner une question pertinente sur le sujet spécifique que vous avez choisi!")
         user_input = st.text_input("Donner une question pertinente sur le sujet spécifique que vous avez choisi!")
     elif language == 'عربي':
+        st.write("=> يرجى اختيار موضوع من القائمة على اليمين")
         st.subheader("قدم سؤالًا ذا صلة بالموضوع الذي اخترته")
         user_input = st.text_input("")
 
