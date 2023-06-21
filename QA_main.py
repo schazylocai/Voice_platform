@@ -27,53 +27,53 @@ if file_to_upload := st.sidebar.file_uploader(
     'Please select a PDF file to upload:',
     type='pdf',
     accept_multiple_files=True,):
-    for file in file_to_upload:
-        pdf_reader = PyPDF2.PdfReader(file_to_upload[0])
-        text = "".join(page.extract_text() for page in pdf_reader.pages)
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=500,chunk_overlap=20,length_function=len)
-        chunks = text_splitter.split_text(text=text)
+    #for file in file_to_upload:
+    pdf_reader = PyPDF2.PdfReader(file_to_upload[0])
+    text = "".join(page.extract_text() for page in pdf_reader.pages)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500,chunk_overlap=20,length_function=len)
+    chunks = text_splitter.split_text(text=text)
 
-        llm = ChatOpenAI(temperature=0.7, model='gpt-4') # gpt-4 or gpt-3.5-turbo
-        memory = ConversationBufferMemory(return_messages=True)
-        embedding = OpenAIEmbeddings(openai_api_key=secret_key)
-        my_database = Chroma.from_texts(chunks, embedding)
-        retriever = my_database.as_retriever()
+    llm = ChatOpenAI(temperature=0.7, model='gpt-4') # gpt-4 or gpt-3.5-turbo
+    memory = ConversationBufferMemory(return_messages=True)
+    embedding = OpenAIEmbeddings(openai_api_key=secret_key)
+    my_database = Chroma.from_texts(chunks, embedding)
+    retriever = my_database.as_retriever()
 
-        ########## RetrievalQA from chain type ##########
-        response_template = """        
-        • You are a professional in the Educational Field.
-        • Your task is to read research papers, research documents, educational journals, and conference papers.
-        • You should be analytical and reply in depth.
-        • Always reply in a polite and professional manner.
-        • Don't connect or look for answers on the internet.
-        • Only look for answers from the given documents and papers.
-        • Use conversation memory to link all question and responses together
-        • If you don't know the answer to the question, then reply: "I can't be confident about my answer because I am missing the context or some information!"
-    
-        Divide your answer when possible into bullet points style:
-        • What is the question?
-        • What did you read in the document to analyze the question?
-        • What is your answer to the question?
-        • Add citations from the document that supports the answer in bullet points at the end of your answer.
-        • What made you come up with this conclusion or response?
-        • Add references related to questions from the given documents only, in bullet points, each one separately, at the end of your answer.
-    
-        {context}
-    
-        Question: {question}
-    
-        Answer:
-        """
+    ########## RetrievalQA from chain type ##########
+    response_template = """        
+    • You are a professional in the Educational Field.
+    • Your task is to read research papers, research documents, educational journals, and conference papers.
+    • You should be analytical and reply in depth.
+    • Always reply in a polite and professional manner.
+    • Don't connect or look for answers on the internet.
+    • Only look for answers from the given documents and papers.
+    • Use conversation memory to link all question and responses together
+    • If you don't know the answer to the question, then reply: "I can't be confident about my answer because I am missing the context or some information!"
 
-        prompt = PromptTemplate(template=response_template, input_variables=["context", "question"])
-        chain_type_kwargs = {'prompt': prompt}
-        query_model = RetrievalQA.from_chain_type(
-            llm=llm,
-            chain_type="stuff",
-            retriever=retriever,
-            chain_type_kwargs=chain_type_kwargs,
-            memory=memory,
-            verbose=False)
+    Divide your answer when possible into bullet points style:
+    • What is the question?
+    • What did you read in the document to analyze the question?
+    • What is your answer to the question?
+    • Add citations from the document that supports the answer in bullet points at the end of your answer.
+    • What made you come up with this conclusion or response?
+    • Add references related to questions from the given documents only, in bullet points, each one separately, at the end of your answer.
+
+    {context}
+
+    Question: {question}
+
+    Answer:
+    """
+
+    prompt = PromptTemplate(template=response_template, input_variables=["context", "question"])
+    chain_type_kwargs = {'prompt': prompt}
+    query_model = RetrievalQA.from_chain_type(
+        llm=llm,
+        chain_type="stuff",
+        retriever=retriever,
+        chain_type_kwargs=chain_type_kwargs,
+        memory=memory,
+        verbose=False)
 
     if 'generated' not in st.session_state:
         st.session_state['generated'] = []
@@ -85,7 +85,8 @@ if file_to_upload := st.sidebar.file_uploader(
         # Create a new text_area and button
         st.caption("-----------------------------------------------------------------------")
         with st.container():
-            _user_input = st.text_area("What is your query?", placeholder='Enter your text...')
+            st.subheader('What is your query?')
+            _user_input = st.text_area("▼", placeholder='Enter your text...')
             _submit_button = st.button("Submit")
 
         return _user_input,_submit_button
