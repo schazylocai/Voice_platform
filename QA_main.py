@@ -20,8 +20,6 @@ st.caption("Developed & managed by Samuel Chazy: www.samuelchazy.com")
 st.title("GPT Document Analyzer")
 st.write('This application harnesses the power of Large Language Models (GPT) to enable you to seamlessly upload PDF documents and engage with them. In the query section, you can pose any question or request GPT to extract information, analyze content, or generate summaries from the uploaded document.')
 st.write('Simply upload your PDF file from the menu to the left & start querying the documents.')
-st.sidebar.caption('')
-
 
 if file_to_upload := st.sidebar.file_uploader(
     'Please select a PDF file to upload:',
@@ -111,4 +109,5 @@ if file_to_upload := st.sidebar.file_uploader(
     user_input,submit_button = run_model(user_input,submit_button)
 
 else:
-    st.sidebar.error('No file selected yet!')
+    st.sidebar.caption("Don't upload more than 1 pdf file for analysis!")
+    #st.sidebar.write('No file selected yet!')
