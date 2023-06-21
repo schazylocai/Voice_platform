@@ -12,6 +12,7 @@ from langchain.vectorstores import Chroma
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
+from streamlit_chat import message
 import PyPDF2
 
 st.set_page_config(layout="wide")
@@ -75,6 +76,12 @@ if file_to_upload := st.sidebar.file_uploader(
         memory=memory,
         verbose=False)
 
+    if 'generated' not in st.session_state:
+        st.session_state['generated'] = []
+
+    if 'past' not in st.session_state:
+        st.session_state['past'] = []
+
     def create_text_question():
         # Create a new text_area and button
         st.caption("-----------------------------------------------------------------------")
@@ -91,6 +98,8 @@ if file_to_upload := st.sidebar.file_uploader(
             st.caption("-----------------------------------------------------------------------")
 
             response = query_model.run(_user_input)
+            st.session_state.past.append(_user_input)
+            st.session_state.generated.append(response)
             st.write(response)
             #st.write(memory.load_memory_variables({}))
 
