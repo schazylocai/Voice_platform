@@ -12,7 +12,6 @@ from langchain.vectorstores import Chroma
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
-from streamlit_chat import message
 import PyPDF2
 
 st.set_page_config(layout="wide")
