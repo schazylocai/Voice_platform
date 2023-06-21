@@ -27,80 +27,79 @@ if file_to_upload := st.sidebar.file_uploader(
     'Please select a PDF file to upload:',
     type='pdf',
     accept_multiple_files=True,):
-    conversation_memory = ConversationBufferMemory(return_messages=True)
-    for file in file_to_upload:
-        pdf_reader = PyPDF2.PdfReader(file)
-        text = "".join(page.extract_text() for page in pdf_reader.pages)
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=500,chunk_overlap=20,length_function=len)
-        chunks = text_splitter.split_text(text=text)
+    #for file in file_to_upload:
+    pdf_reader = PyPDF2.PdfReader(file_to_upload[0])
+    text = "".join(page.extract_text() for page in pdf_reader.pages)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500,chunk_overlap=20,length_function=len)
+    chunks = text_splitter.split_text(text=text)
 
-        llm = ChatOpenAI(temperature=0.7, model='gpt-4') # gpt-4 or gpt-3.5-turbo
-        embedding = OpenAIEmbeddings(openai_api_key=secret_key)
-        my_database = Chroma.from_texts(chunks, embedding)
-        retriever = my_database.as_retriever()
+    llm = ChatOpenAI(temperature=0.7, model='gpt-4') # gpt-4 or gpt-3.5-turbo
+    memory = ConversationBufferMemory(return_messages=True)
+    embedding = OpenAIEmbeddings(openai_api_key=secret_key)
+    my_database = Chroma.from_texts(chunks, embedding)
+    retriever = my_database.as_retriever()
 
     ########## RetrievalQA from chain type ##########
-    @st.cache_resource(ttl=3600)
-    def run_model(question,_main_llm,_main_retriever,_conversation_memory):
+    response_template = """        
+    • You are a professional in the Educational Field.
+    • Your task is to read research papers, research documents, educational journals, and conference papers.
+    • You should be analytical and reply in depth.
+    • Always reply in a polite and professional manner.
+    • Don't connect or look for answers on the internet.
+    • Only look for answers from the given documents and papers.
+    • Use conversation memory to link all question and responses together
+    • If you don't know the answer to the question, then reply: "I can't be confident about my answer because I am missing the context or some information!"
 
-        response_template = """        
-        • You are a professional in the Educational Field.
-        • Your task is to read research papers, research documents, educational journals, and conference papers.
-        • You should be analytical and reply in depth.
-        • Always reply in a polite and professional manner.
-        • Don't connect or look for answers on the internet.
-        • Only look for answers from the given documents and papers.
-        • Use conversation memory to link all question and responses together
-        • If you don't know the answer to the question, then reply: "I can't be confident about my answer because I am missing the context or some information!"
+    Divide your answer when possible into bullet points style:
+    • What is the question?
+    • What did you read in the document to analyze the question?
+    • What is your answer to the question?
+    • Add citations from the document that supports the answer in bullet points at the end of your answer.
+    • What made you come up with this conclusion or response?
+    • Add references related to questions from the given documents only, in bullet points, each one separately, at the end of your answer.
 
-        Divide your answer when possible into bullet points style:
-        • What is the question?
-        • What did you read in the document to analyze the question?
-        • What is your answer to the question?
-        • Add citations from the document that supports the answer in bullet points at the end of your answer.
-        • What made you come up with this conclusion or response?
-        • Add references related to questions from the given documents only, in bullet points, each one separately, at the end of your answer.
+    {context}
 
-        {context}
+    Question: {question}
 
-        Question: {question}
+    Answer:
+    """
 
-        Answer:
-        """
+    prompt = PromptTemplate(template=response_template, input_variables=["context", "question"])
+    chain_type_kwargs = {'prompt': prompt}
+    query_model = RetrievalQA.from_chain_type(
+        llm=llm,
+        chain_type="stuff",
+        retriever=retriever,
+        chain_type_kwargs=chain_type_kwargs,
+        memory=memory,
+        verbose=False)
 
-        prompt = PromptTemplate(template=response_template, input_variables=["context", "question"])
-        chain_type_kwargs = {'prompt':prompt}
+    def create_text_question():
+        # Create a new text_area and button
+        st.caption("-----------------------------------------------------------------------")
+        with st.container():
+            _user_input = st.text_area("What is your query?", placeholder='Enter your text...')
+            _submit_button = st.button("Submit")
 
-        query_model = RetrievalQA.from_chain_type(
-            llm=_main_llm,
-            chain_type="stuff",
-            retriever=_main_retriever,
-            chain_type_kwargs=chain_type_kwargs,
-            verbose=False)
+        return _user_input,_submit_button
 
-        response = query_model.run(question)
+    def run_model(_user_input,_submit_button):
 
-        _conversation_memory.chat_memory.add_user_message(question)
-        _conversation_memory.chat_memory.add_ai_message(response)
-
-        return response,_conversation_memory
-
-
-    def input_query(_conversation_memory):
-        # Create a text area
-        st.subheader("What is your query?")
-        user_input = st.text_area("Start typing...", value="",placeholder='Enter your text...')
-
-        # Create a submit button
-        if st.button("Submit"):
+        if _submit_button:
             st.write("Query submitted. This may take a minute while we search the database...")
-            st.write("-----------------------------------------------------------------------")
-            response,one_memory = run_model(user_input, llm, retriever, _conversation_memory)
+            st.caption("-----------------------------------------------------------------------")
+
+            response = query_model.run(_user_input)
             st.write(response)
+            #st.write(memory.load_memory_variables({}))
 
-            return response, one_memory
+            _submit_button = False
 
-    input_query(conversation_memory)
+        return user_input,_submit_button
+
+    user_input,submit_button = create_text_question()
+    user_input,submit_button = run_model(user_input,submit_button)
 
 else:
     st.sidebar.error('No file selected yet!')
