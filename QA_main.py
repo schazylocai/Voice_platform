@@ -21,15 +21,21 @@ st.title("GPT Document Analyzer")
 st.write('This application harnesses the power of Large Language Models (GPT) to enable you to seamlessly upload PDF documents and engage with them. In the query section, you can pose any question or request GPT to extract information, analyze content, or generate summaries from the uploaded document.')
 st.write('Simply upload your PDF file from the menu to the left & start querying the documents.')
 
+# things to do before you write a word
+global chunks
+global text_list
+text_list = ''
+
 if file_to_upload := st.sidebar.file_uploader(
     'Please select a PDF file to upload:',
     type='pdf',
     accept_multiple_files=True,):
-    #for file in file_to_upload:
-    pdf_reader = PyPDF2.PdfReader(file_to_upload[0])
-    text = "".join(page.extract_text() for page in pdf_reader.pages)
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=500,chunk_overlap=20,length_function=len)
-    chunks = text_splitter.split_text(text=text)
+    for file in file_to_upload:
+        pdf_reader = PyPDF2.PdfReader(file)
+        text = "".join(page.extract_text() for page in pdf_reader.pages)
+        text_list += text
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=500,chunk_overlap=20,length_function=len)
+        chunks = text_splitter.split_text(text=text_list)
 
     llm = ChatOpenAI(temperature=0.7, model='gpt-4') # gpt-4 or gpt-3.5-turbo
     memory = ConversationBufferMemory(return_messages=True)
@@ -78,6 +84,8 @@ if file_to_upload := st.sidebar.file_uploader(
 
     if 'past' not in st.session_state:
         st.session_state['past'] = []
+
+    st.cache(text_list)
 
     def create_text_question():
         # Create a new text_area and button
