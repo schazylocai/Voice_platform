@@ -1,4 +1,5 @@
 #pip install python-dotenv
+import numpy as np
 import streamlit as st
 import os
 from dotenv import load_dotenv
@@ -21,7 +22,6 @@ st.title("GPT Document Analyzer")
 st.write('This application harnesses the power of Large Language Models (GPT) to enable you to seamlessly upload PDF documents and engage with them. In the query section, you can pose any question or request GPT to extract information, analyze content, or generate summaries from the uploaded document.')
 st.write('Simply upload your PDF file from the menu to the left & start querying the documents.')
 
-# things to do before you write a word
 global chunks
 global text_list
 text_list = ''
@@ -36,6 +36,7 @@ if file_to_upload := st.sidebar.file_uploader(
         text_list += text
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=500,chunk_overlap=20,length_function=len)
         chunks = text_splitter.split_text(text=text_list)
+        chunks = list(chunks)
 
     llm = ChatOpenAI(temperature=0.7, model='gpt-4') # gpt-4 or gpt-3.5-turbo
     memory = ConversationBufferMemory(return_messages=True)
