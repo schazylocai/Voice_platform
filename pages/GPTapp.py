@@ -129,6 +129,7 @@ def read_subscription_from_file():
             for subscription in subscription_data:
                 user_email = subscription["user_email"]
                 status = subscription["status"]
+                st.write(user_email,status)
 
                 if user_email == 'samuel.chazy@gmail.com' and status == True:
                     second_page()
