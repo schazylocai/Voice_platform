@@ -17,8 +17,8 @@ def first_page():
         blob_service_client = BlobServiceClient.from_connection_string(connection_string)
 
         # Specify the container and blob name
-        container_name = "llm_id_container"
-        blob_name = "subscription_ids.json"
+        container_name = "llmidcontainer"
+        blob_name = "subscriptionids.json"
 
         # Check if the blob exists
         blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
@@ -57,7 +57,7 @@ def first_page():
                     blob_service_client.create_container(container_name)
 
                 # Create a blob client
-                blob_name = "subscription_ids.json"
+                blob_name = "subscriptionids.json"
                 blob_client = blob_service_client.get_blob_client(container=container_name,blob=blob_name)
 
                 # Write the subscription IDs to the blob
