@@ -10,6 +10,9 @@ st.set_page_config(layout="wide")
 connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
 
 def first_page():
+    global valid, valid_email
+    valid = False
+    valid_email = False
     st.subheader('Subscription page')
 
     def read_subscription_from_azure_blob():
@@ -32,27 +35,18 @@ def first_page():
         # Decode and return the subscription data
         return json.loads(blob_content.decode("utf-8"))
 
-    ids = read_subscription_from_azure_blob()
-    st.write(ids)
-
     user_email = st.text_input("Enter your email_id:")
 
     if st.button("Submit"):
         if validate_email(user_email):
             st.write("The email address is valid.")
-            valid = True
-        else:
-            st.write("Please enter a valid email address.")
-            valid = False
+            valid_email = True
 
-        if valid:
+        if valid_email:
             st.write('Subscribed')
             # Write user_id and status to subscription_ids
             status = True
-
-            # Prepare the subscription data
-            subscription_data = [{"user_email": user_email, "status": status}]
-            subscription_ids = json.dumps(subscription_data)
+            valid = True
 
             def write_subscription_ids_to_azure_blob():
                 # Create a blob service client
@@ -84,12 +78,18 @@ def first_page():
                     # Upload the updated content to the blob
                     blob_client.upload_blob(updated_content, overwrite=True)
                 else:
+                    # Prepare the subscription data
+                    subscription_data = [{"user_email": user_email, "status": status}]
+                    subscription_ids = json.dumps(subscription_data)
                     # Write the subscription IDs to the blob (since it doesn't exist yet)
                     blob_client.upload_blob(subscription_ids, overwrite=True)
 
         else:
-            st.write('Please subscribe to continue.')
+            st.write("Please enter a valid email address.")
             valid = False
+
+        ids = read_subscription_from_azure_blob()
+        st.write(ids)
 
         return valid
 
