@@ -64,15 +64,28 @@ def first_page():
                 blob_name = "subscriptionids.json"
                 blob_client = container_client.get_blob_client(blob_name)
 
-                # Write the subscription IDs to the blob
-                blob_client.upload_blob(subscription_ids, overwrite=False)
+                # Check if the blob exists
+                if blob_client.exists():
+                    # Download the existing blob content
+                    existing_content = blob_client.download_blob().readall()
+
+                    # Append new data to the existing content
+                    existing_data = json.loads(existing_content.decode("utf-8"))
+                    new_data = [{"user_email": user_email, "status": status}]
+                    combined_data = existing_data + new_data
+
+                    # Convert the combined data to JSON
+                    updated_content = json.dumps(combined_data)
+
+                    # Upload the updated content to the blob
+                    blob_client.upload_blob(updated_content, overwrite=True)
+                else:
+                    # Write the subscription IDs to the blob (since it doesn't exist yet)
+                    blob_client.upload_blob(subscription_ids, overwrite=True)
 
             # Prepare the subscription data
             subscription_data = [{"user_email": user_email, "status": status}]
             subscription_ids = json.dumps(subscription_data)
-
-            # Write the subscription IDs to the Azure blob
-            write_subscription_ids_to_azure_blob()
 
         else:
             st.write('Please subscribe to continue.')
