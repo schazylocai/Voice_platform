@@ -1,6 +1,8 @@
 import streamlit as st
 import json
 import os
+from dotenv import load_dotenv
+load_dotenv() # read local .env file
 from azure.storage.blob import BlobServiceClient
 from validate_email import validate_email
 
