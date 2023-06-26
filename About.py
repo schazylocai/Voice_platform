@@ -84,6 +84,8 @@ def first_page():
                     # Write the subscription IDs to the blob (since it doesn't exist yet)
                     blob_client.upload_blob(subscription_ids, overwrite=True)
 
+            write_subscription_ids_to_azure_blob()
+
         else:
             st.write("Please enter a valid email address.")
             valid = False
