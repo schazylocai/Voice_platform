@@ -3,5 +3,4 @@ pypdf2
 langchain
 python-dotenv
 numpy
-azure-cli
-azure-storage-blob
+validate_email
