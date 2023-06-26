@@ -10,8 +10,9 @@ from pages.GPTapp import second_page
 
 st.set_page_config(layout="wide")
 connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
-stripe_api_key = os.environ['PUBLISHABLE_KEY']
+stripe_publishable_key = os.environ['STRIPE_PUBLISHABLE_KEY']
 strip_secret_key = os.environ['STRIPE_SECRET_KEY']
+stripe_api_key = os.environ['STRIPE_API_KEY']
 
 def first_page():
     global valid, valid_email
@@ -110,6 +111,14 @@ def first_page():
             st.button("Subscribe to Plan", on_click=lambda: stripe.Subscription.create(
                 customer=st.session_state[user_email],
                 plan=subscription_plan.id))
+
+            # Add error handling
+            try:
+                stripe.Subscription.create(
+                    customer=st.session_state[user_email],
+                    plan=subscription_plan.id)
+            except Exception as e:
+                st.error(e)
 
         run_stripe()
         return valid
