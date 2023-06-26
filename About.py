@@ -10,8 +10,8 @@ from pages.GPTapp import second_page
 
 st.set_page_config(layout="wide")
 connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
-stripe.api_key = os.environ['STRIPE_SECRET_KEY']
-PLAN_ID = os.environ['PLAN_ID']
+stripe_api_key = os.environ['PUBLISHABLE_KEY']
+strip_secret_key = os.environ['STRIPE_SECRET_KEY']
 
 def first_page():
     global valid, valid_email
@@ -96,32 +96,22 @@ def first_page():
 
         ids = read_subscription_from_azure_blob()
 
-        def get_stripe_session_id(success_url,cancel_url):
-            session = stripe.checkout.Session.create(
-                payment_method_types=['card'],
-                line_items=[{
-                    'price': PLAN_ID,
-                    'quantity': 1,}],
-                mode='subscription',
-                success_url=success_url,
-                cancel_url=cancel_url
-            )
-            st.write(session.values())
-            st.write(session.items())
-            return session.id
+        def run_stripe():
+            # Set your Stripe API keys
+            stripe_keys = {"SECRET_KEY": strip_secret_key,"publishable_key": stripe_api_key,}
 
-        def show_subscription_plan():
-            st.subheader('Subscription Form')
-            success_url = second_page()
-            cancel_url = first_page()
-            session_id = get_stripe_session_id(success_url,cancel_url)
+            # Create a subscription plan
+            subscription_plan = stripe.Subscription.create(
+                api_key=stripe_api_key,
+                name="Monthly Plan",
+                billing_cycle="monthly",)
 
-            # Display the subscription button
-            if st.button("Subscribe"):
-                st.write("Redirecting to payment...")
-                st.markdown(f'<a href="{session_id}">Click here to proceed with payment</a>', unsafe_allow_html=True)
+            # Create a button to subscribe to the plan
+            st.button("Subscribe to Plan", on_click=lambda: stripe.Subscription.create(
+                customer=st.session_state[user_email],
+                plan=subscription_plan.id))
 
-        show_subscription_plan()
+        run_stripe()
         return valid
 
 if __name__ == '__main__':
