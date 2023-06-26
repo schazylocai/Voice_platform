@@ -6,6 +6,7 @@ load_dotenv() # read local .env file
 from azure.storage.blob import BlobServiceClient
 from validate_email import validate_email
 import stripe
+from pages.GPTapp import second_page
 
 st.set_page_config(layout="wide")
 connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
@@ -95,20 +96,25 @@ def first_page():
 
         ids = read_subscription_from_azure_blob()
 
-        def get_stripe_session_id():
+        def get_stripe_session_id(success_url,cancel_url):
             session = stripe.checkout.Session.create(
                 payment_method_types=['card'],
                 line_items=[{
                     'price': PLAN_ID,
                     'quantity': 1,}],
-                mode='subscription')
+                mode='subscription',
+                success_url=success_url,
+                cancel_url=cancel_url
+            )
             st.write(session.values())
             st.write(session.items())
             return session.id
 
         def show_subscription_plan():
-            st.subheader('Subscription page')
-            session_id = get_stripe_session_id()
+            st.subheader('Subscription Form')
+            success_url = second_page()
+            cancel_url = first_page()
+            session_id = get_stripe_session_id(success_url,cancel_url)
 
             # Display the subscription button
             if st.button("Subscribe"):
