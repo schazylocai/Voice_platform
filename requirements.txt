@@ -2,6 +2,6 @@ streamlit
 pypdf2
 langchain
 python-dotenv
-openai
-chromadb
-tiktoken
+numpy
+azure-cli
+azure-storage-blob

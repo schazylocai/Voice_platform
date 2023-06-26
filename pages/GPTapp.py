@@ -118,25 +118,3 @@ def second_page():
 
     else:
         st.sidebar.caption("No file selected yet!")
-
-def read_subscription_from_file():
-    if os.path.exists(os.path.join("data","subscription_ids.json")):
-
-        # Open the file in read mode
-        with open("data/subscription_ids.json", "r") as file:
-            # Read the list of subscriptions from the file
-            subscription_data = json.load(file)
-            for subscription in subscription_data:
-                user_email = subscription["user_email"]
-                status = subscription["status"]
-                st.write(user_email,status)
-
-                if user_email == 'samuel.chazy@gmail.com' and status == True:
-                    second_page()
-                    break
-            else:
-                st.write("Please subscribe!")
-
-        return subscription_data
-
-read_subscription_from_file()
