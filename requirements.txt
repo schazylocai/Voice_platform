@@ -4,3 +4,4 @@ langchain
 python-dotenv
 numpy
 validate_email
+azure-storage-blob
