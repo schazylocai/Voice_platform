@@ -65,7 +65,7 @@ def first_page():
                 blob_client = container_client.get_blob_client(blob_name)
 
                 # Write the subscription IDs to the blob
-                blob_client.upload_blob(subscription_ids, overwrite=True)
+                blob_client.upload_blob(subscription_ids, overwrite=False)
 
             # Prepare the subscription data
             subscription_data = [{"user_email": user_email, "status": status}]
