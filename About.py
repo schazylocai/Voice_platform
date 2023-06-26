@@ -50,6 +50,10 @@ def first_page():
             # Write user_id and status to subscription_ids
             status = True
 
+            # Prepare the subscription data
+            subscription_data = [{"user_email": user_email, "status": status}]
+            subscription_ids = json.dumps(subscription_data)
+
             def write_subscription_ids_to_azure_blob():
                 # Create a blob service client
                 blob_service_client = BlobServiceClient.from_connection_string(connection_string)
@@ -82,10 +86,6 @@ def first_page():
                 else:
                     # Write the subscription IDs to the blob (since it doesn't exist yet)
                     blob_client.upload_blob(subscription_ids, overwrite=True)
-
-            # Prepare the subscription data
-            subscription_data = [{"user_email": user_email, "status": status}]
-            subscription_ids = json.dumps(subscription_data)
 
         else:
             st.write('Please subscribe to continue.')
