@@ -5,9 +5,12 @@ from dotenv import load_dotenv
 load_dotenv() # read local .env file
 from azure.storage.blob import BlobServiceClient
 from validate_email import validate_email
+import stripe
 
 st.set_page_config(layout="wide")
 connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
+stripe.api_key = os.environ['STRIPE_SECRET_KEY']
+PLAN_ID = os.environ['PLAN_ID']
 
 def first_page():
     global valid, valid_email
@@ -91,8 +94,28 @@ def first_page():
             valid = False
 
         ids = read_subscription_from_azure_blob()
-        st.write(ids)
 
+        def get_stripe_session_id():
+            session = stripe.checkout.Session.create(
+                payment_method_types=['card'],
+                line_items=[{
+                    'price': PLAN_ID,
+                    'quantity': 1,}],
+                mode='subscription')
+            st.write(session.values())
+            st.write(session.items())
+            return session.id
+
+        def show_subscription_plan():
+            st.subheader('Subscription page')
+            session_id = get_stripe_session_id()
+
+            # Display the subscription button
+            if st.button("Subscribe"):
+                st.write("Redirecting to payment...")
+                st.markdown(f'<a href="{session_id}">Click here to proceed with payment</a>', unsafe_allow_html=True)
+
+        show_subscription_plan()
         return valid
 
 if __name__ == '__main__':

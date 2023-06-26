@@ -5,7 +5,6 @@ import os
 from dotenv import load_dotenv
 load_dotenv() # read local .env file
 secret_key = os.environ['OPENAI_API_KEY']
-import json
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import RetrievalQA
