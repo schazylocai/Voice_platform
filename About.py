@@ -152,8 +152,6 @@ def first_page():
         Terms()
 
         if st.button:
-            # Redirect the user to the payment portal
-            st.markdown(f'<meta http-equiv="refresh" content="0;url={payment_link}" />', unsafe_allow_html=True)
 
             # Initialize Stripe payment
             session = stripe.checkout.Session.create(
@@ -162,6 +160,11 @@ def first_page():
                 mode="subscription",
                 success_url=success_url,
                 cancel_url=cancel_url)
+
+            payment_link = session.url
+
+            # Redirect the user to the payment portal
+            st.markdown(f'<meta http-equiv="refresh" content="0;url={payment_link}" />', unsafe_allow_html=True)
 
     run_stripe()
 
