@@ -117,3 +117,5 @@ def second_page():
 
     else:
         st.sidebar.caption("No file selected yet!")
+
+second_page()
