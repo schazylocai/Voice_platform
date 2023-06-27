@@ -39,19 +39,24 @@ def first_page():
         with col1:
             st.write(":red[Unlock the Power of AI to Query Your Documents.]")
             st.subheader(":violet[Welcome to GPT Document Analyzer, a revolutionary application that leverages the capabilities of Large Language Models (GPT).]")
+
         with col2:
             st.write(":red[What can this model do for you?]")
             st.write(":violet[With this cutting-edge tool, you can effortlessly upload PDF documents and interact with them like never before. Pose questions, extract valuable information, analyze content, and generate concise summaries directly from your uploaded documents.]")
             st.write(":violet[➜ Watch the video to see how this model works!]")
+
         with col3:
             st.video(video_url)
 
         # section 3
-        st.write("")
-        st.header(":red[Subscription details:]")
-        st.subheader(":violet[Full access: $15 USD/Month]")
-        st.write(":violet[Subscribe today to unlock the full potential of our AI model. As a special bonus, you'll enjoy a 1-day free trial period to thoroughly test its capabilities. Only if you decide to continue after the trial, your subscription will be billed at $15 USD per month.]")
-        st.header(":red[Let's start!]")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.header(":red[Subscription details:]")
+            st.subheader(":violet[Full access: $15 USD/Month]")
+            st.write(
+                ":violet[Subscribe today to unlock the full potential of our AI model. As a special bonus, you'll enjoy a 1-day free trial period to thoroughly test its capabilities. Only if you decide to continue after the trial, your subscription will be billed at $15 USD per month.]")
+
+            st.header(":red[Let's start!]")
 
     # Run Intro
     intro()
@@ -138,23 +143,6 @@ def first_page():
         # Set your Stripe API keys
         stripe.api_key = strip_secret_key
 
-        # Initialize Stripe payment
-        session = stripe.checkout.Session.create(
-            payment_method_types=["card"],
-            line_items=[
-                {
-                    "price": stripe_api_key,
-                    "quantity": 1
-                }
-            ],
-            mode="subscription",
-            success_url=success_url,
-            cancel_url=cancel_url
-        )
-
-        # Get the payment link from the Stripe Checkout Session
-        #payment_link = session.url
-
         # Redirect the user to the payment portal
         st.button(":violet[Proceed to Payment]")
         st.write("")
@@ -162,9 +150,18 @@ def first_page():
         st.write("")
         st.write("")
         Terms()
+
         if st.button:
             # Redirect the user to the payment portal
             st.markdown(f'<meta http-equiv="refresh" content="0;url={payment_link}" />', unsafe_allow_html=True)
+
+            # Initialize Stripe payment
+            session = stripe.checkout.Session.create(
+                payment_method_types=["card"],
+                line_items=[{"price": stripe_api_key, "quantity": 1}],
+                mode="subscription",
+                success_url=success_url,
+                cancel_url=cancel_url)
 
     run_stripe()
 

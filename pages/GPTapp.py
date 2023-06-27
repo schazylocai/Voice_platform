@@ -62,12 +62,10 @@ def second_page():
         • Use conversation memory to link all question and responses together
         • If you don't know the answer to the question, then reply: "I can't be confident about my answer because I am missing the context or some information!"
     
-        Divide your answer when possible into bullet points style:
-        • What is the question?
-        • What did you read in the document to analyze the question?
+        Divide your answer when possible into paragraphs:
         • What is your answer to the question?
+        • How did you come up with this answer?
         • Add citations from the document that supports the answer in bullet points at the end of your answer.
-        • What made you come up with this conclusion or response?
         • Add references related to questions from the given documents only, in bullet points, each one separately, at the end of your answer.
     
         {context}
@@ -95,7 +93,7 @@ def second_page():
 
         def create_text_question():
             # Create a new text_area and button
-            st.caption("-----------------------------------------------------------------------")
+            st.caption("-----------------------------------------------------------------------------")
             with st.container():
                 st.subheader('What is your query?')
                 _user_input = st.text_area("▼", placeholder='Enter your text...')
@@ -106,8 +104,8 @@ def second_page():
         def run_model(_user_input,_submit_button):
 
             if _submit_button:
-                st.write("Query submitted. This may take a minute while we search the database...")
-                st.caption("-----------------------------------------------------------------------")
+                st.write("Query submitted. This may take a -> minute -< while we search the database...")
+                st.caption("-----------------------------------------------------------------------------")
 
                 response = query_model.run(_user_input)
                 st.session_state.past.append(_user_input)
