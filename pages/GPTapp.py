@@ -6,6 +6,11 @@ from dotenv import load_dotenv
 load_dotenv() # read local .env file
 secret_key = os.environ['OPENAI_API_KEY']
 
+import stripe
+stripe_publishable_key = os.environ['STRIPE_PUBLISHABLE_KEY']
+strip_secret_key = os.environ['STRIPE_SECRET_KEY']
+stripe_api_key = os.environ['STRIPE_API_KEY']
+
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import RetrievalQA
 from langchain.chat_models import ChatOpenAI
@@ -15,6 +20,8 @@ from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
 import PyPDF2
 
+global subscribed
+subscribed = False
 global chunks
 global text_list
 
@@ -118,4 +125,18 @@ def second_page():
     else:
         st.sidebar.caption("No file selected yet!")
 
-second_page()
+def check_subscription(subscribed_status):
+    email = st.text_input(":violet[Please enter your email address:]")
+    if st.button(":violet[Submit]"):
+        stripe.api_key = strip_secret_key
+        customer = stripe.Customer.list(email=email)
+        if len(customer.data) > 0:
+            subscribed_status = True
+            second_page()
+        else:
+            st.header(':red[You are not subscribed to this service!]')
+            st.write(':violet[Please subscribe using the About section.]')
+
+        return subscribed_status
+
+check_subscription(subscribed)

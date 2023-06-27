@@ -14,6 +14,10 @@ strip_secret_key = os.environ['STRIPE_SECRET_KEY']
 stripe_api_key = os.environ['STRIPE_API_KEY']
 
 video_url = "https://www.youtube.com/watch?v=YXpdalfhgoQ"
+payment_link = "https://buy.stripe.com/test_fZe9APbAraUZ3HqfYZ"
+success_url="https://gptdocanalyzer.azurewebsites.net/GPTapp"
+cancel_url="https://gptdocanalyzer.azurewebsites.net/"
+user_email = ""
 
 def first_page():
     #global status, valid_email
@@ -31,6 +35,7 @@ def first_page():
 
         # section 2
         col1,col2,col3 = st.columns(3)
+
         with col1:
             st.write(":red[Unlock the Power of AI to Query Your Documents.]")
             st.subheader(":violet[Welcome to GPT Document Analyzer, a revolutionary application that leverages the capabilities of Large Language Models (GPT).]")
@@ -132,7 +137,6 @@ def first_page():
     def run_stripe():
         # Set your Stripe API keys
         stripe.api_key = strip_secret_key
-        payment_link = "https://buy.stripe.com/test_fZe9APbAraUZ3HqfYZ"
 
         # Initialize Stripe payment
         session = stripe.checkout.Session.create(
@@ -144,13 +148,12 @@ def first_page():
                 }
             ],
             mode="subscription",
-            #success_url=payment_link,
-            success_url="https://gptdocanalyzer.azurewebsites.net/GPTapp",
-            cancel_url="https://gptdocanalyzer.azurewebsites.net/"
+            success_url=success_url,
+            cancel_url=cancel_url
         )
 
         # Get the payment link from the Stripe Checkout Session
-        payment_link = session.url
+        #payment_link = session.url
 
         # Redirect the user to the payment portal
         st.button(":violet[Proceed to Payment]")
@@ -165,8 +168,5 @@ def first_page():
 
     run_stripe()
 
-
-        #ids = read_subscription_from_azure_blob()
-
 if __name__ == '__main__':
-    subscription_valid = first_page()
+    first_page()
