@@ -6,4 +6,4 @@ textColor="white"
 font="sans serif"
 base="dark"
 [server]
-maxUploadSize = 15
+maxUploadSize = 100

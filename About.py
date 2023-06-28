@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 load_dotenv() # read local .env file
 from azure.storage.blob import BlobServiceClient
 import stripe
+import webbrowser
 
 st.set_page_config(layout="wide",initial_sidebar_state='expanded',page_icon="🔬")
 connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
@@ -48,16 +49,6 @@ def first_page():
         with col3:
             st.video(video_url)
 
-        # section 3
-        col1, col2 = st.columns(2)
-        with col1:
-            st.header(":red[Subscription details:]")
-            st.subheader(":violet[Full access: $15 USD/Month]")
-            st.write(
-                ":violet[Subscribe today to unlock the full potential of our AI model. As a special bonus, you'll enjoy a 1-day free trial period to thoroughly test its capabilities. Only if you decide to continue after the trial, your subscription will be billed at $15 USD per month.]")
-
-            st.header(":red[Let's start!]")
-
     # Run Intro
     intro()
 
@@ -83,90 +74,60 @@ def first_page():
             st.write(":violet[Limitation of Liability:]")
             st.caption("We are not liable for any direct or indirect damages arising from the use or inability to use our services, including but not limited to loss of data, revenue, or profits. Our services are provided 'as is' without any warranties or guarantees.")
 
-    def read_subscription_from_azure_blob():
-        # Create a blob service client
-        blob_service_client = BlobServiceClient.from_connection_string(connection_string)
-
-        # Specify the container and blob name
-        container_name = "llmidcontainer"
-        blob_name = "subscriptionids.json"
-
-        # Check if the blob exists
-        container_client = blob_service_client.get_container_client(container_name)
-        if not container_client.get_blob_client(blob_name).exists():
-            st.write("Please subscribe!")
-            return None
-
-        # Download the blob content
-        blob_content = container_client.download_blob(blob_name).readall()
-
-        # Decode and return the subscription data
-        return json.loads(blob_content.decode("utf-8"))
-
-    def write_subscription_ids_to_azure_blob():
-        # Create a blob service client
-        blob_service_client = BlobServiceClient.from_connection_string(connection_string)
-
-        # Create a container
-        container_name = "llmidcontainer"
-        container_client = blob_service_client.get_container_client(container_name)
-        if not container_client.exists():
-            container_client.create_container()
-
-        # Create a blob client
-        blob_name = "subscriptionids.json"
-        blob_client = container_client.get_blob_client(blob_name)
-
-        # Check if the blob exists
-        if blob_client.exists():
-            # Download the existing blob content
-            existing_content = blob_client.download_blob().readall()
-
-            # Append new data to the existing content
-            existing_data = json.loads(existing_content.decode("utf-8"))
-            new_data = [{"user_email": user_email, "status": status}]
-            combined_data = existing_data + new_data
-
-            # Convert the combined data to JSON
-            updated_content = json.dumps(combined_data)
-
-            # Upload the updated content to the blob
-            blob_client.upload_blob(updated_content, overwrite=True)
-        else:
-            # Prepare the subscription data
-            subscription_data = [{"user_email": user_email, "status": status}]
-            subscription_ids = json.dumps(subscription_data)
-            # Write the subscription IDs to the blob (since it doesn't exist yet)
-            blob_client.upload_blob(subscription_ids, overwrite=True)
-
     def run_stripe():
         # Set your Stripe API keys
         stripe.api_key = strip_secret_key
 
         # Redirect the user to the payment portal
-        st.button(":violet[Proceed to Payment]")
-        st.write("")
-        st.write("")
-        st.write("")
+        pay = st.button(":violet[Proceed to Payment]",key='payment')
         st.write("")
         Terms()
 
-        if st.button:
+        if pay:
 
             # Initialize Stripe payment
             session = stripe.checkout.Session.create(
                 payment_method_types=["card"],
                 line_items=[{"price": stripe_api_key, "quantity": 1}],
                 mode="subscription",
-                success_url=success_url,
+                success_url=cancel_url,
                 cancel_url=cancel_url)
 
-            payment_link = session.url
+            payment_link_access = session.url
 
             # Redirect the user to the payment portal
-            st.markdown(f'<meta http-equiv="refresh" content="0;url={payment_link}" />', unsafe_allow_html=True)
+            webbrowser.open(payment_link_access,new=0,autoraise=False)
 
-    run_stripe()
+    def check_customer():
+
+        # section 3
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            subscribed = False
+
+            st.header(":red[Already subscribed?]")
+            email = st.text_input(":violet[Please enter your email address:]")
+
+            if email_button := st.button(":violet[Submit]"):
+                customer = stripe.Customer.list(email='samuel.chazy@gmail.com')
+                if len(customer.data) == 0:
+                    subscribed = True
+                else:
+                    st.write(':red[You are not subscribed to this service!]')
+
+        with col2:
+            st.header(":red[Subscription details:]")
+            st.subheader(":violet[Full access: $15 USD/Month]")
+            st.write(
+                ":violet[Subscribe today to unlock the full potential of our AI model. As a special bonus, you'll enjoy a 1-day free trial period to thoroughly test its capabilities. Only if you decide to continue after the trial, your subscription will be billed at $15 USD per month.]")
+
+        with col3:
+            st.header(":red[Subscribe!]")
+            run_stripe()
+
+
+    check_customer()
 
 if __name__ == '__main__':
     first_page()

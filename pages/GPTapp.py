@@ -1,15 +1,17 @@
 #pip install python-dotenv
-import numpy as np
 import streamlit as st
 import os
 from dotenv import load_dotenv
+import stripe
+import PyPDF2
+
 load_dotenv() # read local .env file
 secret_key = os.environ['OPENAI_API_KEY']
 
-import stripe
 stripe_publishable_key = os.environ['STRIPE_PUBLISHABLE_KEY']
 strip_secret_key = os.environ['STRIPE_SECRET_KEY']
 stripe_api_key = os.environ['STRIPE_API_KEY']
+stripe.api_key = strip_secret_key
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import RetrievalQA
@@ -18,123 +20,92 @@ from langchain.vectorstores import Chroma
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
-import PyPDF2
 
-global subscribed
-subscribed = False
-global chunks
-global text_list
+file_to_upload = st.sidebar.file_uploader(label='Please select PDF files to upload:', type='pdf',
+                                              accept_multiple_files=True, key='files')
 
-def second_page():
-    #st.caption("Developed & managed by Samuel Chazy: www.samuelchazy.com")
-    st.title("GPT Document Analyzer")
-    st.write('This application harnesses the power of Large Language Models (GPT) to enable you to seamlessly upload PDF documents and engage with them. In the query section, you can pose any question or request GPT to extract information, analyze content, or generate summaries from the uploaded document.')
-    st.write('Simply upload your PDF file from the menu to the left & start querying the documents.')
+# st.caption("Developed & managed by Samuel Chazy: www.samuelchazy.com")
+st.title(":violet[GPT Document Analyzer]")
+st.write(':violet[Upload your PDF files from the left menu & start querying the documents.]')
+
+if len(file_to_upload) > 0:
 
     text_list = ''
+    chunks = ''
 
-    if file_to_upload := st.sidebar.file_uploader(
-        'Please select a PDF file to upload:',
-        type='pdf',
-        accept_multiple_files=True,):
-        for file in file_to_upload:
-            pdf_reader = PyPDF2.PdfReader(file)
-            text = "".join(page.extract_text() for page in pdf_reader.pages)
-            text_list += text
-            text_splitter = RecursiveCharacterTextSplitter(chunk_size=500,chunk_overlap=20,length_function=len)
-            chunks = text_splitter.split_text(text=text_list)
-            chunks = list(chunks)
+    for file in file_to_upload:
+        pdf_reader = PyPDF2.PdfReader(file)
+        text = "".join(page.extract_text() for page in pdf_reader.pages)
+        text_list += text
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=500,chunk_overlap=20,length_function=len)
+        chunks = text_splitter.split_text(text=text_list)
+        chunks = list(chunks)
 
-        llm = ChatOpenAI(temperature=0.7, model='gpt-4') # gpt-4 or gpt-3.5-turbo
-        memory = ConversationBufferMemory(return_messages=True)
-        embedding = OpenAIEmbeddings(openai_api_key=secret_key)
-        my_database = Chroma.from_texts(chunks, embedding)
-        retriever = my_database.as_retriever()
+    llm = ChatOpenAI(temperature=0.7, model='gpt-4') # gpt-4 or gpt-3.5-turbo
+    memory = ConversationBufferMemory(return_messages=True)
+    embedding = OpenAIEmbeddings(openai_api_key=secret_key)
+    my_database = Chroma.from_texts(chunks, embedding)
+    retriever = my_database.as_retriever()
 
-        ########## RetrievalQA from chain type ##########
-        response_template = """        
-        • You are a professional in the Educational Field.
-        • Your task is to read research papers, research documents, educational journals, and conference papers.
-        • You should be analytical and reply in depth.
-        • Always reply in a polite and professional manner.
-        • Don't connect or look for answers on the internet.
-        • Only look for answers from the given documents and papers.
-        • Use conversation memory to link all question and responses together
-        • If you don't know the answer to the question, then reply: "I can't be confident about my answer because I am missing the context or some information!"
-    
-        Divide your answer when possible into paragraphs:
-        • What is your answer to the question?
-        • How did you come up with this answer?
-        • Add citations from the document that supports the answer in bullet points at the end of your answer.
-        • Add references related to questions from the given documents only, in bullet points, each one separately, at the end of your answer.
-    
-        {context}
-    
-        Question: {question}
-    
-        Answer:
-        """
+    ########## RetrievalQA from chain type ##########
+    response_template = """
+    • You are a professional in the Educational Field.
+    • Your task is to read research papers, research documents, educational journals, and conference papers.
+    • You should be analytical and reply in depth.
+    • Always reply in a polite and professional manner.
+    • Don't connect or look for answers on the internet.
+    • Only look for answers from the given documents and papers.
+    • Use conversation memory to link all question and responses together
+    • If you don't know the answer to the question, then reply: "I can't be confident about my answer because I am missing the context or some information!"
 
-        prompt = PromptTemplate(template=response_template, input_variables=["context", "question"])
-        chain_type_kwargs = {'prompt': prompt}
-        query_model = RetrievalQA.from_chain_type(
-            llm=llm,
-            chain_type="stuff",
-            retriever=retriever,
-            chain_type_kwargs=chain_type_kwargs,
-            memory=memory,
-            verbose=False)
+    Divide your answer when possible into paragraphs:
+    • What is your answer to the question?
+    • How did you come up with this answer?
+    • Add citations from the document that supports the answer in bullet points at the end of your answer.
+    • Add references related to questions from the given documents only, in bullet points, each one separately, at the end of your answer.
 
-        if 'generated' not in st.session_state:
-            st.session_state['generated'] = []
+    {context}
 
-        if 'past' not in st.session_state:
-            st.session_state['past'] = []
+    Question: {question}
 
-        def create_text_question():
-            # Create a new text_area and button
-            st.caption("-----------------------------------------------------------------------------")
-            with st.container():
-                st.subheader('What is your query?')
-                _user_input = st.text_area("▼", placeholder='Enter your text...')
-                _submit_button = st.button("Submit")
+    Answer:
+    """
 
-            return _user_input,_submit_button
+    prompt = PromptTemplate(template=response_template, input_variables=["context", "question"])
+    chain_type_kwargs = {'prompt': prompt}
+    query_model = RetrievalQA.from_chain_type(
+        llm=llm,
+        chain_type="stuff",
+        retriever=retriever,
+        chain_type_kwargs=chain_type_kwargs,
+        memory=memory,
+        verbose=False)
 
-        def run_model(_user_input,_submit_button):
+    def create_text_question():
+        # Create a new text_area and button
+        with st.container():
+            st.subheader(':red[What is your query?]')
+            _user_input = st.text_area(":violet[▼]", placeholder='Enter your text...')
+            _submit_button = st.button(":violet[Submit]")
 
-            if _submit_button:
-                st.write("Query submitted. This may take a -> minute -< while we search the database...")
-                st.caption("-----------------------------------------------------------------------------")
+        return _user_input,_submit_button
 
-                response = query_model.run(_user_input)
-                st.session_state.past.append(_user_input)
-                st.session_state.generated.append(response)
-                st.write(response)
-                #st.write(memory.load_memory_variables({}))
+    def run_model(_user_input,_submit_button):
 
-                _submit_button = False
+        if _submit_button:
+            st.divider()
+            st.write(":red[Query submitted. This may take a :red[minute] while we query the documents...]")
+            st.divider()
 
-            return user_input,_submit_button
+            response = query_model.run(_user_input)
+            st.write(response)
 
-        user_input,submit_button = create_text_question()
-        user_input,submit_button = run_model(user_input,submit_button)
+            _submit_button = False
 
-    else:
-        st.sidebar.caption("No file selected yet!")
+        return user_input,_submit_button
 
-def check_subscription(subscribed_status):
-    email = st.text_input(":violet[Please enter your email address:]")
-    if st.button(":violet[Submit]"):
-        stripe.api_key = strip_secret_key
-        customer = stripe.Customer.list(email=email)
-        if len(customer.data) > 0:
-            subscribed_status = True
-            second_page()
-        else:
-            st.header(':red[You are not subscribed to this service!]')
-            st.write(':violet[Please subscribe using the About section.]')
+    user_input,submit_button = create_text_question()
+    user_input,submit_button = run_model(user_input,submit_button)
 
-        return subscribed_status
-
-check_subscription(subscribed)
+else:
+    st.sidebar.caption(":red[=> No file selected yet!]")
