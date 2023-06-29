@@ -7,3 +7,4 @@ validate_email
 azure-storage-blob
 stripe
 openai
+chromadb
