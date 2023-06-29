@@ -15,7 +15,7 @@ strip_secret_key = os.environ['STRIPE_SECRET_KEY']
 stripe_api_key = os.environ['STRIPE_API_KEY']
 
 video_url = "https://www.youtube.com/watch?v=YXpdalfhgoQ"
-payment_link = "https://buy.stripe.com/test_fZe9APbAraUZ3HqfYZ"
+#payment_link = "https://buy.stripe.com/test_fZe9APbAraUZ3HqfYZ"
 success_url="https://gptdocanalyzer.azurewebsites.net/GPTapp"
 cancel_url="https://gptdocanalyzer.azurewebsites.net/"
 user_email = ""
@@ -99,10 +99,8 @@ def run_subscription():
             success_url=cancel_url,
             cancel_url=cancel_url)
 
-        payment_link_access = session.url
-
         # Redirect the user to the payment portal
-        webbrowser.open(payment_link_access)
+        browser = webbrowser.open(url=session.url,new=0,autoraise=True)
 
     # Check customers
     st.sidebar.title(":red[Already subscribed?]")
