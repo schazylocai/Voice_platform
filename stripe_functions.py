@@ -46,7 +46,12 @@ def check_customers():
                     customer_id = customer.id
                     subscription = stripe.Subscription.list(customer=customer_id)
                     days_left = get_days_left(subscription)
-                    st.sidebar.write(f":red[{days_left} days left for this month.]")
+
+                    if subscription['data'][0]['cancel_at_period_end']:
+                        st.sidebar.write(f":red[Subscription will be canceled in {days_left} days.]")
+                    else:
+                        st.sidebar.write(f":red[{days_left} days left for this month.]")
+
                     st.sidebar.subheader(':red[Click up on GPTapp to proceed.]')
                     user = True
                 else:
@@ -94,7 +99,11 @@ def cancel_service():
                     subscription = stripe.Subscription.list(customer=customer_id)
                     days_left = get_days_left(subscription)
                     subscription_id = subscription['data'][0]['id']
-                    stripe.Subscription.delete(subscription_id)
+                    stripe.Subscription.modify(subscription_id, cancel_at_period_end=True)
+
+                    if days_left == 1:
+                        stripe.Subscription.delete(subscription_id)
+
                     st.sidebar.write(':violet[Subscription cancelled successfully for the next billing cycle!]')
                     st.sidebar.write(f":red[{days_left} days left in the current subscription period.]")
                 else:
