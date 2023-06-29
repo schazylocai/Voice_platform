@@ -21,7 +21,6 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
 
-@st.cache_data
 def launch_app():
     file_to_upload = st.sidebar.file_uploader(label='Please select PDF files to upload:', type='pdf',
                                                   accept_multiple_files=True, key='files')

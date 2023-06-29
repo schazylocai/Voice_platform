@@ -102,16 +102,26 @@ def run_subscription():
         payment_link_access = session.url
 
         # Redirect the user to the payment portal
-        webbrowser.open(payment_link_access,new=0,autoraise=True)
+        webbrowser.open(payment_link_access)
 
     # Check customers
     st.sidebar.title(":red[Already subscribed?]")
     email = st.sidebar.text_input(":violet[Please enter your email address:]")
 
     if email_button := st.sidebar.button(":violet[Submit]"):
-        customer = stripe.Customer.list(email='samuel.chazy@gmail.com')
-        if len(customer.data) == 0:
-            subscribed_user = 'True'
+
+        customers = stripe.Customer.list()
+
+        if len(customers.data) > 0:
+            customer = customers.data[0]
+            username = customer.email
+            if username == email:
+                st.sidebar.write(':violet[Subscription is valid!]')
+                st.sidebar.subheader(':red[Click up on GPTapp to proceed.]')
+                subscribed_user = 'True'
+            else:
+                st.sidebar.write(':red[Subscription is not valid!]')
+                subscribed_user = 'False'
 
         else:
             st.sidebar.write(':red[You are not subscribed to this service!]')
