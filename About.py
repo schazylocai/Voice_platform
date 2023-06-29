@@ -90,7 +90,7 @@ def run_subscription():
     # Set your Stripe API keys
     stripe.api_key = strip_secret_key
 
-    if pay := st.sidebar.button(":violet[Proceed to Payment]", key='payment'):
+    if pay := st.sidebar.button(":blue[Proceed to Payment]", key='payment'):
         # Initialize Stripe payment
         session = stripe.checkout.Session.create(
             payment_method_types=["card"],
@@ -106,7 +106,7 @@ def run_subscription():
     st.sidebar.title(":red[Already subscribed?]")
     email = st.sidebar.text_input(":violet[Please enter your email address:]")
 
-    if email_button := st.sidebar.button(":violet[Submit]"):
+    if email_button := st.sidebar.button(":blue[Submit]"):
 
         customers = stripe.Customer.list()
 
