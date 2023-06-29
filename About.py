@@ -1,24 +1,13 @@
 import streamlit as st
-import json
 import os
 from dotenv import load_dotenv
 load_dotenv() # read local .env file
 from azure.storage.blob import BlobServiceClient
-import stripe
-import webbrowser
 
 st.set_page_config(layout="wide",initial_sidebar_state='expanded',page_icon="🔬")
 connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
-
-stripe_publishable_key = os.environ['STRIPE_PUBLISHABLE_KEY']
-strip_secret_key = os.environ['STRIPE_SECRET_KEY']
-stripe_api_key = os.environ['STRIPE_API_KEY']
-
 video_url = "https://www.youtube.com/watch?v=YXpdalfhgoQ"
-#payment_link = "https://buy.stripe.com/test_fZe9APbAraUZ3HqfYZ"
-success_url="https://gptdocanalyzer.azurewebsites.net/GPTapp"
-cancel_url="https://gptdocanalyzer.azurewebsites.net/"
-user_email = ""
+from stripe_functions import check_customers,subscribe_to_service,cancel_service
 
 def first_page():
     status = False
@@ -49,10 +38,11 @@ def first_page():
             st.video(video_url)
 
         # section 3
+        st.divider()
         st.header(":red[Subscription details]")
         st.subheader(":violet[Full access: $15 USD/Month]")
-        st.write(
-            ":violet[Subscribe today to unlock the full potential of our AI model. As a special bonus, you'll enjoy a :red[1-day free trial period] to thoroughly test its capabilities. Only if you decide to continue after the trial, your subscription will be billed at $15 USD per month.]")
+        st.write(":violet[Subscribe to unlock the full potential of our AI model.]")
+        #st.write(":violet[As a special bonus, you'll enjoy a :red[1-day free trial period] to thoroughly test its capabilities. Only if you decide to continue after the trial, your subscription will be billed at $15 USD per month.]")
 
         def Terms():
             # section 4
@@ -83,50 +73,8 @@ def first_page():
     # Run Intro
     intro()
 
-def run_subscription():
-    subscribed_user = 'False'
-    # Run stripe
-    st.sidebar.title(":red[Want to subscribe?]")
-    # Set your Stripe API keys
-    stripe.api_key = strip_secret_key
-
-    if pay := st.sidebar.button(":blue[Proceed to Payment]", key='payment'):
-        # Initialize Stripe payment
-        session = stripe.checkout.Session.create(
-            payment_method_types=["card"],
-            line_items=[{"price": stripe_api_key, "quantity": 1}],
-            mode="subscription",
-            success_url=cancel_url,
-            cancel_url=cancel_url)
-
-        # Redirect the user to the payment portal
-        browser = webbrowser.open(url=session.url,new=0,autoraise=True)
-
-    # Check customers
-    st.sidebar.title(":red[Already subscribed?]")
-    email = st.sidebar.text_input(":violet[Please enter your email address:]")
-
-    if email_button := st.sidebar.button(":blue[Submit]"):
-
-        customers = stripe.Customer.list()
-
-        if len(customers.data) > 0:
-            customer = customers.data[0]
-            username = customer.email
-            if username == email:
-                st.sidebar.write(':violet[Subscription is valid!]')
-                st.sidebar.subheader(':red[Click up on GPTapp to proceed.]')
-                subscribed_user = 'True'
-            else:
-                st.sidebar.write(':red[Subscription is not valid!]')
-                subscribed_user = 'False'
-
-        else:
-            st.sidebar.write(':red[You are not subscribed to this service!]')
-            subscribed_user = 'False'
-
-    return subscribed_user
 
 first_page()
-#run_subscription()
-st.session_state.subscribed_status = run_subscription()
+st.session_state.subscribed_status = check_customers()
+subscribe_to_service()
+cancel_service()

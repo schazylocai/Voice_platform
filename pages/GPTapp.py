@@ -115,7 +115,7 @@ def launch_app():
 subscribed = False
 if "subscribed_status" in st.session_state:
     subscribed_user = st.session_state.subscribed_status
-    if subscribed_user == 'True':
+    if subscribed_user:
         launch_app()
     else:
         st.header(':red[You are not subscribed to this service!]')
