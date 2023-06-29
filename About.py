@@ -102,7 +102,7 @@ def run_subscription():
         payment_link_access = session.url
 
         # Redirect the user to the payment portal
-        webbrowser.open(payment_link_access,new=0,autoraise=False)
+        webbrowser.open(payment_link_access,new=0,autoraise=True)
 
     # Check customers
     st.sidebar.title(":red[Already subscribed?]")
