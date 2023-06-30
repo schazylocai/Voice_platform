@@ -13,11 +13,11 @@ cancel_url="https://gptdocanalyzer.azurewebsites.net/"
 user_email = ""
 
 stripe_publishable_key = os.environ['STRIPE_PUBLISHABLE_KEY']
-strip_secret_key = os.environ['STRIPE_SECRET_KEY']
+stripe_secret_key = os.environ['STRIPE_SECRET_KEY']
 stripe_api_key = os.environ['STRIPE_API_KEY']
 
 subscribed_user = 'False'
-stripe.api_key = strip_secret_key
+#stripe.api_key = stripe_secret_key
 
 def get_days_left(subscription):
     current_timestamp = datetime.now().timestamp()
@@ -25,9 +25,10 @@ def get_days_left(subscription):
     return max(0, int((current_period_end - current_timestamp) / (24 * 3600)))
 
 def check_customers():
+
     user = False
     # Check customers
-    st.sidebar.title(":red[Already subscribed?]")
+    st.sidebar.title(":red[Login to start!]")
     email = st.sidebar.text_input(":violet[Please enter your email address:]",key='email_add')
 
     if email_button := st.sidebar.button(":red[Submit]",key='submit_add'):
@@ -66,12 +67,30 @@ def check_customers():
 
 
 def subscribe_to_service():
-    # Subscribe to the service
-    st.sidebar.divider()
-    st.sidebar.subheader(":blue[Want to subscribe?]")
-    if pay := st.sidebar.button(":blue[Proceed to Payment]", key='payment'):
-        # Initialize Stripe payment
+    def subscribe_menu():
+
+        st.sidebar.divider()
+        st.sidebar.subheader(":blue[Want to subscribe?]")
+        # Check if customer exists
+        email = st.sidebar.text_input(":violet[Please enter your email address:]", key='email_check')
+
+        if email_button := st.sidebar.button(":red[Submit]", key='submit_email_check'):
+
+            customers = stripe.Customer.list()
+            customer = customers.data[0]
+            username = customer.email
+
+            if username == email:
+                st.sidebar.write(":red[User already exists. Please login!]")
+
+            else: proceed_to_payment()
+
+    def proceed_to_payment():
+
+        # if pay := st.sidebar.button(":blue[Proceed to Payment]", key='proceed_payment'):
+            # Initialize Stripe payment
         session = stripe.checkout.Session.create(
+            api_key=stripe_secret_key,
             payment_method_types=["card"],
             line_items=[{"price": stripe_api_key, "quantity": 1}],
             mode="subscription",
@@ -79,10 +98,13 @@ def subscribe_to_service():
             cancel_url=cancel_url)
 
         # Redirect the user to the payment portal
-        browser = webbrowser.open(url=session.url,new=0,autoraise=True)
+        webbrowser.open(url=session.url, new=0)
+
+    subscribe_menu()
 
 
 def cancel_service():
+
     # Cancel subscription to the service
     st.sidebar.divider()
     st.sidebar.subheader(":blue[Cancel subscription?]")

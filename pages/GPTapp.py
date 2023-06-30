@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 import stripe
 import PyPDF2
+from Crypto.Cipher import AES
 
 load_dotenv() # read local .env file
 secret_key = os.environ['OPENAI_API_KEY']
@@ -22,10 +23,18 @@ from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
 
 def launch_app():
-    file_to_upload = st.sidebar.file_uploader(label='Please select PDF files to upload:', type='pdf',
-                                                  accept_multiple_files=True, key='files')
 
-    # st.caption("Developed & managed by Samuel Chazy: www.samuelchazy.com")
+    # Choose domain
+    st.sidebar.title(":red[Sectors of expertise]")
+    sector = st.sidebar.selectbox(":violet[Choose your Domain]",("Education & Training","Business & Management",
+                                                        "Technology & Engineering","Healthcare & Medicine",
+                                                        "Creative & Media","Retail & Commerce"))
+    st.sidebar.divider()
+
+    # upload files
+    st.sidebar.title(":red[File uploader]")
+    file_to_upload = st.sidebar.file_uploader(label=':violet[Select PDF or Word files to upload]', type='pdf',
+                                                  accept_multiple_files=True, key='files')
     st.title(":violet[GPT Document Analyzer]")
     st.write(':violet[Upload your PDF files from the left menu & start querying the documents.]')
 
@@ -49,26 +58,25 @@ def launch_app():
         retriever = my_database.as_retriever()
 
         ########## RetrievalQA from chain type ##########
-        response_template = """
-        • You are a professional in the Educational Field.
-        • Your task is to read research papers, research documents, educational journals, and conference papers.
-        • You should be analytical and reply in depth.
+        response_template = f"""
+        • You will act as a professional and a researcher in the {sector} Field.
+        • Your task is to read through research papers, documents, journals, manuals, articles, and presentations that are related to the {sector} sector.
+        • You should be analytical, thoughtful, and reply in depth and details to any question.
         • Always reply in a polite and professional manner.
         • Don't connect or look for answers on the internet.
         • Only look for answers from the given documents and papers.
-        • Use conversation memory to link all question and responses together
         • If you don't know the answer to the question, then reply: "I can't be confident about my answer because I am missing the context or some information!"
     
         Divide your answer when possible into paragraphs:
         • What is your answer to the question?
-        • How did you come up with this answer?
-        • Add citations from the document that supports the answer in bullet points at the end of your answer.
-        • Add references related to questions from the given documents only, in bullet points, each one separately, at the end of your answer.
+        • What are the various elements that helped you with your answer?
+        • Add citations when possible from the document that supports the answer in bullet points at the end of your answer.
+        • Always ddd references related to questions from the given documents only, in bullet points, each one separately, at the end of your answer.
     
-        {context}
-    
-        Question: {question}
-    
+        {{context}}
+        
+        Question: {{question}}
+        
         Answer:
         """
 
@@ -95,7 +103,7 @@ def launch_app():
 
             if _submit_button:
                 st.divider()
-                st.write(":red[Query submitted. This may take a :red[minute] while we query the documents...]")
+                st.write(":red[Query submitted. This may take a :red[minute or two] while we query the documents...]")
                 st.divider()
 
                 response = query_model.run(_user_input)
