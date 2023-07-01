@@ -109,7 +109,7 @@ def launch_app():
                 st.divider()
 
                 response = query_model.run(_user_input)
-                st.write(response)
+                st.subheader(response)
 
                 _submit_button = False
 

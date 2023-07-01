@@ -36,7 +36,7 @@ def check_customers():
     password = st.sidebar.text_input(":violet[Create a password and save it]", key='password_add')
 
     if len(email) == 0:
-        st.sidebar.write(":red[Enter your email]")
+        st.sidebar.write(":blue[Enter your email]")
 
     else:
         if email_button := st.sidebar.button(":red[Submit]",key='submit_add'):
@@ -87,13 +87,13 @@ def subscribe_to_service():
         username = ''
 
         st.sidebar.divider()
-        st.sidebar.subheader(":blue[Want to subscribe?]")
+        st.sidebar.title(":red[Want to subscribe?]")
         # Check if customer exists
         email = st.sidebar.text_input(":violet[Enter your email address]", key='email_check')
         password = st.sidebar.text_input(":violet[Create a password and save it]", key='password_check')
 
         if len(email) == 0:
-            st.sidebar.write(":red[Enter your email]")
+            st.sidebar.write(":blue[Enter your email]")
 
         else:
             if email_button := st.sidebar.button(":red[Submit]", key='submit_email_check'):
@@ -144,7 +144,7 @@ def cancel_service():
     password = st.sidebar.text_input(":violet[Create a password and save it]", key='password_cancel')
 
     if len(email) == 0:
-        st.sidebar.write(":red[Enter your email]")
+        st.sidebar.write(":blue[Enter your email]")
 
     else:
         if email_button_cancel := st.sidebar.button(":red[Submit]",key='submit_cancel'):
