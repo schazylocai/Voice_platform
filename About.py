@@ -2,7 +2,6 @@ import streamlit as st
 import os
 from dotenv import load_dotenv
 load_dotenv() # read local .env file
-from azure.storage.blob import BlobServiceClient
 
 st.set_page_config(layout="wide",initial_sidebar_state='expanded',page_icon="🔬")
 connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']

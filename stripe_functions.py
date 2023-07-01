@@ -27,63 +27,91 @@ def get_days_left(subscription):
 def check_customers():
 
     user = False
+    global username
+    username = ''
+
     # Check customers
     st.sidebar.title(":red[Login to start!]")
     email = st.sidebar.text_input(":violet[Please enter your email address:]",key='email_add')
+    password = st.sidebar.text_input(":violet[Create a password and save it]", key='password_add')
 
-    if email_button := st.sidebar.button(":red[Submit]",key='submit_add'):
+    if len(email) == 0:
+        st.sidebar.write(":red[Enter your email]")
 
-        customers = stripe.Customer.list()
+    else:
+        if email_button := st.sidebar.button(":red[Submit]",key='submit_add'):
 
-        if len(customers.data) > 0:
-            customer = customers.data[0]
-            username = customer.email
+            if len(password) < 4:
+                st.sidebar.write(":red[Enter a valid password]")
 
-            if username == email:
-                subscriptions = stripe.Subscription.list(customer=customer.id)
+            else:
 
-                if len(subscriptions.data) > 0:
-                    st.sidebar.write(':violet[Subscription is valid!]')
-                    customer_id = customer.id
-                    subscription = stripe.Subscription.list(customer=customer_id)
-                    days_left = get_days_left(subscription)
+                customers = stripe.Customer.list()
 
-                    if subscription['data'][0]['cancel_at_period_end']:
-                        st.sidebar.write(f":red[Subscription will be canceled in {days_left} days.]")
+                if len(customers.data) > 0:
+                    customer = customers.data[0]
+                    username = customer.email
+
+                    if username == email:
+                        subscriptions = stripe.Subscription.list(customer=customer.id)
+
+                        if len(subscriptions.data) > 0:
+                            st.sidebar.write(':violet[Subscription is valid!]')
+                            customer_id = customer.id
+                            subscription = stripe.Subscription.list(customer=customer_id)
+                            days_left = get_days_left(subscription)
+
+                            if subscription['data'][0]['cancel_at_period_end']:
+                                st.sidebar.write(f":red[Subscription will be canceled in {days_left} days.]")
+                            else:
+                                st.sidebar.write(f":red[{days_left} days left for this month.]")
+
+                            st.sidebar.subheader(':red[Click up on GPTapp to proceed.]')
+                            user = True
                     else:
-                        st.sidebar.write(f":red[{days_left} days left for this month.]")
+                        st.sidebar.write(':red[Subscription is not valid!]')
+                        user = False
 
-                    st.sidebar.subheader(':red[Click up on GPTapp to proceed.]')
-                    user = True
                 else:
-                    st.sidebar.write(':red[Subscription is not valid!]')
-                    user = False
-
-        else:
-            st.sidebar.write(':red[You are not subscribed to this service!]')
-            user = True
+                    st.sidebar.write(':red[You are not subscribed to this service!]')
+                    user = True
 
     return user
 
 
 def subscribe_to_service():
+
     def subscribe_menu():
+
+        global username
+        username = ''
 
         st.sidebar.divider()
         st.sidebar.subheader(":blue[Want to subscribe?]")
         # Check if customer exists
-        email = st.sidebar.text_input(":violet[Please enter your email address:]", key='email_check')
+        email = st.sidebar.text_input(":violet[Enter your email address]", key='email_check')
+        password = st.sidebar.text_input(":violet[Create a password and save it]", key='password_check')
 
-        if email_button := st.sidebar.button(":red[Submit]", key='submit_email_check'):
+        if len(email) == 0:
+            st.sidebar.write(":red[Enter your email]")
 
-            customers = stripe.Customer.list()
-            customer = customers.data[0]
-            username = customer.email
+        else:
+            if email_button := st.sidebar.button(":red[Submit]", key='submit_email_check'):
+                customers = stripe.Customer.list()
+                if len(customers.data) > 0:
+                    customer = customers.data[0]
+                    username = customer.email
 
-            if username == email:
-                st.sidebar.write(":red[User already exists. Please login!]")
+                if username == email:
+                    st.sidebar.write(":red[User already exists. Please login!]")
 
-            else: proceed_to_payment()
+                else:
+                    if len(password) < 4:
+                        st.sidebar.write(":red[Enter a valid password]")
+                        st.sidebar.write(":red[Password should be at least 4 numbers/characters)]")
+
+                    else:
+                        proceed_to_payment()
 
     def proceed_to_payment():
 
@@ -105,35 +133,53 @@ def subscribe_to_service():
 
 def cancel_service():
 
+    global username
+    username = ''
+
     # Cancel subscription to the service
     st.sidebar.divider()
     st.sidebar.subheader(":blue[Cancel subscription?]")
-    email_id = st.sidebar.text_input(":red[Please enter your email address:]",key='email_cancel')
-    if email_button_cancel := st.sidebar.button(":red[Submit]",key='submit_cancel'):
-        customers = stripe.Customer.list()
-        if len(customers.data) > 0:
-            customer = customers.data[0]
-            username = customer.email
-            if username == email_id:
-                subscriptions = stripe.Subscription.list(customer=customer.id)
-                if len(subscriptions.data) > 0:
-                    customer_id = customer.id
-                    subscription = stripe.Subscription.list(customer=customer_id)
-                    days_left = get_days_left(subscription)
-                    subscription_id = subscription['data'][0]['id']
-                    stripe.Subscription.modify(subscription_id, cancel_at_period_end=True)
+    # Check if customer exists
+    email = st.sidebar.text_input(":red[Please enter your email address:]",key='email_cancel')
+    password = st.sidebar.text_input(":violet[Create a password and save it]", key='password_cancel')
 
-                    if days_left == 1:
-                        stripe.Subscription.delete(subscription_id)
+    if len(email) == 0:
+        st.sidebar.write(":red[Enter your email]")
 
-                    st.sidebar.write(':violet[Subscription cancelled successfully for the next billing cycle!]')
-                    st.sidebar.write(f":red[{days_left} days left in the current subscription period.]")
+    else:
+        if email_button_cancel := st.sidebar.button(":red[Submit]",key='submit_cancel'):
+
+            if len(password) < 4:
+                    st.sidebar.write(":red[Enter a valid password]")
+
+            else:
+                customers = stripe.Customer.list()
+
+                if len(customers.data) > 0:
+                    customer = customers.data[0]
+                    username = customer.email
+
+                    if username == email:
+                        subscriptions = stripe.Subscription.list(customer=customer.id)
+
+                        if len(subscriptions.data) > 0:
+                            customer_id = customer.id
+                            subscription = stripe.Subscription.list(customer=customer_id)
+                            days_left = get_days_left(subscription)
+                            subscription_id = subscription['data'][0]['id']
+                            stripe.Subscription.modify(subscription_id, cancel_at_period_end=True)
+
+                            if days_left == 1:
+                                stripe.Subscription.delete(subscription_id)
+
+                            st.sidebar.write(':violet[Subscription cancelled successfully for the next billing cycle!]')
+                            st.sidebar.write(f":red[{days_left} days left in the current subscription period.]")
+                        else:
+                            st.sidebar.write(':red[No active subscription found!]')
+                    else:
+                        st.sidebar.write(":red[Customer doesn't exist]")
                 else:
                     st.sidebar.write(':red[No active subscription found!]')
-            else:
-                st.sidebar.write(":red[Customer doesn't exist]")
-        else:
-            st.sidebar.write(':red[No active subscription found!]')
 
     st.sidebar.divider()
     return subscribed_user

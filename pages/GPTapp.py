@@ -62,6 +62,8 @@ def launch_app():
         • You will act as a professional and a researcher in the {sector} Field.
         • Your task is to read through research papers, documents, journals, manuals, articles, and presentations that are related to the {sector} sector.
         • You should be analytical, thoughtful, and reply in depth and details to any question.
+        • If you suspect bias in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is biased". Explain why do yuo think it is biased.
+        • If you suspect incorrect or misleading information in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is incorrect or misleading". Explain why do yuo think it is incorrect or misleading.
         • Always reply in a polite and professional manner.
         • Don't connect or look for answers on the internet.
         • Only look for answers from the given documents and papers.
@@ -126,4 +128,5 @@ if "subscribed_status" in st.session_state:
     if subscribed_user:
         launch_app()
     else:
-        st.header(':red[You are not subscribed to this service!]')
+        st.header(':red[Subscription is not valid!]')
+        st.subheader(':violet[Please Login or Subscribe in the About page.]')
