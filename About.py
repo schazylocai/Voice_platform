@@ -6,7 +6,7 @@ from azure.storage.blob import BlobServiceClient
 
 st.set_page_config(layout="wide",initial_sidebar_state='expanded',page_icon="🔬")
 connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
-video_url = "https://www.youtube.com/watch?v=YXpdalfhgoQ"
+video_url = "https://youtu.be/L3nwcuxxvGI"
 from stripe_functions import check_customers,subscribe_to_service,cancel_service
 
 def first_page():
