@@ -17,7 +17,7 @@ stripe_secret_key = os.environ['STRIPE_SECRET_KEY']
 stripe_api_key = os.environ['STRIPE_API_KEY']
 
 subscribed_user = 'False'
-#stripe.api_key = stripe_secret_key
+stripe.api_key = stripe_secret_key
 
 def get_days_left(subscription):
     current_timestamp = datetime.now().timestamp()
