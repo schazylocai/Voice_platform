@@ -118,8 +118,8 @@ def subscribe_to_service():
                 customer = customers.data[0]
                 username = customer.email
 
-            if username == email:
-                st.sidebar.write(":red[User already exists. Please login!]")
+                if username == email:
+                    st.sidebar.write(":red[User already exists. Please login!]")
 
             else:
                 if len(password) < 4:
@@ -127,21 +127,20 @@ def subscribe_to_service():
                     st.sidebar.write(":red[Password should be at least 4 numbers/characters)]")
 
                 else:
-                    write_subscription_ids_to_azure_blob(email, password)
-                    proceed_to_payment()
+                    session = stripe.checkout.Session.create(
+                        api_key=stripe_secret_key,
+                        payment_method_types=["card"],
+                        line_items=[{"price": stripe_api_key, "quantity": 1}],
+                        mode="subscription",
+                        success_url=success_url,
+                        cancel_url=cancel_url)
 
-def proceed_to_payment():
+                    email,password = write_subscription_ids_to_azure_blob(email, password)
 
-    # session = stripe.checkout.Session.create(
-    #     api_key=stripe_secret_key,
-    #     payment_method_types=["card"],
-    #     line_items=[{"price": stripe_api_key, "quantity": 1}],
-    #     mode="subscription",
-    #     success_url=success_url,
-    #     cancel_url=cancel_url)
+                    # Redirect the user to the payment portal
+                    webbrowser.open(url=session.url, new=0)
 
-    # Redirect the user to the payment portal
-    webbrowser.open(url=payment_link, new=0)
+                    return email,password
 
 
 def cancel_service():
