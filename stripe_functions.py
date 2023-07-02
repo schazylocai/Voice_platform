@@ -135,10 +135,11 @@ def subscribe_to_service():
                         success_url=success_url,
                         cancel_url=cancel_url)
 
-                    email,password = write_subscription_ids_to_azure_blob(email, password)
-
                     # Redirect the user to the payment portal
-                    webbrowser.open(url=session.url, new=0)
+                    webbrowser.open(url=session.url)
+
+                    # Write email & password to Azure blob
+                    email, password = write_subscription_ids_to_azure_blob(email, password)
 
                     return email,password
 
