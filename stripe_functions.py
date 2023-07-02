@@ -127,21 +127,28 @@ def subscribe_to_service():
                     st.sidebar.write(":red[Password should be at least 4 numbers/characters)]")
 
                 else:
-                    session = stripe.checkout.Session.create(
-                        api_key=stripe_secret_key,
-                        payment_method_types=["card"],
-                        line_items=[{"price": stripe_api_key, "quantity": 1}],
-                        mode="subscription",
-                        success_url=success_url,
-                        cancel_url=cancel_url)
-
-                    # Redirect the user to the payment portal
-                    webbrowser.open(url=session.url)
-
                     # Write email & password to Azure blob
                     email, password = write_subscription_ids_to_azure_blob(email, password)
 
-                    return email,password
+                    # Proceed to pay
+                    proceed_to_payment()
+
+    return email,password
+
+def proceed_to_payment():
+
+    # Open stripe session
+    # if proceed_button := st.sidebar.button(":red[Proceed to payment]", key='submit_payment'):
+    session = stripe.checkout.Session.create(
+        api_key=stripe_secret_key,
+        payment_method_types=["card"],
+        line_items=[{"price": stripe_api_key, "quantity": 1}],
+        mode="subscription",
+        success_url=success_url,
+        cancel_url=cancel_url)
+
+    # Redirect the user to the payment portal
+    webbrowser.open(url=session.url)
 
 
 def cancel_service():
