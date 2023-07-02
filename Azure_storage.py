@@ -19,22 +19,21 @@ def read_subscription_from_azure_blob(username):
         st.write(":red[No data found!]")
         return None
 
-    # Download the blob content
-    blob_content = container_client.download_blob(blob_name).readall()
-
-    # Decode and return the subscription data
-    subscription_data = json.loads(blob_content.decode("utf-8"))
-
-    if username in subscription_data:
-        username = subscription_data[username]
-        password = username["password"]
-        st.write("Username:", username)
-        st.write("Password:", password)
-
-        return username, password
-
     else:
-        st.write(":red[User not found!]")
+        # Download the blob content
+        blob_content = container_client.download_blob(blob_name).readall()
+
+        # Decode and return the subscription data
+
+        subscription_data = json.loads(blob_content.decode("utf-8"))
+
+        for user in range(len(subscription_data)):
+
+            if username == subscription_data[user]['user_email']:
+                username = subscription_data[user]["user_email"]
+                password = subscription_data[user]["password"]
+
+                return username, password
 
 
 def write_subscription_ids_to_azure_blob(user_email,password):

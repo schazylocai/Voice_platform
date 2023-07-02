@@ -50,44 +50,41 @@ def check_customers():
                 st.sidebar.write(":red[Enter a valid password]")
 
             else:
-
                 customers = stripe.Customer.list()
 
                 if len(customers.data) > 0:
-                    customer = customers.data[0]
-                    username = customer.email
+                    for user in range(len(customers.data)):
 
-                    if username == email:
+                        customer = customers.data[user]
+                        username = customer.email
 
-                        # Check password
-                        username_azure,password_azure = read_subscription_from_azure_blob(username)
-                        if password == password_azure:
+                        if username == email:
 
-                            # Check subscription
-                            subscriptions = stripe.Subscription.list(customer=customer.id)
+                            # Check password
+                            username_azure,password_azure = read_subscription_from_azure_blob(username)
+                            if password_azure == password:
 
-                            if len(subscriptions.data) > 0:
-                                st.sidebar.write(':violet[Subscription is valid!]')
-                                customer_id = customer.id
-                                subscription = stripe.Subscription.list(customer=customer_id)
-                                days_left = get_days_left(subscription)
+                                # Check subscription
+                                subscriptions = stripe.Subscription.list(customer=customer.id)
 
-                                if subscription['data'][0]['cancel_at_period_end']:
-                                    st.sidebar.write(f":red[Subscription will be canceled in {days_left} days.]")
+                                if len(subscriptions.data) > 0:
+                                    st.sidebar.write(':violet[Subscription is valid!]')
+                                    customer_id = customer.id
+                                    subscription = stripe.Subscription.list(customer=customer_id)
+                                    days_left = get_days_left(subscription)
+
+                                    if subscription['data'][0]['cancel_at_period_end']:
+                                        st.sidebar.write(f":red[Subscription will be canceled in {days_left} days.]")
+                                    else:
+                                        st.sidebar.write(f":red[{days_left} days left for this month.]")
+
+                                    st.sidebar.subheader(':red[Click up on GPTapp to proceed.]')
+                                    user = True
+
                                 else:
-                                    st.sidebar.write(f":red[{days_left} days left for this month.]")
+                                    st.sidebar.write(':red[No active subscription found!]')
 
-                                st.sidebar.subheader(':red[Click up on GPTapp to proceed.]')
-                                user = True
-
-                            else:
-                                st.sidebar.write(':red[No active subscription found!]')
-
-                        else: st.write(":red[Incorrect password]")
-
-                    else:
-                        st.sidebar.write(':red[Subscription is not valid!]')
-                        user = False
+                            else: st.sidebar.write(":red[Incorrect password]")
 
                 else:
                     st.sidebar.write(':red[You are not subscribed to this service!]')
@@ -102,7 +99,6 @@ def subscribe_to_service():
     def proceed_to_payment():
 
         # Open stripe session
-        # if proceed_button := st.sidebar.button(":red[Proceed to payment]", key='submit_payment'):
         session = stripe.checkout.Session.create(
             api_key=stripe_secret_key,
             payment_method_types=["card"],
@@ -136,17 +132,16 @@ def subscribe_to_service():
                 if username == email:
                     st.sidebar.write(":red[User already exists. Please login!]")
 
+            if len(password) < 4:
+                st.sidebar.write(":red[Enter a valid password]")
+                st.sidebar.write(":red[Password should be at least 4 numbers/characters)]")
+
             else:
-                if len(password) < 4:
-                    st.sidebar.write(":red[Enter a valid password]")
-                    st.sidebar.write(":red[Password should be at least 4 numbers/characters)]")
+                # Write email & password to Azure blob
+                email, password = write_subscription_ids_to_azure_blob(email, password)
 
-                else:
-                    # Write email & password to Azure blob
-                    email, password = write_subscription_ids_to_azure_blob(email, password)
-
-                    # Proceed to pay
-                    proceed_to_payment()
+                # Proceed to pay
+                proceed_to_payment()
 
     return email,password
 
@@ -177,38 +172,39 @@ def cancel_service():
                 customers = stripe.Customer.list()
 
                 if len(customers.data) > 0:
-                    customer = customers.data[0]
-                    username = customer.email
 
-                    if username == email:
+                    for user in range(len(customers.data)):
 
-                        # Check password
-                        username_azure, password_azure = read_subscription_from_azure_blob(username)
-                        if password == password_azure:
+                        customer = customers.data[user]
+                        username = customer.email
 
-                            subscriptions = stripe.Subscription.list(customer=customer.id)
+                        if username == email:
 
-                            if len(subscriptions.data) > 0:
-                                customer_id = customer.id
-                                subscription = stripe.Subscription.list(customer=customer_id)
-                                days_left = get_days_left(subscription)
-                                subscription_id = subscription['data'][0]['id']
-                                stripe.Subscription.modify(subscription_id, cancel_at_period_end=True)
+                            # Check password
+                            username_azure, password_azure = read_subscription_from_azure_blob(username)
+                            if password_azure == password:
 
-                                if days_left == 1:
-                                    stripe.Subscription.delete(subscription_id)
+                                subscriptions = stripe.Subscription.list(customer=customer.id)
 
-                                st.sidebar.write(':violet[Subscription cancelled successfully for the next billing cycle!]')
-                                st.sidebar.write(f":red[{days_left} days left in the current subscription period.]")
+                                if len(subscriptions.data) > 0:
+                                    customer_id = customer.id
+                                    subscription = stripe.Subscription.list(customer=customer_id)
+                                    days_left = get_days_left(subscription)
+                                    subscription_id = subscription['data'][0]['id']
+                                    stripe.Subscription.modify(subscription_id, cancel_at_period_end=True)
+
+                                    if days_left == 1:
+                                        stripe.Subscription.delete(subscription_id)
+
+                                    st.sidebar.write(':violet[Subscription cancelled successfully for the next billing cycle!]')
+                                    st.sidebar.write(f":red[{days_left} days left in the current subscription period.]")
+
+                                else:
+                                    st.sidebar.write(':red[No active subscription found!]')
 
                             else:
-                                st.sidebar.write(':red[No active subscription found!]')
+                                st.sidebar.write(":red[Incorrect password]")
 
-                        else:
-                            st.write(":red[Incorrect password]")
-
-                    else:
-                        st.sidebar.write(":red[Customer doesn't exist]")
                 else:
                     st.sidebar.write(':red[No active subscription found!]')
 

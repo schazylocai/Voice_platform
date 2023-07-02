@@ -2,6 +2,7 @@ import streamlit as st
 import os
 from dotenv import load_dotenv
 load_dotenv() # read local .env file
+import smtplib
 
 st.set_page_config(layout="wide",initial_sidebar_state='expanded',page_icon="🔬")
 connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
@@ -68,6 +69,34 @@ def first_page():
         st.write("")
         st.write("")
         Terms()
+
+        def send_email(sender, recipient, subject, body):
+            with smtplib.SMTP("smtp.gmail.com", 587) as server:
+                server.ehlo()
+                server.starttls()
+                server.login(sender, os.environ["EMAIL_PASSWORD"])
+                server.sendmail(sender, recipient, f"Subject: {subject}\n\n{body}")
+
+        def contact_us_form():
+
+            with st.expander(':violet[Contact Us!]'):
+                name = st.text_input(':violet[Name]', key='name')
+                email = st.text_input(':violet[Email]', key='email')
+                message = st.text_area(':violet[Message]', key='message')
+                submitted = st.button(':red[Submit]')
+
+                if submitted:
+                    if name.strip() == '':
+                        st.error(':red[Enter your name!]')
+                    elif email.strip() == '':
+                        st.error(':red[Enter your email!]')
+                    elif message.strip() == '':
+                        st.error(':red[Enter a message!]')
+                    else:
+                        send_email(os.environ["MY_EMAIL_ADDRESS"], email, "Contact Form Submission", message)
+                        st.success(':violet[Form submitted successfully!]')
+
+        contact_us_form()
 
     # Run Intro
     intro()
