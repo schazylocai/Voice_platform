@@ -99,6 +99,21 @@ def check_customers():
 def subscribe_to_service():
 
     username = ''
+    def proceed_to_payment():
+
+        # Open stripe session
+        # if proceed_button := st.sidebar.button(":red[Proceed to payment]", key='submit_payment'):
+        session = stripe.checkout.Session.create(
+            api_key=stripe_secret_key,
+            payment_method_types=["card"],
+            line_items=[{"price": stripe_api_key, "quantity": 1}],
+            mode="subscription",
+            success_url=success_url,
+            cancel_url=cancel_url)
+
+        # Create a clickable link to the payment URL
+        pay_link = f'<a href="{session.url}" target="_blank">Click here to proceed to payment!</a>'
+        st.sidebar.write(pay_link, unsafe_allow_html=True)
 
     st.sidebar.divider()
     st.sidebar.title(":red[Want to subscribe?]")
@@ -134,21 +149,6 @@ def subscribe_to_service():
                     proceed_to_payment()
 
     return email,password
-
-def proceed_to_payment():
-
-    # Open stripe session
-    # if proceed_button := st.sidebar.button(":red[Proceed to payment]", key='submit_payment'):
-    session = stripe.checkout.Session.create(
-        api_key=stripe_secret_key,
-        payment_method_types=["card"],
-        line_items=[{"price": stripe_api_key, "quantity": 1}],
-        mode="subscription",
-        success_url=success_url,
-        cancel_url=cancel_url)
-
-    # Redirect the user to the payment portal
-    webbrowser.open(url=session.url)
 
 
 def cancel_service():
