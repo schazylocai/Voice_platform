@@ -8,9 +8,10 @@ from datetime import datetime
 import os
 from Azure_storage import write_subscription_ids_to_azure_blob,read_subscription_from_azure_blob
 
-#payment_link = "https://buy.stripe.com/test_fZe9APbAraUZ3HqfYZ"
+payment_link = "https://buy.stripe.com/test_fZe9APbAraUZ3HqfYZ"
 success_url="https://gptdocanalyzer.com/"
 cancel_url="https://gptdocanalyzer.com/"
+stripe_product_id = "prod_O9s28TVcxPlBON"
 user_email = ""
 
 stripe_publishable_key = os.environ['STRIPE_PUBLISHABLE_KEY']
@@ -131,16 +132,16 @@ def subscribe_to_service():
 
 def proceed_to_payment():
 
-    session = stripe.checkout.Session.create(
-        api_key=stripe_secret_key,
-        payment_method_types=["card"],
-        line_items=[{"price": stripe_api_key, "quantity": 1}],
-        mode="subscription",
-        success_url=success_url,
-        cancel_url=cancel_url)
+    # session = stripe.checkout.Session.create(
+    #     api_key=stripe_secret_key,
+    #     payment_method_types=["card"],
+    #     line_items=[{"price": stripe_api_key, "quantity": 1}],
+    #     mode="subscription",
+    #     success_url=success_url,
+    #     cancel_url=cancel_url)
 
     # Redirect the user to the payment portal
-    webbrowser.open(url=session.url, new=0)
+    webbrowser.open(url=payment_link, new=0)
 
 
 def cancel_service():
