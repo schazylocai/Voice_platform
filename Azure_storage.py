@@ -45,7 +45,7 @@ def write_subscription_ids_to_azure_blob(user_email,password):
 
         # Append new data to the existing content
         existing_data = json.loads(existing_content.decode("utf-8"))
-        new_data = [{"user_email": user_email, "status": password}]
+        new_data = [{"user_email": user_email, "password": password}]
         combined_data = existing_data + new_data
 
         # Convert the combined data to JSON
@@ -55,7 +55,7 @@ def write_subscription_ids_to_azure_blob(user_email,password):
         blob_client.upload_blob(updated_content, overwrite=True)
     else:
         # Prepare the subscription data
-        subscription_data = [{"user_email": user_email, "status": password}]
+        subscription_data = [{"user_email": user_email, "password": password}]
         subscription_ids = json.dumps(subscription_data)
         # Write the subscription IDs to the blob (since it doesn't exist yet)
         blob_client.upload_blob(subscription_ids, overwrite=True)

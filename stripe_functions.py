@@ -6,6 +6,7 @@ import stripe
 import webbrowser
 from datetime import datetime
 import os
+from Azure_storage import write_subscription_ids_to_azure_blob
 
 #payment_link = "https://buy.stripe.com/test_fZe9APbAraUZ3HqfYZ"
 success_url="https://gptdocanalyzer.azurewebsites.net/GPTapp"
@@ -33,7 +34,9 @@ def check_customers():
     # Check customers
     st.sidebar.title(":red[Login to start!]")
     email = st.sidebar.text_input(":violet[Please enter your email address:]",key='email_add')
-    password = st.sidebar.text_input(":violet[Create a password and save it]", key='password_add')
+    email = email.strip().lower()
+    password = st.sidebar.text_input(":violet[Enter your password]", key='password_add')
+    password = password.strip()
 
     if len(email) == 0:
         st.sidebar.write(":blue[Enter your email]")
@@ -90,7 +93,9 @@ def subscribe_to_service():
         st.sidebar.title(":red[Want to subscribe?]")
         # Check if customer exists
         email = st.sidebar.text_input(":violet[Enter your email address]", key='email_check')
+        email = email.strip().lower()
         password = st.sidebar.text_input(":violet[Create a password and save it]", key='password_check')
+        password = password.strip()
 
         if len(email) == 0:
             st.sidebar.write(":blue[Enter your email]")
@@ -111,6 +116,7 @@ def subscribe_to_service():
                         st.sidebar.write(":red[Password should be at least 4 numbers/characters)]")
 
                     else:
+                        write_subscription_ids_to_azure_blob(email, password)
                         proceed_to_payment()
 
     def proceed_to_payment():
@@ -141,7 +147,9 @@ def cancel_service():
     st.sidebar.subheader(":blue[Cancel subscription?]")
     # Check if customer exists
     email = st.sidebar.text_input(":red[Please enter your email address:]",key='email_cancel')
-    password = st.sidebar.text_input(":violet[Create a password and save it]", key='password_cancel')
+    email = email.strip().lower()
+    password = st.sidebar.text_input(":violet[Enter your password]", key='password_cancel')
+    password = password.strip()
 
     if len(email) == 0:
         st.sidebar.write(":blue[Enter your email]")
