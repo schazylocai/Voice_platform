@@ -28,7 +28,6 @@ def get_days_left(subscription):
 def check_customers():
 
     user = False
-    global username
     username = ''
 
     # Check customers
@@ -84,9 +83,24 @@ def check_customers():
 
 def subscribe_to_service():
 
+    def proceed_to_payment():
+
+        # if pay := st.sidebar.button(":blue[Proceed to Payment]", key='proceed_payment'):
+            # Initialize Stripe payment
+        session = stripe.checkout.Session.create(
+            api_key=stripe_secret_key,
+            payment_method_types=["card"],
+            line_items=[{"price": stripe_api_key, "quantity": 1}],
+            mode="subscription",
+            success_url=cancel_url,
+            cancel_url=cancel_url)
+
+        # Redirect the user to the payment portal
+        webbrowser.open(url=session.url, new=0)
+
+
     def subscribe_menu():
 
-        global username
         username = ''
 
         st.sidebar.divider()
@@ -119,27 +133,11 @@ def subscribe_to_service():
                         write_subscription_ids_to_azure_blob(email, password)
                         proceed_to_payment()
 
-    def proceed_to_payment():
-
-        # if pay := st.sidebar.button(":blue[Proceed to Payment]", key='proceed_payment'):
-            # Initialize Stripe payment
-        session = stripe.checkout.Session.create(
-            api_key=stripe_secret_key,
-            payment_method_types=["card"],
-            line_items=[{"price": stripe_api_key, "quantity": 1}],
-            mode="subscription",
-            success_url=cancel_url,
-            cancel_url=cancel_url)
-
-        # Redirect the user to the payment portal
-        webbrowser.open(url=session.url, new=0)
-
     subscribe_menu()
 
 
 def cancel_service():
 
-    global username
     username = ''
 
     # Cancel subscription to the service

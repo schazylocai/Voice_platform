@@ -59,3 +59,5 @@ def write_subscription_ids_to_azure_blob(user_email,password):
         subscription_ids = json.dumps(subscription_data)
         # Write the subscription IDs to the blob (since it doesn't exist yet)
         blob_client.upload_blob(subscription_ids, overwrite=True)
+
+    return user_email,password
