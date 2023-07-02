@@ -6,7 +6,7 @@ import stripe
 import webbrowser
 from datetime import datetime
 import os
-from Azure_storage import write_subscription_ids_to_azure_blob
+from Azure_storage import write_subscription_ids_to_azure_blob,read_subscription_from_azure_blob
 
 #payment_link = "https://buy.stripe.com/test_fZe9APbAraUZ3HqfYZ"
 success_url="https://gptdocanalyzer.azurewebsites.net/GPTapp"
@@ -55,21 +55,30 @@ def check_customers():
                     username = customer.email
 
                     if username == email:
-                        subscriptions = stripe.Subscription.list(customer=customer.id)
 
-                        if len(subscriptions.data) > 0:
-                            st.sidebar.write(':violet[Subscription is valid!]')
-                            customer_id = customer.id
-                            subscription = stripe.Subscription.list(customer=customer_id)
-                            days_left = get_days_left(subscription)
+                        # Check password
+                        username_azure,password_azure = read_subscription_from_azure_blob(username)
+                        if password == password_azure:
 
-                            if subscription['data'][0]['cancel_at_period_end']:
-                                st.sidebar.write(f":red[Subscription will be canceled in {days_left} days.]")
-                            else:
-                                st.sidebar.write(f":red[{days_left} days left for this month.]")
+                            # Check subscription
+                            subscriptions = stripe.Subscription.list(customer=customer.id)
 
-                            st.sidebar.subheader(':red[Click up on GPTapp to proceed.]')
-                            user = True
+                            if len(subscriptions.data) > 0:
+                                st.sidebar.write(':violet[Subscription is valid!]')
+                                customer_id = customer.id
+                                subscription = stripe.Subscription.list(customer=customer_id)
+                                days_left = get_days_left(subscription)
+
+                                if subscription['data'][0]['cancel_at_period_end']:
+                                    st.sidebar.write(f":red[Subscription will be canceled in {days_left} days.]")
+                                else:
+                                    st.sidebar.write(f":red[{days_left} days left for this month.]")
+
+                                st.sidebar.subheader(':red[Click up on GPTapp to proceed.]')
+                                user = True
+
+                        else: st.write(":red[Incorrect password]")
+
                     else:
                         st.sidebar.write(':red[Subscription is not valid!]')
                         user = False
@@ -130,8 +139,8 @@ def subscribe_to_service():
                         st.sidebar.write(":red[Password should be at least 4 numbers/characters)]")
 
                     else:
-                        write_subscription_ids_to_azure_blob(email, password)
                         proceed_to_payment()
+                        write_subscription_ids_to_azure_blob(email, password)
 
     subscribe_menu()
 
