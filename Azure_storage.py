@@ -5,7 +5,7 @@ load_dotenv() # read local .env file
 from azure.storage.blob import BlobServiceClient
 import json
 
-connection_string = os.environ['connection_string']
+connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
 container_name = "llmidcontainer"
 blob_name = "subscriptionids.json"
 
