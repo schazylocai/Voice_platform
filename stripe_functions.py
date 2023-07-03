@@ -1,9 +1,7 @@
 import streamlit as st
-import os
 from dotenv import load_dotenv
 load_dotenv() # read local .env file
 import stripe
-import webbrowser
 from datetime import datetime
 import os
 from Azure_storage import write_subscription_ids_to_azure_blob,read_subscription_from_azure_blob
@@ -38,58 +36,57 @@ def check_customers():
     st.sidebar.title(":red[Login to start!]")
     email = st.sidebar.text_input(":violet[Please enter your email address:]",key='email_add')
     email = email.strip().lower()
-    password = st.sidebar.text_input(":violet[Enter your password]", key='password_add')
+    password = st.sidebar.text_input(":violet[Enter your password]", key='password_add', type='password')
     password = password.strip()
 
     if len(email) == 0:
         st.sidebar.write(":blue[Enter your email]")
 
-    else:
-        if email_button := st.sidebar.button(":red[Submit]",key='submit_add'):
+    elif email_button := st.sidebar.button(":red[Submit]",key='submit_add'):
 
-            if len(password) < 4:
-                st.sidebar.write(":red[Enter a valid password]")
+        if len(password) < 4:
+            st.sidebar.write(":red[Enter a valid password]")
+
+        else:
+            customers = stripe.Customer.list()
+
+            if len(customers.data) > 0:
+                for user in range(len(customers.data)):
+
+                    customer = customers.data[user]
+                    username = customer.email.strip().lower()
+
+                    if username == email:
+
+                        # Check password
+                        username_azure,password_azure = read_subscription_from_azure_blob(username)
+                        if password_azure == password:
+
+                            # Check subscription
+                            subscriptions = stripe.Subscription.list(customer=customer.id)
+
+                            if len(subscriptions.data) > 0:
+                                st.sidebar.write(':violet[Subscription is valid!]')
+                                customer_id = customer.id
+                                subscription = stripe.Subscription.list(customer=customer_id)
+                                days_left = get_days_left(subscription)
+
+                                if subscription['data'][0]['cancel_at_period_end']:
+                                    st.sidebar.write(f":red[Subscription will be canceled in {days_left} days.]")
+                                else:
+                                    st.sidebar.write(f":red[{days_left} days left for this month.]")
+
+                                st.sidebar.subheader(':red[Click up on GPTapp to proceed.]')
+                                user = True
+
+                            else:
+                                st.sidebar.write(':red[No active subscription found!]')
+
+                        else: st.sidebar.write(":red[Incorrect password]")
 
             else:
-                customers = stripe.Customer.list()
-
-                if len(customers.data) > 0:
-                    for user in range(len(customers.data)):
-
-                        customer = customers.data[user]
-                        username = customer.email.strip().lower()
-
-                        if username == email:
-
-                            # Check password
-                            username_azure,password_azure = read_subscription_from_azure_blob(username)
-                            if password_azure == password:
-
-                                # Check subscription
-                                subscriptions = stripe.Subscription.list(customer=customer.id)
-
-                                if len(subscriptions.data) > 0:
-                                    st.sidebar.write(':violet[Subscription is valid!]')
-                                    customer_id = customer.id
-                                    subscription = stripe.Subscription.list(customer=customer_id)
-                                    days_left = get_days_left(subscription)
-
-                                    if subscription['data'][0]['cancel_at_period_end']:
-                                        st.sidebar.write(f":red[Subscription will be canceled in {days_left} days.]")
-                                    else:
-                                        st.sidebar.write(f":red[{days_left} days left for this month.]")
-
-                                    st.sidebar.subheader(':red[Click up on GPTapp to proceed.]')
-                                    user = True
-
-                                else:
-                                    st.sidebar.write(':red[No active subscription found!]')
-
-                            else: st.sidebar.write(":red[Incorrect password]")
-
-                else:
-                    st.sidebar.write(':red[You are not subscribed to this service!]')
-                    user = True
+                st.sidebar.write(':red[You are not subscribed to this service!]')
+                user = True
 
     return user
 
@@ -117,7 +114,7 @@ def subscribe_to_service():
     # Check if customer exists
     email = st.sidebar.text_input(":violet[Enter your email address]", key='email_check')
     email = email.strip().lower()
-    password = st.sidebar.text_input(":violet[Create a password and save it]", key='password_check')
+    password = st.sidebar.text_input(":violet[Create a password and save it]", key='password_check', type='password')
     password = password.strip()
 
     if len(email) == 0:
@@ -157,7 +154,7 @@ def cancel_service():
     # Check if customer exists
     email = st.sidebar.text_input(":red[Please enter your email address:]",key='email_cancel')
     email = email.strip().lower()
-    password = st.sidebar.text_input(":violet[Enter your password]", key='password_cancel')
+    password = st.sidebar.text_input(":violet[Enter your password]", key='password_cancel', type='password')
     password = password.strip()
 
     if len(email) == 0:

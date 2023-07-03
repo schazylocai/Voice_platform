@@ -1,10 +1,8 @@
-#pip install python-dotenv
 import streamlit as st
 import os
 from dotenv import load_dotenv
 import stripe
 import PyPDF2
-from Crypto.Cipher import AES
 
 load_dotenv() # read local .env file
 secret_key = os.environ['OPENAI_API_KEY']
@@ -20,7 +18,6 @@ from langchain.chat_models import ChatOpenAI
 from langchain.vectorstores import Chroma
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
-from langchain.memory import ConversationBufferMemory
 
 def launch_app():
 
@@ -52,7 +49,6 @@ def launch_app():
             chunks = list(chunks)
 
         llm = ChatOpenAI(temperature=0.7, model='gpt-4') # gpt-4 or gpt-3.5-turbo
-        memory = ConversationBufferMemory(return_messages=True)
         embedding = OpenAIEmbeddings(openai_api_key=secret_key)
         my_database = Chroma.from_texts(chunks, embedding)
         retriever = my_database.as_retriever()
@@ -89,7 +85,6 @@ def launch_app():
             chain_type="stuff",
             retriever=retriever,
             chain_type_kwargs=chain_type_kwargs,
-            memory=memory,
             verbose=False)
 
         def create_text_question():
