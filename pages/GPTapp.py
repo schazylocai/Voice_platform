@@ -3,6 +3,9 @@ import os
 from dotenv import load_dotenv
 import stripe
 import PyPDF2
+import docx2txt
+import textract
+import tempfile
 
 load_dotenv() # read local .env file
 secret_key = os.environ['OPENAI_API_KEY']
@@ -30,7 +33,7 @@ def launch_app():
 
     # upload files
     st.sidebar.title(":red[File uploader]")
-    file_to_upload = st.sidebar.file_uploader(label=':violet[Select PDF or Word files to upload]', type='pdf',
+    file_to_upload = st.sidebar.file_uploader(label=':violet[Select PDF, word, or text files to upload]', type=['pdf','docx','rtf','txt'],
                                                   accept_multiple_files=True, key='files')
     st.title(":violet[GPT Document Analyzer]")
     st.write(':violet[Upload your PDF files from the left menu & start querying the documents.]')
@@ -41,12 +44,39 @@ def launch_app():
         chunks = ''
 
         for file in file_to_upload:
-            pdf_reader = PyPDF2.PdfReader(file)
-            text = "".join(page.extract_text() for page in pdf_reader.pages)
-            text_list += text
-            text_splitter = RecursiveCharacterTextSplitter(chunk_size=500,chunk_overlap=20,length_function=len)
-            chunks = text_splitter.split_text(text=text_list)
-            chunks = list(chunks)
+
+            # Check if the upload file is a pdf
+            if str(file.name).endswith('.pdf'):
+                pdf_reader = PyPDF2.PdfReader(file)
+                text = "".join(page.extract_text() for page in pdf_reader.pages)
+                text_list += text
+
+            # Check if the upload file is a Word docx
+            elif str(file.name).endswith('.docx'):
+                text = docx2txt.process(file)
+                text_list += text
+
+            # Check if the upload file is a text rtf
+            elif str(file.name).endswith('.rtf'):
+                with tempfile.NamedTemporaryFile(suffix=".rtf") as tmp:
+                    tmp.write(file.read())
+                    tmp.seek(0)
+                    text = textract.process(tmp.name, method='rtf')
+                    text_list += text.decode('utf-8')
+
+            # Check if the upload file is a text txt
+            elif str(file.name).endswith('.txt'):
+                with tempfile.NamedTemporaryFile(suffix=".txt") as tmp:
+                    tmp.write(file.read())
+                    tmp.seek(0)
+                    text = textract.process(tmp.name, method='txt')
+                    text_list += text.decode('utf-8')
+            else:
+                st.sidebar.write(":red[File format is not correct!]")
+
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=20, length_function=len)
+        chunks = text_splitter.split_text(text=text_list)
+        chunks = list(chunks)
 
         llm = ChatOpenAI(temperature=0.7, model='gpt-4') # gpt-4 or gpt-3.5-turbo
         embedding = OpenAIEmbeddings(openai_api_key=secret_key)
@@ -64,17 +94,17 @@ def launch_app():
         • Don't connect or look for answers on the internet.
         • Only look for answers from the given documents and papers.
         • If you don't know the answer to the question, then reply: "I can't be confident about my answer because I am missing the context or some information!"
-    
+
         Divide your answer when possible into paragraphs:
         • What is your answer to the question?
         • What are the various elements that helped you with your answer?
         • Add citations when possible from the document that supports the answer in bullet points at the end of your answer.
         • Always ddd references related to questions from the given documents only, in bullet points, each one separately, at the end of your answer.
-    
+
         {{context}}
-        
+
         Question: {{question}}
-        
+
         Answer:
         """
 

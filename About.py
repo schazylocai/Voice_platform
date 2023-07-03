@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv() # read local .env file
 import smtplib
+import re
 
 st.set_page_config(layout="wide",initial_sidebar_state='expanded',page_icon="🔬")
 connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
@@ -27,11 +28,12 @@ def first_page():
 
         with col1:
             st.write(":red[Unlock the Power of AI to Query Your Documents.]")
-            st.subheader(":violet[Welcome to GPT Document Analyzer, a revolutionary application that leverages the capabilities of Large Language Models (GPT).]")
+            st.header(":violet[Welcome to GPT Document Analyzer, a revolutionary application that leverages the capabilities of Large Language Models.]")
 
         with col2:
             st.write(":red[What can this model do for you?]")
-            st.write(":violet[With this cutting-edge tool, you can effortlessly upload PDF documents and interact with them like never before. Pose questions, extract valuable information, analyze content, and generate concise summaries directly from your uploaded documents.]")
+            st.subheader(":violet[With this cutting-edge tool, you can effortlessly upload PDF, word, or text documents and interact with them like never before.]")
+            st.write(":violet[Pose questions, extract valuable information, analyze content, and generate concise summaries directly from your uploaded documents.]")
             st.write(":violet[➜ Watch the video to see how this model works!]")
 
         with col3:
@@ -80,21 +82,28 @@ def first_page():
         def contact_us_form():
 
             with st.expander(':violet[Contact Us!]'):
-                name = st.text_input(':violet[Name]', key='name')
-                email = st.text_input(':violet[Email]', key='email')
-                message = st.text_area(':violet[Message]', key='message')
+                sender_name = st.text_input(':violet[Name]', key='name')
+                sender_email = st.text_input(':violet[Email]', key='email')
+                sender_message = st.text_area(':violet[Message]', key='message')
                 submitted = st.button(':red[Submit]')
 
+                def is_valid_email(sender_email):
+                    # Use a regular expression pattern to validate the email address format
+                    pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+                    return re.match(pattern, sender_email) is not None
+
                 if submitted:
-                    if name.strip() == '':
+                    if sender_name.strip() == '':
                         st.error(':red[Enter your name!]')
-                    elif email.strip() == '':
+                    elif sender_email.strip() == '':
                         st.error(':red[Enter your email!]')
-                    elif message.strip() == '':
+                    elif not is_valid_email(sender_email.strip()):
+                        st.error(':red[Enter a valid email address!]')
+                    elif sender_message.strip() == '':
                         st.error(':red[Enter a message!]')
                     else:
-                        send_email(os.environ["MY_EMAIL_ADDRESS"], email, "Contact Form Submission", message)
-                        st.success(':violet[Form submitted successfully!]')
+                        send_email(sender=os.environ["MY_EMAIL_ADDRESS"], recipient=os.environ["MY_EMAIL_ADDRESS"], subject="Contact Form Submission", body=sender_message)
+                        st.success(':violet[Form submitted successfully. We will get back to you as soon as possible!]')
 
         contact_us_form()
 
