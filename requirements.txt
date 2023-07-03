@@ -2,7 +2,6 @@ streamlit
 pypdf2
 docx2txt
 textract
-unrtf
 antiword
 langchain
 python-dotenv
