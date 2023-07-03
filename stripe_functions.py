@@ -34,6 +34,7 @@ def check_customers():
     username = ''
 
     # Check customers
+    st.sidebar.write("")
     st.sidebar.title(":red[Login to start!]")
     email = st.sidebar.text_input(":violet[Please enter your email address:]",key='email_add')
     email = email.strip().lower()
@@ -56,7 +57,7 @@ def check_customers():
                     for user in range(len(customers.data)):
 
                         customer = customers.data[user]
-                        username = customer.email
+                        username = customer.email.strip().lower()
 
                         if username == email:
 
@@ -176,7 +177,7 @@ def cancel_service():
                     for user in range(len(customers.data)):
 
                         customer = customers.data[user]
-                        username = customer.email
+                        username = customer.email.strip().lower()
 
                         if username == email:
 

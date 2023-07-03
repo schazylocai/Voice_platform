@@ -98,6 +98,15 @@ def first_page():
 
         contact_us_form()
 
+        st.write("")
+        st.write("")
+        st.write("")
+        st.write("")
+        st.write("")
+        st.write("")
+        st.divider()
+        st.markdown(":violet[© 2023 FAB DWC LLC. All rights reserved.]")
+
     # Run Intro
     intro()
 
