@@ -22,7 +22,7 @@ from langchain.vectorstores import Chroma
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
 
-from Azure_storage import upload_file_to_azure_blob,delete_file
+from Azure_storage import upload_file_to_azure_blob,delete_file,read_file_from_azure_blob
 
 
 def launch_app():
@@ -58,20 +58,22 @@ def launch_app():
                 st.session_state.file_names = []
             st.session_state.file_names.append(file.name)
 
+            file = read_file_from_azure_blob(file)
+
             # Check if the upload file is a pdf
-            if str(file.name).endswith('.pdf'):
+            if str(file).endswith('.pdf'):
 
                 pdf_reader = PyPDF2.PdfReader(file)
                 text = "".join(page.extract_text() for page in pdf_reader.pages)
                 text_list += text
 
             # Check if the upload file is a Word docx
-            elif str(file.name).endswith('.docx'):
+            elif str(file).endswith('.docx'):
                 text = docx2txt.process(file)
                 text_list += text
 
             # Check if the upload file is a text rtf
-            elif str(file.name).endswith('.rtf'):
+            elif str(file).endswith('.rtf'):
                 with tempfile.NamedTemporaryFile(suffix=".rtf") as tmp:
                     tmp.write(file.read())
                     tmp.seek(0)
@@ -79,7 +81,7 @@ def launch_app():
                     text_list += text.decode('utf-8')
 
             # Check if the upload file is a text txt
-            elif str(file.name).endswith('.txt'):
+            elif str(file).endswith('.txt'):
                 with tempfile.NamedTemporaryFile(suffix=".txt") as tmp:
                     tmp.write(file.read())
                     tmp.seek(0)

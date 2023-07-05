@@ -79,7 +79,7 @@ def upload_file_to_azure_blob(file):
     try:
         # Get the BlobClient instance
         blob_client = blob_service_client.get_blob_client(container=container_name, blob=file.name)
-        #blob_client.upload_blob(file,overwrite=True)
+        blob_client.upload_blob(file,overwrite=True)
 
     except Exception as e:
         st.sidebar.error(f"An error occurred while uploading the file: {str(e)}")
@@ -99,17 +99,17 @@ def delete_file(files_path):
         st.sidebar.error(f"An error occurred while deleting the local file: {str(e)}")
 
 
-def read_file_from_azure_blob(filename):
+def read_file_from_azure_blob(file):
 
     try:
         # Get the BlobClient instance
-        blob_client = blob_service_client.get_blob_client(container="<container_name>", blob=filename)
+        blob_client = blob_service_client.get_blob_client(container=container_name, blob=file.name)
 
         # Download the file from Azure Blob Storage
-        file_contents = blob_client.download_blob().readall()
+        file_contents = blob_client.download_blob()
 
-        # Display the file contents
-        st.write(file_contents)
+        return file_contents.name
+
     except Exception as e:
         st.error(f"An error occurred while reading the file: {str(e)}")
 

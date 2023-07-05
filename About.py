@@ -27,12 +27,12 @@ def first_page():
         col1,col2,col3 = st.columns(3)
 
         with col1:
-            st.write(":red[Unlock the Power of AI to Query Your Documents.]")
+            st.write(":red[Unlock the Power of AI & GPT4 to Query Your Documents.]")
             st.header(":violet[Welcome to GPT Document Analyzer, a revolutionary application that leverages the capabilities of Large Language Models.]")
 
         with col2:
             st.write(":red[What can this model do for you?]")
-            st.subheader(":violet[With this cutting-edge tool, you can effortlessly upload PDF, word, or text documents and interact with them like never before.]")
+            st.subheader(":violet[With this cutting-edge tool, you can effortlessly upload multiple PDF, word, or text documents and interact with them like never before.]")
             st.write(":violet[Pose questions, extract valuable information, analyze content, and generate concise summaries directly from your uploaded documents.]")
             st.write(":violet[➜ Watch the video to see how this model works!]")
 
