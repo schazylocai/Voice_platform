@@ -71,7 +71,6 @@ def launch_app():
                     tmp.seek(0)
                     text = textract.process(tmp.name, method='rtf')
                     text_list += text.decode('utf-8')
-                    text_lines = text.decode('utf-8').splitlines()
                     with st.expander(file.name):
                         text_lines = text.decode('utf-8').splitlines()
                         for line in text_lines:
