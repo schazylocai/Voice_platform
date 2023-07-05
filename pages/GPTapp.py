@@ -22,8 +22,6 @@ from langchain.vectorstores import Chroma
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
 
-from Azure_storage import upload_file_to_azure_blob,delete_file,read_file_from_azure_blob
-
 
 def launch_app():
 
@@ -50,43 +48,46 @@ def launch_app():
 
         for file in file_to_upload:
 
-            # Upload file to Azure storage
-            upload_file_to_azure_blob(file)
-
-            # Store the file names in the Streamlit session state list
-            if "file_names" not in st.session_state:
-                st.session_state.file_names = []
-            st.session_state.file_names.append(file.name)
-
-            file = read_file_from_azure_blob(file)
-
             # Check if the upload file is a pdf
-            if str(file).endswith('.pdf'):
+            if str(file.name).endswith('.pdf'):
 
                 pdf_reader = PyPDF2.PdfReader(file)
                 text = "".join(page.extract_text() for page in pdf_reader.pages)
                 text_list += text
+                with st.expander(file.name):
+                    st.write(text)
 
             # Check if the upload file is a Word docx
-            elif str(file).endswith('.docx'):
+            elif str(file.name).endswith('.docx'):
                 text = docx2txt.process(file)
                 text_list += text
+                with st.expander(file.name):
+                    st.write(text)
 
             # Check if the upload file is a text rtf
-            elif str(file).endswith('.rtf'):
+            elif str(file.name).endswith('.rtf'):
                 with tempfile.NamedTemporaryFile(suffix=".rtf") as tmp:
                     tmp.write(file.read())
                     tmp.seek(0)
                     text = textract.process(tmp.name, method='rtf')
                     text_list += text.decode('utf-8')
+                    text_lines = text.decode('utf-8').splitlines()
+                    with st.expander(file.name):
+                        text_lines = text.decode('utf-8').splitlines()
+                        for line in text_lines:
+                            st.write(line)
 
             # Check if the upload file is a text txt
-            elif str(file).endswith('.txt'):
+            elif str(file.name).endswith('.txt'):
                 with tempfile.NamedTemporaryFile(suffix=".txt") as tmp:
                     tmp.write(file.read())
                     tmp.seek(0)
                     text = textract.process(tmp.name, method='txt')
                     text_list += text.decode('utf-8')
+                    with st.expander(file.name):
+                        text_lines = text.decode('utf-8').splitlines()
+                        for line in text_lines:
+                            st.write(line)
             else:
                 st.sidebar.write(":red[File format is not correct!]")
 
@@ -113,9 +114,8 @@ def launch_app():
 
         Divide your answer when possible into paragraphs:
         • What is your answer to the question?
-        • What are the various elements that helped you with your answer?
-        • Add citations when possible from the document that supports the answer in bullet points at the end of your answer.
-        • Always ddd references related to questions from the given documents only, in bullet points, each one separately, at the end of your answer.
+        • Add citations when possible from the document that supports the answer at the end of your answer.
+        • Always add full references related to questions from the given documents only, in bullet points, each one separately, at the end of your answer.
 
         {{context}}
 
@@ -162,7 +162,6 @@ def launch_app():
     else:
         st.sidebar.caption(":red[=> No file selected yet!]")
 
-
 # Check if a user is subscribed to launch the GPTapp
 subscribed = False
 if "subscribed_status" in st.session_state:
@@ -172,6 +171,3 @@ if "subscribed_status" in st.session_state:
     else:
         st.header(':red[Subscription is not valid!]')
         st.subheader(':violet[Please Login or Subscribe in the About page.]')
-
-# Check if session ended to delete the files
-files_used = set(list(st.session_state))

@@ -85,14 +85,12 @@ def upload_file_to_azure_blob(file):
         st.sidebar.error(f"An error occurred while uploading the file: {str(e)}")
 
 
-def delete_file(files_path):
+def delete_file(files):
 
     try:
         # Get the BlobClient instance
-        st.write(files_path)
-        for file_path in files_path:
-            st.write(file_path)
-            blob_client = blob_service_client.get_blob_client(container=container_name, blob=file_path)
+        for file in files:
+            blob_client = blob_service_client.get_blob_client(container=container_name, blob=files)
             blob_client.delete_blob()
 
     except Exception as e:
@@ -112,30 +110,3 @@ def read_file_from_azure_blob(file):
 
     except Exception as e:
         st.error(f"An error occurred while reading the file: {str(e)}")
-
-# Streamlit app
-def start():
-
-    # File uploader
-    uploaded_file = st.sidebar.file_uploader("Choose a file")
-    if uploaded_file is not None:
-        upload_file_to_azure_blob(uploaded_file)
-
-        # Delete the local file after upload
-        delete_file(uploaded_file)
-
-    # st.subheader("Read File from Azure Blob Storage")
-    #
-    # # List the files in the Azure Blob Storage container
-    # blob_container_client = blob_service_client.get_container_client(container="<container_name>")
-    # blob_list = [blob.name for blob in blob_container_client.list_blobs()]
-    #
-    # if len(blob_list) > 0:
-    #     # Select a file to read
-    #     selected_file = st.selectbox("Select a file", blob_list)
-    #
-    #     if st.button("Read File"):
-    #         # Read the selected file from Azure Blob Storage
-    #         read_file_from_azure_blob(selected_file)
-    # else:
-    #     st.info("No files available in Azure Blob Storage")
