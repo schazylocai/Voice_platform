@@ -22,7 +22,12 @@ from langchain.vectorstores import Chroma
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
 
+from Azure_storage import upload_file_to_azure_blob,delete_file
+
+
 def launch_app():
+
+    st.session_state.setdefault(key='start')
 
     # Choose domain
     st.sidebar.title(":red[Sectors of expertise]")
@@ -45,8 +50,17 @@ def launch_app():
 
         for file in file_to_upload:
 
+            # Upload file to Azure storage
+            upload_file_to_azure_blob(file)
+
+            # Store the file names in the Streamlit session state list
+            if "file_names" not in st.session_state:
+                st.session_state.file_names = []
+            st.session_state.file_names.append(file.name)
+
             # Check if the upload file is a pdf
             if str(file.name).endswith('.pdf'):
+
                 pdf_reader = PyPDF2.PdfReader(file)
                 text = "".join(page.extract_text() for page in pdf_reader.pages)
                 text_list += text
@@ -147,6 +161,7 @@ def launch_app():
         st.sidebar.caption(":red[=> No file selected yet!]")
 
 
+# Check if a user is subscribed to launch the GPTapp
 subscribed = False
 if "subscribed_status" in st.session_state:
     subscribed_user = st.session_state.subscribed_status
@@ -155,3 +170,6 @@ if "subscribed_status" in st.session_state:
     else:
         st.header(':red[Subscription is not valid!]')
         st.subheader(':violet[Please Login or Subscribe in the About page.]')
+
+# Check if session ended to delete the files
+files_used = set(list(st.session_state))

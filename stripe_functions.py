@@ -125,7 +125,7 @@ def subscribe_to_service():
             customers = stripe.Customer.list()
             if len(customers.data) > 0:
                 customer = customers.data[0]
-                username = customer.email
+                username = customer.email.strip().lower()
 
                 if username == email:
                     st.sidebar.write(":red[User already exists. Please login!]")
