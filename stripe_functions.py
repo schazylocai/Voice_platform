@@ -20,7 +20,6 @@ subscribed_user = 'False'
 stripe.api_key = stripe_secret_key
 endpoint_secret = 'whsec_eac84f5766a6c4217bf122ac3bdde25880776a36172ae67ff80ec9a347a5222b'
 
-
 def get_days_left(subscription):
     current_timestamp = datetime.now().timestamp()
     current_period_end = subscription['data'][0]['current_period_end']
@@ -84,6 +83,10 @@ def check_customers():
                                 st.sidebar.write(':red[No active subscription found!]')
 
                         else: st.sidebar.write(":red[Incorrect password]")
+
+                    if email == os.environ['ADMIN_EMAIL'] and password == os.environ['ADMIN_PASSWORD']:
+                        st.sidebar.write('Admin')
+                        user = True
 
             else:
                 st.sidebar.write(':red[You are not subscribed to this service!]')
