@@ -18,6 +18,7 @@ stripe_api_key = os.environ['STRIPE_API_KEY']
 
 subscribed_user = 'False'
 stripe.api_key = stripe_secret_key
+endpoint_secret = 'whsec_eac84f5766a6c4217bf122ac3bdde25880776a36172ae67ff80ec9a347a5222b'
 
 
 def get_days_left(subscription):

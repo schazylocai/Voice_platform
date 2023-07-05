@@ -36,7 +36,7 @@ def launch_app():
 
     # upload files
     st.sidebar.title(":red[File uploader]")
-    file_to_upload = st.sidebar.file_uploader(label=':violet[Select PDF, word, or text files to upload]', type=['pdf','docx','rtf','txt'],
+    file_to_upload = st.sidebar.file_uploader(label=':violet[Select PDF, word, or text files to upload]', type=['pdf','docx','txt'],
                                                   accept_multiple_files=True, key='files')
     st.title(":violet[GPT Document Analyzer]")
     st.write(':violet[Upload your PDF files from the left menu & start querying the documents.]')
@@ -63,18 +63,6 @@ def launch_app():
                 text_list += text
                 with st.expander(file.name):
                     st.write(text)
-
-            # Check if the upload file is a text rtf
-            elif str(file.name).endswith('.rtf'):
-                with tempfile.NamedTemporaryFile(suffix=".rtf") as tmp:
-                    tmp.write(file.read())
-                    tmp.seek(0)
-                    text = textract.process(tmp.name, method='rtf')
-                    text_list += text.decode('utf-8')
-                    with st.expander(file.name):
-                        text_lines = text.decode('utf-8').splitlines()
-                        for line in text_lines:
-                            st.write(line)
 
             # Check if the upload file is a text txt
             elif str(file.name).endswith('.txt'):
