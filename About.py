@@ -27,7 +27,7 @@ def first_page():
         col1,col2,col3 = st.columns(3)
 
         with col1:
-            st.write(":red[Unlock the Power of AI & GPT4 to Query Your Documents.]")
+            st.write(":red[Unlock the Power of AI & ] :blue[GPT4]:red[ to Query Your Documents.]")
             st.header(":violet[Welcome to GPT Document Analyzer, a revolutionary application that leverages the capabilities of Large Language Models.]")
 
         with col2:

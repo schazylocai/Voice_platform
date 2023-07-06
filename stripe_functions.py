@@ -74,9 +74,9 @@ def check_customers():
                                 if subscription['data'][0]['cancel_at_period_end']:
                                     st.sidebar.write(f":red[Subscription will be canceled in {days_left} days.]")
                                 else:
-                                    st.sidebar.write(f":red[{days_left} days left for this month.]")
+                                    st.sidebar.write(f":violet[{days_left} days left for this month.]")
 
-                                st.sidebar.subheader(':red[Click up on GPTapp to proceed.]')
+                                st.sidebar.title(':blue[Click on top of the side menu ➜ ] :red[GPTapp]:blue[ tab to start...]')
                                 user = True
 
                             else:
@@ -85,7 +85,6 @@ def check_customers():
                         else: st.sidebar.write(":red[Incorrect password]")
 
                     if email == os.environ['ADMIN_EMAIL'] and password == os.environ['ADMIN_PASSWORD']:
-                        st.sidebar.write('Admin')
                         user = True
 
             else:
