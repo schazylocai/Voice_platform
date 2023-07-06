@@ -45,13 +45,14 @@ def launch_app():
 
     text_list = ''
     chunks = []
+    max_files = 8
+    
     def get_chunks(text_list_in):
         text_splitter_in = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=20, length_function=len)
         chunks_in = text_splitter_in.split_text(text=text_list)
         return list(chunks_in)
 
-    if len(file_to_upload) > 0:
-
+    if 0 < len(file_to_upload) < max_files:
         for file in file_to_upload:
 
             # Check if the upload file is a pdf
@@ -87,74 +88,77 @@ def launch_app():
 
             except Exception as e:
                 st.sidebar.write(":red[File couldn't be loaded. The file has some irregularities!]")
-                continue
+                return False
 
-            chunks = get_chunks(text_list)
+        chunks = get_chunks(text_list)
 
-            llm = ChatOpenAI(temperature=0.7, model='gpt-4') # gpt-4 or gpt-3.5-turbo
-            embedding = OpenAIEmbeddings(openai_api_key=secret_key)
-            my_database = Chroma.from_texts(chunks, embedding)
-            retriever = my_database.as_retriever()
+        llm = ChatOpenAI(temperature=0.5, model='gpt-4') # gpt-4 or gpt-3.5-turbo
+        embedding = OpenAIEmbeddings(openai_api_key=secret_key)
+        my_database = Chroma.from_texts(chunks, embedding)
+        retriever = my_database.as_retriever()
 
-            ########## RetrievalQA from chain type ##########
-            response_template = f"""
-            • You will act as a professional and a researcher in the {sector} Field.
-            • Your task is to read through research papers, documents, journals, manuals, articles, and presentations that are related to the {sector} sector.
-            • You should be analytical, thoughtful, and reply in depth and details to any question.
-            • If you suspect bias in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is biased". Explain why do yuo think it is biased.
-            • If you suspect incorrect or misleading information in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is incorrect or misleading". Explain why do yuo think it is incorrect or misleading.
-            • Always reply in a polite and professional manner.
-            • Don't connect or look for answers on the internet.
-            • Only look for answers from the given documents and papers.
-            • If you don't know the answer to the question, then reply: "I can't be confident about my answer because I am missing the context or some information! Please try to be more precise and accurate in your query, and if need be, try to refer to the name of the document that you would like to query."
-    
-            Divide your answer when possible into paragraphs:
-            • What is your answer to the question?
-            • Add citations when possible from the document that supports the answer at the end of your answer.
-            • Always add full references related to questions from the given documents only, in bullet points, each one separately, at the end of your answer.
-    
-            {{context}}
-    
-            Question: {{question}}
-    
-            Answer:
-            """
+        ########## RetrievalQA from chain type ##########
+        response_template = f"""
+        • You will act as a professional and a researcher in the {sector} Field.
+        • Your task is to read through research papers, documents, journals, manuals, articles, and presentations that are related to the {sector} sector.
+        • You should be analytical, thoughtful, and reply in depth and details to any question.
+        • If you suspect bias in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is biased". Explain why do yuo think it is biased.
+        • If you suspect incorrect or misleading information in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is incorrect or misleading". Explain why do yuo think it is incorrect or misleading.
+        • Always reply in a polite and professional manner.
+        • Don't connect or look for answers on the internet.
+        • Only look for answers from the given documents and papers.
+        • If you don't know the answer to the question, then reply: "I can't be confident about my answer because I am missing the context or some information! Please try to be more precise and accurate in your query, and if need be, try to refer to the name of the document that you would like to query."
 
-            prompt = PromptTemplate(template=response_template, input_variables=["context", "question"])
-            chain_type_kwargs = {'prompt': prompt}
-            query_model = RetrievalQA.from_chain_type(
-                llm=llm,
-                chain_type="stuff",
-                retriever=retriever,
-                chain_type_kwargs=chain_type_kwargs,
-                verbose=False)
+        Divide your answer when possible into paragraphs:
+        • What is your answer to the question?
+        • Add citations when possible from the document that supports the answer at the end of your answer.
+        • Always add full references related to questions from the given documents only, in bullet points, each one separately, at the end of your answer.
 
-            def create_text_question():
-                # Create a new text_area and button
-                with st.container():
-                    st.subheader(':red[What is your query?]')
-                    _user_input = st.text_area(":violet[▼]", placeholder='Enter your text...')
-                    _submit_button = st.button(":violet[Submit]")
+        {{context}}
 
-                return _user_input,_submit_button
+        Question: {{question}}
 
-            def run_model(_user_input,_submit_button):
+        Answer:
+        """
 
-                if _submit_button:
+        prompt = PromptTemplate(template=response_template, input_variables=["context", "question"])
+        chain_type_kwargs = {'prompt': prompt}
+        query_model = RetrievalQA.from_chain_type(
+            llm=llm,
+            chain_type="stuff",
+            retriever=retriever,
+            chain_type_kwargs=chain_type_kwargs,
+            verbose=False)
+
+        def create_text_question():
+            # Create a new text_area and button
+            with st.container():
+                st.subheader(':red[What is your query?]')
+                _user_input = st.text_area(":violet[▼]", placeholder='Enter your text...')
+                _submit_button = st.button(":violet[Submit]")
+
+            return _user_input,_submit_button
+
+        def run_model(_user_input,_submit_button):
+
+            if _submit_button:
+                st.divider()
+                with st.spinner(text=":red[Query submitted. This may take a :red[minute or two] while we query the documents...]"):
                     st.divider()
-                    with st.spinner(text=":red[Query submitted. This may take a :red[minute or two] while we query the documents...]"):
-                        st.divider()
-                        response = query_model.run(_user_input)
-                        st.subheader(response)
-                        _submit_button = False
+                    response = query_model.run(_user_input)
+                    st.subheader(response)
+                    _submit_button = False
 
-                return user_input,_submit_button
+            return user_input,_submit_button
 
-            user_input,submit_button = create_text_question()
-            user_input,submit_button = run_model(user_input,submit_button)
+        user_input,submit_button = create_text_question()
+        user_input,submit_button = run_model(user_input,submit_button)
 
-    else:
+    elif len(file_to_upload) == 0:
         st.sidebar.caption(":red[=> No file selected yet!]")
+
+    elif len(file_to_upload) >= max_files:
+        st.sidebar.caption(f":red[=> Maximum number of uploaded files is {max_files}. Please remove some files!]")
 
 # Check if a user is subscribed to launch the GPTapp
 subscribed = False
