@@ -24,9 +24,12 @@ from langchain.vectorstores import Chroma
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
 
+text_list = []
+max_files = 5
 
 def launch_app():
 
+    global text_list
     st.session_state.setdefault(key='start')
 
     # Choose domain
@@ -43,15 +46,6 @@ def launch_app():
     st.title(":violet[GPT Document Analyzer]")
     st.write(':violet[Upload your PDF files from the left menu & start querying the documents.]')
 
-    text_list = ''
-    chunks = []
-    max_files = 8
-    
-    def get_chunks(text_list_in):
-        text_splitter_in = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=20, length_function=len)
-        chunks_in = text_splitter_in.split_text(text=text_list)
-        return list(chunks_in)
-
     if 0 < len(file_to_upload) < max_files:
         for file in file_to_upload:
 
@@ -61,14 +55,14 @@ def launch_app():
 
                     pdf_reader = PyPDF2.PdfReader(file)
                     text = "".join(page.extract_text() for page in pdf_reader.pages)
-                    text_list += text
+                    text_list.append(text)
                     with st.expander(file.name):
                         st.write(text)
 
                 # Check if the upload file is a Word docx
                 elif str(file.name).endswith('.docx'):
                     text = docx2txt.process(file)
-                    text_list += text
+                    text_list.append(text)
                     with st.expander(file.name):
                         st.write(text)
 
@@ -78,7 +72,7 @@ def launch_app():
                         tmp.write(file.read())
                         tmp.seek(0)
                         text = textract.process(tmp.name, method='txt')
-                        text_list += text.decode('utf-8')
+                        text_list.append(text.decode('utf-8'))
                         with st.expander(file.name):
                             text_lines = text.decode('utf-8').splitlines()
                             for line in text_lines:
@@ -90,45 +84,50 @@ def launch_app():
                 st.sidebar.write(":red[File couldn't be loaded. The file has some irregularities!]")
                 return False
 
-        chunks = get_chunks(text_list)
+        with st.spinner(text=":red[Please wait while we collect all the documents...]"):
 
-        llm = ChatOpenAI(temperature=0.5, model='gpt-4') # gpt-4 or gpt-3.5-turbo
-        embedding = OpenAIEmbeddings(openai_api_key=secret_key)
-        my_database = Chroma.from_texts(chunks, embedding)
-        retriever = my_database.as_retriever()
+            text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=20, length_function=len)
+            chunks = text_splitter.split_text(text=str(text_list))
+            chunks = list(chunks)
 
-        ########## RetrievalQA from chain type ##########
-        response_template = f"""
-        • You will act as a professional and a researcher in the {sector} Field.
-        • Your task is to read through research papers, documents, journals, manuals, articles, and presentations that are related to the {sector} sector.
-        • You should be analytical, thoughtful, and reply in depth and details to any question.
-        • If you suspect bias in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is biased". Explain why do yuo think it is biased.
-        • If you suspect incorrect or misleading information in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is incorrect or misleading". Explain why do yuo think it is incorrect or misleading.
-        • Always reply in a polite and professional manner.
-        • Don't connect or look for answers on the internet.
-        • Only look for answers from the given documents and papers.
-        • If you don't know the answer to the question, then reply: "I can't be confident about my answer because I am missing the context or some information! Please try to be more precise and accurate in your query, and if need be, try to refer to the name of the document that you would like to query."
 
-        Divide your answer when possible into paragraphs:
-        • What is your answer to the question?
-        • Add citations when possible from the document that supports the answer at the end of your answer.
-        • Always add full references related to questions from the given documents only, in bullet points, each one separately, at the end of your answer.
+            llm = ChatOpenAI(temperature=0.5, model='gpt-4') # gpt-4 or gpt-3.5-turbo
+            embedding = OpenAIEmbeddings(openai_api_key=secret_key)
+            my_database = Chroma.from_texts(chunks, embedding)
+            retriever = my_database.as_retriever()
 
-        {{context}}
+            ########## RetrievalQA from chain type ##########
+            response_template = f"""
+            • You will act as a professional and a researcher in the {sector} Field.
+            • Your task is to read through research papers, documents, journals, manuals, articles, and presentations that are related to the {sector} sector.
+            • You should be analytical, thoughtful, and reply in depth and details to any question.
+            • If you suspect bias in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is biased". Explain why do yuo think it is biased.
+            • If you suspect incorrect or misleading information in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is incorrect or misleading". Explain why do yuo think it is incorrect or misleading.
+            • Always reply in a polite and professional manner.
+            • Don't connect or look for answers on the internet.
+            • Only look for answers from the given documents and papers.
+            • If you don't know the answer to the question, then reply: "I can't be confident about my answer because I am missing the context or some information! Please try to be more precise and accurate in your query, and if need be, try to refer to the name of the document that you would like to query."
+    
+            Divide your answer when possible into paragraphs:
+            • What is your answer to the question?
+            • Add citations when possible from the document that supports the answer at the end of your answer.
+            • Always add full references related to questions from the given documents only, in bullet points, each one separately, at the end of your answer.
+    
+            {{context}}
+    
+            Question: {{question}}
+    
+            Answer:
+            """
 
-        Question: {{question}}
-
-        Answer:
-        """
-
-        prompt = PromptTemplate(template=response_template, input_variables=["context", "question"])
-        chain_type_kwargs = {'prompt': prompt}
-        query_model = RetrievalQA.from_chain_type(
-            llm=llm,
-            chain_type="stuff",
-            retriever=retriever,
-            chain_type_kwargs=chain_type_kwargs,
-            verbose=False)
+            prompt = PromptTemplate(template=response_template, input_variables=["context", "question"])
+            chain_type_kwargs = {'prompt': prompt}
+            query_model = RetrievalQA.from_chain_type(
+                llm=llm,
+                chain_type="stuff",
+                retriever=retriever,
+                chain_type_kwargs=chain_type_kwargs,
+                verbose=False)
 
         def create_text_question():
             # Create a new text_area and button
