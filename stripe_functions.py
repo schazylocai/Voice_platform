@@ -64,52 +64,93 @@ def check_customers():
 
                             # Check subscription
                             subscriptions = stripe.Subscription.list(customer=customer.id)
-                            status = stripe.Subscription.list(customer=customer.id)['data'][0]['status']
-                            st.sidebar.write(status)
+                            status = stripe.Subscription.list(customer=customer.id)['data']
+                            if status:
+                                status = status[0]['status']
+                            else: status = 'Unknown'
 
-                            if status in ['active', 'canceled']:
+                            if status in ['active']:
                                 st.sidebar.write(':violet[Subscription is valid!]')
                                 customer_id = customer.id
                                 subscription = stripe.Subscription.list(customer=customer_id)
                                 days_left = get_days_left(subscription)
 
-                                if subscription['data'][0]['cancel_at_period_end']:
-                                    st.sidebar.write(f":red[Subscription will be canceled in {days_left} days.]")
-                                else:
-                                    st.sidebar.write(f":violet[{days_left} days left for this month.]")
+                                st.sidebar.write(f":violet[{days_left} days left for this month.]")
+                                st.sidebar.title(':blue[Click at the top of this page on ] :red[GPTapp]:blue[ tab to start...]')
+                                found = True
+                                pass_found = True
+                                user = True
+                                return user
+
+                            elif status in ['canceled']:
+                                customer_id = customer.id
+                                subscription = stripe.Subscription.list(customer=customer_id)
+                                days_left = get_days_left(subscription)
 
                                 if days_left == 0 and status == 'canceled':
                                     st.sidebar.write(':red[Subscription period ended after cancellation!]')
+                                    found = True
+                                    pass_found = True
                                     user = False
-                                else:
-                                    st.sidebar.title(':blue[Click at the top of this page ] :red[GPTapp]:blue[ tab to start...]')
+                                    return user
+
+                                elif subscription['data'][0]['cancel_at_period_end']:
+                                    st.sidebar.write(f":red[Subscription will be canceled in {days_left} days.]")
+                                    st.sidebar.title(':blue[Click at the top of this page on ] :red[GPTapp]:blue[ tab to start...]')
+
                                     found = True
                                     pass_found = True
                                     user = True
                                     return user
 
+                                else:
+                                    st.sidebar.write(f":red[Subscription is canceled.]")
+
+                                    found = True
+                                    pass_found = True
+                                    user = False
+                                    return user
+
                             elif status in ['trialing']:
                                 st.sidebar.write(':red[Subscription is on trial mode!]')
+                                st.sidebar.title(':blue[Click at the top of this page ] :red[GPTapp]:blue[ tab to start...]')
+                                found = True
+                                pass_found = True
                                 user = True
+                                return user
 
                             else:
                                 st.sidebar.write(':red[No active subscription found!]')
+                                found = True
+                                pass_found = True
                                 user = False
+                                return user
 
                         else: st.sidebar.write(":red[Incorrect password]")
+                        found = True
+                        pass_found = True
                         user = False
+                        return user
 
                     elif email == os.environ['ADMIN_EMAIL'] and password == os.environ['ADMIN_PASSWORD']:
                         found = True
                         pass_found = True
                         user = True
+                        return user
 
                 if not found and not pass_found:
                     st.sidebar.write(':red[Wrong credentials!]')
+                    found = False
+                    pass_found = False
+                    user = False
+                    return user
 
             else:
                 st.sidebar.write(':red[You are not subscribed to this service!]')
+                found = False
+                pass_found = False
                 user = False
+                return user
 
     return user
 
