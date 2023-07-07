@@ -209,17 +209,31 @@ def cancel_service():
                                 subscriptions = stripe.Subscription.list(customer=customer.id)
 
                                 if len(subscriptions.data) > 0:
-                                    customer_id = customer.id
-                                    subscription = stripe.Subscription.list(customer=customer_id)
-                                    days_left = get_days_left(subscription)
-                                    subscription_id = subscription['data'][0]['id']
-                                    stripe.Subscription.modify(subscription_id, cancel_at_period_end=True)
 
-                                    if days_left == 1:
+                                    status = stripe.Subscription.list(customer=customer.id)['data'][0]['status']
+
+                                    if status == 'active':
+                                        customer_id = customer.id
+                                        subscription = stripe.Subscription.list(customer=customer_id)
+                                        days_left = get_days_left(subscription)
+                                        subscription_id = subscription['data'][0]['id']
+                                        stripe.Subscription.modify(subscription_id, cancel_at_period_end=True)
+
+                                        if days_left == 0:
+                                            stripe.Subscription.delete(subscription_id)
+
+                                        st.sidebar.write(':violet[Subscription cancelled successfully for the next billing cycle!]')
+                                        st.sidebar.write(f":red[{days_left} days left in the current subscription period.]")
+
+                                    elif status == 'trialing':
+                                        customer_id = customer.id
+                                        subscription = stripe.Subscription.list(customer=customer_id)
+                                        subscription_id = subscription['data'][0]['id']
+                                        stripe.Subscription.modify(subscription_id, cancel_at_period_end=False)
                                         stripe.Subscription.delete(subscription_id)
 
-                                    st.sidebar.write(':violet[Subscription cancelled successfully for the next billing cycle!]')
-                                    st.sidebar.write(f":red[{days_left} days left in the current subscription period.]")
+                                        st.sidebar.write(
+                                            ':violet[Subscription cancelled successfully!]')
 
                                 else:
                                     st.sidebar.write(':red[No active subscription found!]')
