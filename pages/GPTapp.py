@@ -46,7 +46,7 @@ def launch_app():
     st.title(":violet[GPT Document Analyzer]")
     st.write(':violet[Upload your PDF files from the left menu & start querying the documents.]')
 
-    if 0 < len(file_to_upload) < max_files:
+    if 0 < len(file_to_upload) <= max_files:
         for file in file_to_upload:
 
             # Check if the upload file is a pdf

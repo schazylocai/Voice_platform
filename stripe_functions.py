@@ -6,10 +6,8 @@ from datetime import datetime
 import os
 from Azure_storage import write_subscription_ids_to_azure_blob,read_subscription_from_azure_blob
 
-payment_link = "https://buy.stripe.com/test_fZe9APbAraUZ3HqfYZ"
 success_url="https://gptdocanalyzer.com/"
 cancel_url="https://gptdocanalyzer.com/"
-stripe_product_id = "prod_O9s28TVcxPlBON"
 user_email = ""
 
 stripe_publishable_key = os.environ['STRIPE_PUBLISHABLE_KEY']
@@ -64,8 +62,9 @@ def check_customers():
 
                             # Check subscription
                             subscriptions = stripe.Subscription.list(customer=customer.id)
+                            status = stripe.Subscription.list(customer=customer.id)['data'][0]['status']
 
-                            if len(subscriptions.data) > 0:
+                            if status in ['active', 'canceled']:
                                 st.sidebar.write(':violet[Subscription is valid!]')
                                 customer_id = customer.id
                                 subscription = stripe.Subscription.list(customer=customer_id)
@@ -76,8 +75,15 @@ def check_customers():
                                 else:
                                     st.sidebar.write(f":violet[{days_left} days left for this month.]")
 
-                                st.sidebar.title(':blue[Click on top of the side menu ➜ ] :red[GPTapp]:blue[ tab to start...]')
-                                user = True
+                                if days_left == 0 and status == 'canceled':
+                                    st.sidebar.write(':red[Subscription period ended after cancellation!]')
+                                    user = False
+                                else:
+                                    st.sidebar.title(':blue[Click at the top of this page ] :red[GPTapp]:blue[ tab to start...]')
+                                    user = True
+
+                            elif status in ['trialing']:
+                                st.sidebar.write(':red[Subscription is on trial mode!]')
 
                             else:
                                 st.sidebar.write(':red[No active subscription found!]')
@@ -106,14 +112,15 @@ def subscribe_to_service():
             line_items=[{"price": stripe_api_key, "quantity": 1}],
             mode="subscription",
             success_url=success_url,
-            cancel_url=cancel_url)
+            cancel_url=cancel_url,
+            subscription_data = {'trial_period_days': 1})
 
         # Create a clickable link to the payment URL
         pay_link = f'<a href="{session.url}" target="_blank">Click here to proceed to payment!</a>'
         st.sidebar.write(pay_link, unsafe_allow_html=True)
 
     st.sidebar.divider()
-    st.sidebar.title(":red[Want to subscribe?]")
+    st.sidebar.title(":violet[Want to subscribe?]")
     # Check if customer exists
     email = st.sidebar.text_input(":violet[Enter your email address]", key='email_check')
     email = email.strip().lower()
@@ -153,9 +160,9 @@ def cancel_service():
 
     # Cancel subscription to the service
     st.sidebar.divider()
-    st.sidebar.subheader(":blue[Cancel subscription?]")
+    st.sidebar.subheader(":violet[Cancel subscription?]")
     # Check if customer exists
-    email = st.sidebar.text_input(":red[Please enter your email address:]",key='email_cancel')
+    email = st.sidebar.text_input(":violet[Please enter your email address:]",key='email_cancel')
     email = email.strip().lower()
     password = st.sidebar.text_input(":violet[Enter your password]", key='password_cancel', type='password')
     password = password.strip()

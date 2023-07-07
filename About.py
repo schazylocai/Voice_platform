@@ -17,7 +17,7 @@ def first_page():
     def intro():
 
         # section 1
-        st.title(":red[GPT Document Analyzer]") # blue, green, orange, red, violet.
+        st.title(":violet[GPT Document Analyzer]") # blue, green, orange, red, violet.
         st.write("")
         st.write("")
         st.write("")
@@ -41,7 +41,7 @@ def first_page():
 
         # section 3
         st.divider()
-        st.header(":red[Subscription details]")
+        st.header(":violet[Subscription details]")
         st.subheader(":violet[Full access: $15 USD/Month]")
         st.write(":violet[Subscribe to unlock the full potential of our AI model.]")
         #st.write(":violet[As a special bonus, you'll enjoy a :red[1-day free trial period] to thoroughly test its capabilities. Only if you decide to continue after the trial, your subscription will be billed at $15 USD per month.]")
