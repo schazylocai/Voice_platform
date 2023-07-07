@@ -65,6 +65,7 @@ def check_customers():
                             # Check subscription
                             subscriptions = stripe.Subscription.list(customer=customer.id)
                             status = stripe.Subscription.list(customer=customer.id)['data'][0]['status']
+                            st.sidebar.write(status)
 
                             if status in ['active', 'canceled']:
                                 st.sidebar.write(':violet[Subscription is valid!]')
@@ -85,6 +86,7 @@ def check_customers():
                                     found = True
                                     pass_found = True
                                     user = True
+                                    return user
 
                             elif status in ['trialing']:
                                 st.sidebar.write(':red[Subscription is on trial mode!]')
