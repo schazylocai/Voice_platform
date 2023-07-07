@@ -42,9 +42,8 @@ def first_page():
         # section 3
         st.divider()
         st.header(":violet[Subscription details]")
-        st.subheader(":violet[Full access: $15 USD/Month]")
+        st.subheader(":violet[Full access: $15 USD/Month + 1 day free trial period]")
         st.write(":violet[Subscribe to unlock the full potential of our AI model.]")
-        #st.write(":violet[As a special bonus, you'll enjoy a :red[1-day free trial period] to thoroughly test its capabilities. Only if you decide to continue after the trial, your subscription will be billed at $15 USD per month.]")
 
         def Terms():
             # section 4
