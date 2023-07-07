@@ -49,6 +49,8 @@ def check_customers():
             customers = stripe.Customer.list()
 
             if len(customers.data) > 0:
+                found = False
+                pass_found = False
                 for user in range(len(customers.data)):
 
                     customer = customers.data[user]
@@ -80,22 +82,32 @@ def check_customers():
                                     user = False
                                 else:
                                     st.sidebar.title(':blue[Click at the top of this page ] :red[GPTapp]:blue[ tab to start...]')
+                                    found = True
+                                    pass_found = True
                                     user = True
 
                             elif status in ['trialing']:
                                 st.sidebar.write(':red[Subscription is on trial mode!]')
+                                user = True
 
                             else:
                                 st.sidebar.write(':red[No active subscription found!]')
+                                user = False
 
                         else: st.sidebar.write(":red[Incorrect password]")
+                        user = False
 
-                    if email == os.environ['ADMIN_EMAIL'] and password == os.environ['ADMIN_PASSWORD']:
+                    elif email == os.environ['ADMIN_EMAIL'] and password == os.environ['ADMIN_PASSWORD']:
+                        found = True
+                        pass_found = True
                         user = True
+
+                if not found and not pass_found:
+                    st.sidebar.write(':red[Wrong credentials!]')
 
             else:
                 st.sidebar.write(':red[You are not subscribed to this service!]')
-                user = True
+                user = False
 
     return user
 
