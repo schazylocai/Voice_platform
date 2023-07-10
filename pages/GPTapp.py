@@ -23,9 +23,13 @@ from langchain.chat_models import ChatOpenAI
 from langchain.vectorstores import Chroma
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
+from langchain.memory import ConversationBufferMemory
 
+client_started = False
+subscribed = False
 text_list = []
 max_files = 5
+final_result = {"query":"","answer":""}
 
 def launch_app():
 
@@ -86,7 +90,14 @@ def launch_app():
 
         with st.spinner(text=":red[Please wait while we collect all the documents...]"):
 
-            text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=20, length_function=len)
+            length_words = len(str(text_list))
+            if length_words > 2500:
+                chunk_size = 2500
+
+            else:
+                chunk_size = int(length_words * 0.5)
+
+            text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_size * 0.01, length_function=len)
             chunks = text_splitter.split_text(text=str(text_list))
             chunks = list(chunks)
 
@@ -94,64 +105,71 @@ def launch_app():
             llm = ChatOpenAI(temperature=0.5, model='gpt-4') # gpt-4 or gpt-3.5-turbo
             embedding = OpenAIEmbeddings(openai_api_key=secret_key)
             my_database = Chroma.from_texts(chunks, embedding)
-            retriever = my_database.as_retriever()
+            retriever = my_database.as_retriever(search_kwargs={"k": 1})
+            memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
-            ########## RetrievalQA from chain type ##########
-            response_template = f"""
-            • You will act as a professional and a researcher in the {sector} Field.
-            • Your task is to read through research papers, documents, journals, manuals, articles, and presentations that are related to the {sector} sector.
-            • You should be analytical, thoughtful, and reply in depth and details to any question.
-            • If you suspect bias in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is biased". Explain why do yuo think it is biased.
-            • If you suspect incorrect or misleading information in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is incorrect or misleading". Explain why do yuo think it is incorrect or misleading.
-            • Always reply in a polite and professional manner.
-            • Don't connect or look for answers on the internet.
-            • Only look for answers from the given documents and papers.
-            • If you don't know the answer to the question, then reply: "I can't be confident about my answer because I am missing the context or some information! Please try to be more precise and accurate in your query, and if need be, try to refer to the name of the document that you would like to query."
-    
-            Divide your answer when possible into paragraphs:
-            • What is your answer to the question?
-            • Add citations when possible from the document that supports the answer at the end of your answer.
-            • Always add full references related to questions from the given documents only, in bullet points, each one separately, at the end of your answer.
-    
-            {{context}}
-    
-            Question: {{question}}
-    
-            Answer:
-            """
+        ########## RetrievalQA from chain type ##########
+        response_template = f"""
+        • You will act as a professional and a researcher in the {sector} Field.
+        • Your task is to read through research papers, documents, journals, manuals, articles, and presentations that are related to the {sector} sector.
+        • You should be analytical, thoughtful, and reply in depth and details to any question.
+        • If you suspect bias in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is biased". Explain why do yuo think it is biased.
+        • If you suspect incorrect or misleading information in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is incorrect or misleading". Explain why do yuo think it is incorrect or misleading.
+        • Always reply in a polite and professional manner.
+        • Don't connect or look for answers on the internet.
+        • Only look for answers from the given documents and papers.
+        • If you don't know the answer to the question, then reply: "I can't be confident about my answer because I am missing the context or some information! Please try to be more precise and accurate in your query, and if need be, try to refer to the name of the document that you would like to query."
 
-            prompt = PromptTemplate(template=response_template, input_variables=["context", "question"])
-            chain_type_kwargs = {'prompt': prompt}
-            query_model = RetrievalQA.from_chain_type(
-                llm=llm,
-                chain_type="stuff",
-                retriever=retriever,
-                chain_type_kwargs=chain_type_kwargs,
-                verbose=False)
+        Divide your answer when possible into paragraphs:
+        • What is your answer to the question?
+        • Add citations when possible from the document that supports the answer at the end of your answer.
+        • Always add full references related to questions from the given documents only, in bullet points, each one separately, at the end of your answer.
+
+        {{context}}
+
+        Question: {{question}}
+
+        Answer:
+        """
+
+        prompt = PromptTemplate(template=response_template, input_variables=["context", "question"])
+        chain_type_kwargs = {'prompt': prompt}
+        query_model = RetrievalQA.from_chain_type(
+            llm=llm,
+            chain_type="stuff",
+            memory=memory,
+            return_source_documents=False,
+            retriever=retriever,
+            chain_type_kwargs=chain_type_kwargs,
+            verbose=False)
 
         def create_text_question():
             # Create a new text_area and button
-            with st.container():
-                st.subheader(':red[What is your query?]')
-                _user_input = st.text_area(":violet[▼]", placeholder='Enter your text...')
-                _submit_button = st.button(":violet[Submit]")
+            st.subheader(':red[What is your query?]')
+            user_text = st.text_area(":violet[▼]", placeholder='Enter your text...',key='user_text')
 
-            return _user_input,_submit_button
+            with st.form(key='my_form'):
+                user_input = user_text
+                submit_button = st.form_submit_button(label=':violet[Submit]')
+                if submit_button:
+                    user_input, result_q, query = run_model(user_input)
+                    final_result[query] = result_q
 
-        def run_model(_user_input,_submit_button):
+                return user_text
 
-            if _submit_button:
-                st.divider()
-                with st.spinner(text=":red[Query submitted. This may take a :red[minute or two] while we query the documents...]"):
-                    st.divider()
-                    response = query_model.run(_user_input)
-                    st.subheader(response)
-                    _submit_button = False
+        def run_model(_user_input):
 
-            return user_input,_submit_button
+            st.divider()
+            with st.spinner(text=":red[Query submitted. This may take a :red[minute or two] while we query the documents...]"):
+                chat_history = [(_user_input, "answer")]
+                result = query_model({"query":_user_input,"chat_history":chat_history})
+                user_query = result['query']
+                result = result['chat_history'][1].content
+                st.subheader(result)
 
-        user_input,submit_button = create_text_question()
-        user_input,submit_button = run_model(user_input,submit_button)
+                return _user_input,result,user_query
+
+        create_text_question()
 
     elif len(file_to_upload) == 0:
         st.sidebar.caption(":red[=> No file selected yet!]")
@@ -159,12 +177,13 @@ def launch_app():
     elif len(file_to_upload) >= max_files:
         st.sidebar.caption(f":red[=> Maximum number of uploaded files is {max_files}. Please remove some files!]")
 
+
 # Check if a user is subscribed to launch the GPTapp
-subscribed = False
-if "subscribed_status" in st.session_state:
+if "subscribed_status" in st.session_state and client_started == False:
     subscribed_user = st.session_state.subscribed_status
     if subscribed_user:
         launch_app()
+        client_started = True
     else:
         st.header(':red[Subscription is not valid!]')
         st.subheader(':violet[Please Login or Subscribe in the About page.]')
