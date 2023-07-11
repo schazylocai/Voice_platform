@@ -17,11 +17,19 @@ def first_page():
     def intro():
 
         # section 1
-        st.title(":violet[GPT Document Analyzer]") # blue, green, orange, red, violet.
-        st.write("")
-        st.write("")
-        st.write("")
-        st.write("")
+        col1,col2,col3 = st.columns(3)
+
+        with col1:
+            st.title(":violet[GPT Document Analyzer]") # blue, green, orange, red, violet.
+            st.write("")
+            st.write("")
+            st.write("")
+            st.write("")
+
+        # with col3:
+        #     st.write("")
+        #     st.write(":red[🌎 🌏 Choose your language]")
+        #     st.selectbox("Language", options=('English', 'Arabic'),label_visibility='hidden',key='language')
 
         # section 2
         col1,col2,col3 = st.columns(3)
