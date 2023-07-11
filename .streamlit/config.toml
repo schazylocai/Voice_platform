@@ -6,5 +6,5 @@ textColor="white"
 font="sans serif"
 base="dark"
 [server]
-maxUploadSize = 20
+maxUploadSize = 15
 enableXsrfProtection = false

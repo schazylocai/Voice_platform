@@ -47,6 +47,7 @@ def launch_app():
     st.sidebar.title(":red[File uploader]")
     file_to_upload = st.sidebar.file_uploader(label=':violet[Select PDF, word, or text files to upload]', type=['pdf','docx','txt'],
                                                   accept_multiple_files=True, key='files')
+    st.sidebar.caption(":violet[The uploaded document should not have more than 20% of images in it, or the model might not be able to read it.]")
     st.title(":violet[GPT Document Analyzer]")
     st.write(':violet[Upload your PDF files from the left menu & start querying the documents.]')
 
@@ -91,13 +92,8 @@ def launch_app():
         with st.spinner(text=":red[Please wait while we collect all the documents...]"):
 
             length_words = len(str(text_list))
-            if length_words > 2500:
-                chunk_size = 2500
-
-            else:
-                chunk_size = int(length_words * 0.5)
-
-            text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_size * 0.01, length_function=len)
+            chunk_size = 5000 if length_words > 5000 else int(length_words * 0.25)
+            text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_size * 0.001, length_function=len)
             chunks = text_splitter.split_text(text=str(text_list))
             chunks = list(chunks)
 
