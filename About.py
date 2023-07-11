@@ -28,8 +28,8 @@ def first_page():
 
         # with col3:
         #     st.write("")
-        #     st.write(":red[🌎 🌏 Choose your language]")
-        #     st.selectbox("Language", options=('English', 'Arabic'),label_visibility='hidden',key='language')
+        #     st.write(":red[Choose your language 🐋 🌎 🦢 اختر لغتك]")
+        #     st.selectbox("Language", options=('English', 'العربية'),label_visibility='hidden',key='language')
 
         # section 2
         col1,col2,col3 = st.columns(3)
