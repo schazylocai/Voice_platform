@@ -99,7 +99,7 @@ def launch_app():
             chunks = list(chunks)
 
 
-            llm = ChatOpenAI(temperature=0.3, model='gpt-3.5-turbo') # gpt-4 or gpt-3.5-turbo
+            llm = ChatOpenAI(temperature=0.3, model='gpt-4') # gpt-4 or gpt-3.5-turbo
             embedding = OpenAIEmbeddings(openai_api_key=secret_key)
             my_database = Chroma.from_texts(chunks, embedding)
             retriever = my_database.as_retriever(search_kwargs={"k": 1})
