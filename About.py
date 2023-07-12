@@ -19,39 +19,81 @@ def first_page():
         # section 1
         col1,col2,col3 = st.columns(3)
 
-        with col1:
-            st.title(":violet[GPT Document Analyzer]") # blue, green, orange, red, violet.
-            st.write("")
-            st.write("")
-            st.write("")
-            st.write("")
-
         # with col3:
         #     st.write("")
-        #     st.write(":red[Choose your language 🐋 🌎 🦢 اختر لغتك]")
-        #     st.selectbox("Language", options=('English', 'العربية'),label_visibility='hidden',key='language')
+        #     st.subheader(":violet[Choose your language   🌎   اختر لغتك]")
+        #     language = st.selectbox("Language", options=('English', 'العربية'),label_visibility='hidden',key='language')
+        language = 'English'
+        if language == 'English':
+            with col1:
+                # blue, green, orange, red, violet.
+                st.title(":violet[GPT Document Analyzer]")
+                st.write("")
+                st.write("")
+                st.write("")
+                st.write("")
 
-        # section 2
-        col1,col2,col3 = st.columns(3)
+            # section 2
+            col1,col2,col3 = st.columns(3)
 
-        with col1:
-            st.write(":red[Unlock the Power of AI & ] :blue[GPT4]:red[ to Query Your Documents.]")
-            st.header(":violet[Welcome to GPT Document Analyzer, a revolutionary application that leverages the capabilities of Large Language Models.]")
+            with col1:
+                st.write(":red[Unlock the Power of AI & ] :blue[GPT4]:red[ to Query Your Documents.]")
+                st.header(":violet[Welcome to GPT Document Analyzer, a revolutionary application that leverages the capabilities of Large Language Models.]")
 
-        with col2:
-            st.write(":red[What can this model do for you?]")
-            st.subheader(":violet[With this cutting-edge tool, you can effortlessly upload multiple PDF, word, or text documents and interact with them like never before.]")
-            st.write(":violet[Pose questions, extract valuable information, analyze content, and generate concise summaries directly from your uploaded documents.]")
-            st.write(":violet[➜ Watch the video to see how this model works!]")
+            with col2:
+                st.write(":red[What can this model do for you?]")
+                st.subheader(":violet[With this cutting-edge tool, you can effortlessly upload multiple PDF, word, or text documents and interact with them like never before.]")
+                st.write(":violet[Pose questions, extract valuable information, analyze content, and generate concise summaries directly from your uploaded documents.]")
+                st.write(":violet[➜ Watch the video to see how this model works!]")
 
-        with col3:
-            st.video(video_url)
+            with col3:
+                st.video(video_url)
 
-        # section 3
-        st.divider()
-        st.header(":violet[Subscription details]")
-        st.subheader(":violet[Full access: $15 USD/Month + 1 day free trial period]")
-        st.write(":violet[Subscribe to unlock the full potential of our AI model.]")
+            # section 3
+            st.divider()
+            st.header(":violet[Subscription details]")
+            st.subheader(":violet[Full access: $15 USD/Month + 1 day free trial period upon subscription]")
+            st.write(":violet[Subscribe to unlock the full potential of our AI model.]")
+
+        elif language == 'العربية':
+            def change_text_style(text_body,type):
+
+                if type == 'title':
+                    return st.write(f"<h1 style='text-align: right; color: violet; font-size: 36px; font-family: \'Harmattan\'>{text_body}</h1>", unsafe_allow_html=True)
+
+            with col1:
+                # blue, green, orange, red, violet.
+                #st.title(":violet[الذكاء الاصطناعي لتحليل المستندات بمساعدة جي بي تي]")
+                change_text_style("الذكاء الاصطناعي لتحليل المستندات بمساعدة جي بي تي",'title')
+                st.write("")
+                st.write("")
+                st.write("")
+                st.write("")
+
+            # section 2
+            col1, col2, col3 = st.columns(3)
+
+            with col1:
+                st.write(":red[Unlock the Power of AI & ] :blue[GPT4]:red[ to Query Your Documents.]")
+                st.header(
+                    ":violet[Welcome to GPT Document Analyzer, a revolutionary application that leverages the capabilities of Large Language Models.]")
+
+            with col2:
+                st.write(":red[What can this model do for you?]")
+                st.subheader(
+                    ":violet[With this cutting-edge tool, you can effortlessly upload multiple PDF, word, or text documents and interact with them like never before.]")
+                st.write(
+                    ":violet[Pose questions, extract valuable information, analyze content, and generate concise summaries directly from your uploaded documents.]")
+                st.write(":violet[➜ Watch the video to see how this model works!]")
+
+            with col3:
+                st.video(video_url)
+
+            # section 3
+            st.divider()
+            st.header(":violet[Subscription details]")
+            st.subheader(":violet[Full access: $15 USD/Month + 1 day free trial period]")
+            st.write(":violet[Subscribe to unlock the full potential of our AI model.]")
 
         def Terms():
             # section 4
@@ -69,7 +111,7 @@ def first_page():
                 st.caption("GPT-Doc Analyzer is easy to use. Simply upload a document to the website, ask a question related to the uploaded document, and GPT-Doc Analyzer will analyze the document.")
                 st.write(":violet[E- What are the limitations of GPT-Doc Analyzer?]")
                 st.caption("GPT-Doc Analyzer is a powerful tool, but it has some limitations. It is not able to handle all types of documents. Here are some specific limitations to keep in mind:")
-                st.caption("• The document should not have more than 20% images in it, or the model will not be able to read it.")
+                st.caption("• As a general rule, the uploaded documents should contain images that do not exceed 40% of the total content.")
                 st.caption("• If the document hangs and stops from uploading, then delete it and try again.")
                 st.caption("• This model is suitable for research papers, text-based documents, and not illustrative books and stories.")
                 st.write(":violet[F- Here are some tips for using GPT-Doc Analyzer]")
@@ -151,5 +193,6 @@ def first_page():
 
 first_page()
 st.session_state.subscribed_status = check_customers()
+st.session_state.messages = []
 subscribe_to_service()
 cancel_service()

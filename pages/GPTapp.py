@@ -45,7 +45,10 @@ def launch_app():
     st.sidebar.title(":red[File uploader]")
     file_to_upload = st.sidebar.file_uploader(label=':violet[Select PDF, word, or text files to upload]', type=['pdf','docx','txt'],
                                                   accept_multiple_files=True, key='files')
-    st.sidebar.caption(":violet[The uploaded document should not have more than 20% of images in it, or the model might not be able to read it.]")
+    st.sidebar.caption(":violet[As a general rule, the uploaded documents should contain images that do not exceed 40% of the total content.]")
+    clear = st.sidebar.button(':red[Clear conversation]',key='clear')
+    if clear:
+        st.session_state.messages = []
     st.title(":violet[GPT Document Analyzer]")
     st.write(':violet[Upload your PDF files from the left menu & start querying the documents.]')
 
@@ -96,7 +99,7 @@ def launch_app():
             chunks = list(chunks)
 
 
-            llm = ChatOpenAI(temperature=0.5, model='gpt-4') # gpt-4 or gpt-3.5-turbo
+            llm = ChatOpenAI(temperature=0.3, model='gpt-3.5-turbo') # gpt-4 or gpt-3.5-turbo
             embedding = OpenAIEmbeddings(openai_api_key=secret_key)
             my_database = Chroma.from_texts(chunks, embedding)
             retriever = my_database.as_retriever(search_kwargs={"k": 1})
@@ -126,10 +129,20 @@ def launch_app():
         Answer:
         """
 
+        if 'ChatOpenAI' not in st.session_state:
+            st.session_state['ChatOpenAI'] = llm
+
+        if 'messages' not in st.session_state:
+            st.session_state.messages = []
+
+        for message in st.session_state.messages:
+            with st.chat_message(message['role']):
+                st.subheader(message['content'])
+
         prompt = PromptTemplate(template=response_template, input_variables=["context", "question"])
         chain_type_kwargs = {'prompt': prompt}
         query_model = RetrievalQA.from_chain_type(
-            llm=llm,
+            llm=st.session_state['ChatOpenAI'],
             chain_type="stuff",
             memory=memory,
             return_source_documents=False,
@@ -138,30 +151,28 @@ def launch_app():
             verbose=False)
 
         def create_text_question():
-            # Create a new text_area and button
-            st.subheader(':red[What is your query?]')
-            user_text = st.text_area(":violet[▼]", placeholder='Enter your text...',key='user_text')
 
-            with st.form(key='my_form'):
-                user_input = user_text
-                submit_button = st.form_submit_button(label=':violet[Submit]')
-                if submit_button:
-                    user_input, result_q, query = run_model(user_input)
-                    final_result[query] = result_q
+            user_input = st.chat_input('Start querying the document here...')
+            if user_input:
+                with st.chat_message('user'):
+                    st.markdown(user_input)
 
-                return user_text
+                st.session_state.messages.append({'role':'user','content':user_input})
 
-        def run_model(_user_input):
+                with st.spinner(text=":red[Query submitted. This may take a :red[minute or two] while we query the documents...]"):
+                    with st.chat_message('assistant'):
+                        message_placeholder = st.empty()
+                        all_results = ''
+                        chat_history = [(user_input, "answer")]
+                        result = query_model({"query": user_input, "chat_history": chat_history})
+                        user_query = result['query']
+                        result = result['chat_history'][1].content
+                        all_results += result
+                        message_placeholder.subheader(f'{all_results}')
+                    st.session_state.messages.append({'role':'assistant','content':all_results})
 
-            st.divider()
-            with st.spinner(text=":red[Query submitted. This may take a :red[minute or two] while we query the documents...]"):
-                chat_history = [(_user_input, "answer")]
-                result = query_model({"query":_user_input,"chat_history":chat_history})
-                user_query = result['query']
-                result = result['chat_history'][1].content
-                st.subheader(result)
 
-                return _user_input,result,user_query
+                    return user_input, result, user_query
 
         create_text_question()
 
