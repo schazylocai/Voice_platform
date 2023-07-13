@@ -53,7 +53,7 @@ def first_page():
             st.divider()
             st.header(":violet[Subscription details]")
             st.subheader(":violet[Full access: $15 USD/Month + 1 day free trial period upon subscription]")
-            st.write(":violet[Subscribe to unlock the full potential of our AI model.]")
+            st.write(":violet[Cancellation must be initiated before the 1-day trial period elapses if you do not wish to continue.]")
 
         elif language == 'العربية':
             def change_text_style(text_body,type):

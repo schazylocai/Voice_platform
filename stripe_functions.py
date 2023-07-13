@@ -38,7 +38,7 @@ def check_customers():
     password = password.strip()
 
     if len(email) == 0:
-        st.sidebar.write(":blue[Enter your email]")
+        st.sidebar.write(":violet[Enter your email]")
 
     elif email_button := st.sidebar.button(":red[Submit]",key='submit_add'):
 
@@ -183,7 +183,7 @@ def subscribe_to_service():
     password = password.strip()
 
     if len(email) == 0:
-        st.sidebar.write(":blue[Enter your email]")
+        st.sidebar.write(":violet[Enter your email]")
 
     else:
         if email_button := st.sidebar.button(":red[Submit]", key='submit_email_check'):
@@ -223,7 +223,7 @@ def cancel_service():
     password = password.strip()
 
     if len(email) == 0:
-        st.sidebar.write(":blue[Enter your email]")
+        st.sidebar.write(":violet[Enter your email]")
 
     else:
         if email_button_cancel := st.sidebar.button(":red[Submit]",key='submit_cancel'):
