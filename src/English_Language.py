@@ -2,12 +2,16 @@ import streamlit as st
 import smtplib
 import re
 import os
-video_url = "https://youtu.be/PgXjVwHmqbg"
+from src.Change_Text_Style import change_text_style_english
+
+video_url_eng = "https://youtu.be/PgXjVwHmqbg"
 
 
 def write_english_About():
-    # section 1
-    col1, col2, col3 = st.columns(3)
+
+    violet = "rgb(169, 131, 247)"
+    red = "rgb(232,89,83)"
+    white = "rgb(255,255,255)"
 
     # section 2
     col1, col2, col3 = st.columns(3)
@@ -26,7 +30,7 @@ def write_english_About():
         st.write(":violet[➜ Watch the video to see how this model works!]")
 
     with col3:
-        st.video(video_url)
+        st.video(video_url_eng)
 
     # section 3
     st.divider()

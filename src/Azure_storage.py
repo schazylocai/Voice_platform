@@ -72,7 +72,7 @@ def write_subscription_ids_to_azure_blob(user_email,password):
 
 def upload_file_to_azure_blob(file):
 
-    file_path = os.path.join(".", file.name)
+    file_path = os.path.join("..", file.name)
     with open(file_path, "wb") as f:
         f.write(file.getbuffer())
 

@@ -117,7 +117,7 @@ def launch_app():
             with st.spinner(text=":red[Please wait while we collect all the documents...]"):
 
                 length_words = len(str(text_list))
-                chunk_size = 5000 if length_words > 5000 else int(length_words * 0.5)
+                chunk_size = 5000 if length_words > 5000 else int(length_words * 1)
                 text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_size * 0.001, length_function=len)
                 chunks = text_splitter.split_text(text=str(text_list))
                 chunks = list(chunks)

@@ -4,7 +4,7 @@ load_dotenv() # read local .env file
 import stripe
 from datetime import datetime
 import os
-from Azure_storage import write_subscription_ids_to_azure_blob,read_subscription_from_azure_blob
+from src.Azure_storage import write_subscription_ids_to_azure_blob,read_subscription_from_azure_blob
 
 success_url="https://gptdocanalyzer.com/"
 cancel_url="https://gptdocanalyzer.com/"
@@ -24,7 +24,7 @@ def get_days_left(subscription):
     return max(0, int((current_period_end - current_timestamp) / (24 * 3600)))
 
 
-def check_customers():
+def check_customers_eng():
 
     user = False
     username = ''
@@ -155,7 +155,7 @@ def check_customers():
     return user
 
 
-def subscribe_to_service():
+def subscribe_to_service_eng():
 
     username = ''
     def proceed_to_payment():
@@ -209,7 +209,7 @@ def subscribe_to_service():
     return email,password
 
 
-def cancel_service():
+def cancel_service_eng():
 
     username = ''
 
