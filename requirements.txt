@@ -283,7 +283,7 @@ sniffio==1.3.0
 sortedcontainers==2.4.0
 soupsieve==2.4.1
 SpeechRecognition==3.10.0
-SQLAlchemy==2.0.19
+SQLAlchemy
 sshtunnel==0.4.0
 stack-data==0.6.2
 starlette==0.20.4
