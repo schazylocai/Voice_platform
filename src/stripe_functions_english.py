@@ -4,7 +4,8 @@ load_dotenv() # read local .env file
 import stripe
 from datetime import datetime
 import os
-from src.Azure_storage import write_subscription_ids_to_azure_blob,read_subscription_from_azure_blob
+#from src.Azure_storage import write_subscription_ids_to_azure_blob,read_subscription_from_azure_blob
+from src.Azure_storage import write_subscription_ids_to_azure_keyvault,read_subscription_from_azure_keyvault
 
 success_url="https://gptdocanalyzer.com/"
 cancel_url="https://gptdocanalyzer.com/"
@@ -59,7 +60,7 @@ def check_customers_eng():
                     if username == email:
 
                         # Check password
-                        username_azure,password_azure = read_subscription_from_azure_blob(username)
+                        username_azure,password_azure = read_subscription_from_azure_keyvault(username,password)
                         if password_azure == password:
 
                             # Check subscription
@@ -201,10 +202,12 @@ def subscribe_to_service_eng():
 
             else:
                 # Write email & password to Azure blob
-                email, password = write_subscription_ids_to_azure_blob(email, password)
-
-                # Proceed to pay
-                proceed_to_payment()
+                email, password = write_subscription_ids_to_azure_keyvault(email, password)
+                if email == 'exists' and password == 'exists':
+                    st.sidebar.write(":red[User already exists. Please login!]")
+                else:
+                    # Proceed to pay
+                    proceed_to_payment()
 
     return email,password
 
@@ -244,7 +247,7 @@ def cancel_service_eng():
                         if username == email:
 
                             # Check password
-                            username_azure, password_azure = read_subscription_from_azure_blob(username)
+                            username_azure, password_azure = read_subscription_from_azure_keyvault(username,password)
                             if password_azure == password:
 
                                 subscriptions = stripe.Subscription.list(customer=customer.id)
