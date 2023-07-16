@@ -5,7 +5,6 @@ load_dotenv() # read local .env file
 from azure.storage.blob import BlobServiceClient
 import json
 
-from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 from azure.identity import ClientSecretCredential
 import re
