@@ -2,11 +2,11 @@ import streamlit as st
 import os
 from dotenv import load_dotenv
 load_dotenv() # read local .env file
-from azure.storage.blob import BlobServiceClient
-import json
+#from azure.storage.blob import BlobServiceClient
+#import json
 
-from azure.keyvault.secrets import SecretClient
-from azure.identity import ClientSecretCredential
+import azure.identity
+import azure.keyvault.secrets
 import re
 
 tenant_id = os.environ["AZURE_TENANT_ID"]
@@ -15,9 +15,8 @@ client_secret = os.environ["AZURE_CLIENT_SECRET"]
 keyvault_name = os.environ["AZURE_KEYVAULT_NAME"]
 keyvault_uri = os.environ["AZURE_KEYVAULT_URI"]
 
-# _credential = DefaultAzureCredential()
-_credential = ClientSecretCredential(tenant_id=tenant_id,client_id=client_id,client_secret=client_secret)
-client = SecretClient(vault_url=keyvault_uri, credential=_credential)
+_credential = azure.identity.ClientSecretCredential(tenant_id=tenant_id,client_id=client_id,client_secret=client_secret)
+client = azure.keyvault.secrets.SecretClient(vault_url=keyvault_uri, credential=_credential)
 
 # connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
 # container_name = "llmidcontainer"
