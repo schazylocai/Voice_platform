@@ -121,7 +121,7 @@ certifi==2023.5.7
 cffi==1.15.1
 chardet==5.1.0
 charset-normalizer==3.2.0
-chromadb==0.3.29
+chromadb
 click==8.1.5
 clickhouse-connect==0.6.6
 colorama==0.4.6
@@ -143,7 +143,7 @@ executing==1.2.0
 extract-msg==0.41.5
 fabric==3.1.0
 faiss-cpu==1.7.4
-fastapi==0.100.0
+fastapi
 fastjsonschema==2.17.1
 flatbuffers==23.5.26
 fqdn==1.5.1
@@ -329,4 +329,4 @@ xmltodict==0.13.0
 yarl==1.9.2
 zipp==3.16.2
 zope.interface==6.0
-zstandard==0.21.0
+zstandard
