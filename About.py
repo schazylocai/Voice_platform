@@ -41,7 +41,7 @@ def first_page():
 
         elif language == 'العربية':
             with col3:
-                change_text_style_english("🌏 Choose your language", 'head', violet)
+                change_text_style_english("🌏Choose your language", 'head', violet)
 
             st.divider()
             write_Arabic_About()
