@@ -30,7 +30,7 @@ def write_Arabic_About():
             'subhead', violet)
         st.markdown("")
         change_text_style_arabic(
-            "توجه بأسئلة، استخرج معلومات قيمة، قم بتحليل المحتوى، وانتج ملخصات موجزة مباشرة من المستندات التي تم تحميلها.!",
+            "توجه بأسئلة، استخرج معلومات قيمة، قم بتحليل المحتوى، وانتج ملخصات موجزة مباشرة من المستندات التي تم تحميلها!",
             'text_violet', violet)
         st.markdown("")
         change_text_style_arabic("شاهد الفيديو لترى كيف يعمل هذا النموذج ⬅︎", 'text_violet', violet)
