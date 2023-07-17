@@ -26,7 +26,7 @@ def write_Arabic_About():
         change_text_style_arabic("ما الذي يمكن لهذا النموذج أن يفعله لك؟", 'text_red', red)
         st.markdown("")
         change_text_style_arabic(
-            "مع هذه الأداة المتقدمة، يمكنك بسهولة تحميل عدة مستندات PDF، Word، أو نص والتفاعل معها كما لم تفعل من قبل.",
+            "مع هذه الأداة المتقدمة، يمكنك بسهولة تحميل عدة مستندات PDF، Word، أو نص والتفاعل معها كما لم تفعل من قبل",
             'subhead', violet)
         st.markdown("")
         change_text_style_arabic(
