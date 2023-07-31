@@ -102,13 +102,6 @@ def write_Arabic_About():
     st.write("")
     Terms()
 
-    def send_email(sender, recipient, subject, body):
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.ehlo()
-            server.starttls()
-            server.login(sender, os.environ["EMAIL_PASSWORD"])
-            server.sendmail(sender, recipient, f"Subject: {subject}\n\n{body}")
-
     def contact_us_form():
 
         change_text_style_arabic("اتصل بنا", 'text_violet', violet)
@@ -134,11 +127,12 @@ def write_Arabic_About():
                 elif sender_message.strip() == '':
                     st.error(':red[!أدخل رسالة]')
                 else:
-                    send_email(
-                        sender=os.environ["MY_EMAIL_ADDRESS"],
+                    send_email_ara(
+                        sender=sender_name,
                         recipient=os.environ["MY_EMAIL_ADDRESS"],
                         subject="Contact Form Submission",
-                        body=sender_message.encode('UTF-8'))
+                        body=sender_message.encode('UTF-8'),
+                        sender_email=sender_email)
                     st.success(':violet[!تم إرسال الاستعلام بنجاح. سنعود إليك في أقرب وقت ممكن]')
 
     contact_us_form()
@@ -151,3 +145,11 @@ def write_Arabic_About():
     st.write("")
     st.divider()
     st.markdown(":violet[© 2023 FAB DWC LLC. جميع الحقوق محفوظة]")
+
+
+def send_email_ara(sender, recipient, subject, body, sender_email):
+    with smtplib.SMTP("smtp.gmail.com", 587) as server:
+        server.ehlo()
+        server.starttls()
+        server.login(recipient, os.environ["EMAIL_PASSWORD"])
+        server.sendmail(sender, recipient, f"Subject: {subject}\n\n{sender}: {sender_email}\n\n{body}")

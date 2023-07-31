@@ -18,6 +18,66 @@ keyvault_uri = os.environ["AZURE_KEYVAULT_URI"]
 _credential = azure.identity.ClientSecretCredential(tenant_id=tenant_id,client_id=client_id,client_secret=client_secret)
 client = azure.keyvault.secrets.SecretClient(vault_url=keyvault_uri, credential=_credential)
 
+
+def read_subscription_from_azure_keyvault(user_email,user_password):
+    try:
+        # Clean the user_email to use it as the secret name
+        username = re.sub(r'\W+', '', user_email)
+        # Check if the secret already exists in the Key Vault
+        try:
+            existing_secret = client.get_secret(username)
+            existing_password = existing_secret.value
+            return user_email,existing_password
+
+        except Exception as ex:
+            # If the secret doesn't exist, write it to the Key Vault
+            return user_email,user_password
+
+    except Exception as e:
+        st.write(":red[Error retrieving data from Azure Key Vault!]")
+        return None,None
+
+def write_subscription_ids_to_azure_keyvault(user_email, user_password):
+    try:
+        # Clean the user_email to use it as the secret name
+        username = re.sub(r'\W+', '', user_email)
+
+        # Check if the secret already exists in the Key Vault
+        try:
+            existing_secret = client.get_secret(username)
+            return 'exists','exists'
+
+        except Exception as ex:
+            # If the secret doesn't exist, write it to the Key Vault
+            secret = client.set_secret(username, user_password)
+            st.sidebar.write(":violet[Credentials saved!]")
+
+        return user_email, user_password
+
+    except Exception as e:
+        st.write(f":red[Error writing data to Azure Key Vault: {e}]")
+        return None, None
+
+
+def retrieve_password_from_azure_keyvault(user_email):
+    try:
+        # Clean the user_email to use it as the secret name
+        username = re.sub(r'\W+', '', user_email)
+        # Check if the secret already exists in the Key Vault
+        try:
+            existing_secret = client.get_secret(username)
+            existing_password = existing_secret.value
+            return existing_secret,existing_password
+
+        except Exception as ex:
+            # If the secret doesn't exist, write it to the Key Vault
+            return user_email,"Password not found!"
+
+    except Exception as e:
+        st.write(":red[Error retrieving data from Azure Key Vault!]")
+        return user_email,"Password not found!"
+
+
 # connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
 # container_name = "llmidcontainer"
 # blob_name = "subscriptionids.json"
@@ -123,46 +183,6 @@ client = azure.keyvault.secrets.SecretClient(vault_url=keyvault_uri, credential=
 #
 #     except Exception as e:
 #         st.error(f"An error occurred while reading the file: {str(e)}")
-
-
-def read_subscription_from_azure_keyvault(user_email,user_password):
-    try:
-        # Clean the user_email to use it as the secret name
-        username = re.sub(r'\W+', '', user_email)
-        # Check if the secret already exists in the Key Vault
-        try:
-            existing_secret = client.get_secret(username)
-            existing_password = existing_secret.value
-            return user_email,existing_password
-
-        except Exception as ex:
-            # If the secret doesn't exist, write it to the Key Vault
-            return user_email,user_password
-
-    except Exception as e:
-        st.write(":red[Error retrieving data from Azure Key Vault!]")
-        return None,None
-
-def write_subscription_ids_to_azure_keyvault(user_email, user_password):
-    try:
-        # Clean the user_email to use it as the secret name
-        username = re.sub(r'\W+', '', user_email)
-
-        # Check if the secret already exists in the Key Vault
-        try:
-            existing_secret = client.get_secret(username)
-            return 'exists','exists'
-
-        except Exception as ex:
-            # If the secret doesn't exist, write it to the Key Vault
-            secret = client.set_secret(username, user_password)
-            st.sidebar.write(":violet[Credentials saved!]")
-
-        return user_email, user_password
-
-    except Exception as e:
-        st.write(f":red[Error writing data to Azure Key Vault: {e}]")
-        return None, None
 
 
 

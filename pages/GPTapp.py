@@ -65,9 +65,10 @@ def launch_app():
                     text = "".join(page.extract_text() for page in pdf_reader.pages)
                     if len(text) > 5:
                         text_list.append(text)
-                        with st.expander(file.name):
-                            st.write(text)
-                            continue_analyze = True
+                        st.subheader(f':blue[{file.name}]')
+                        # with st.expander(file.name):
+                        #     st.write(text)
+                        continue_analyze = True
 
                     else:
                         catch_exception(file.name)
@@ -78,9 +79,10 @@ def launch_app():
                     text = docx2txt.process(file)
                     if len(text) > 5:
                         text_list.append(text)
-                        with st.expander(file.name):
-                            st.write(text)
-                            continue_analyze = True
+                        st.subheader(f':blue[{file.name}]')
+                        # with st.expander(file.name):
+                        #     st.write(text)
+                        continue_analyze = True
 
                     else:
                         catch_exception(file.name)
@@ -93,12 +95,13 @@ def launch_app():
                         tmp.seek(0)
                         text = textract.process(tmp.name, method='txt')
                         if len(text) > 5:
+                            st.subheader(f':blue[{file.name}]')
                             text_list.append(text.decode('utf-8'))
-                            with st.expander(file.name):
-                                text_lines = text.decode('utf-8').splitlines()
-                                for line in text_lines:
-                                    st.write(line)
-                                    continue_analyze = True
+                            # with st.expander(file.name):
+                            #     text_lines = text.decode('utf-8').splitlines()
+                            #     for line in text_lines:
+                            #         st.write(line)
+                            continue_analyze = True
 
                         else:
                             catch_exception(file.name)
@@ -114,7 +117,7 @@ def launch_app():
 
         if continue_analyze:
 
-            with st.spinner(text=":red[Please wait while we collect all the documents...]"):
+            with st.spinner(text=":red[Please wait while we process the documents...]"):
 
                 length_words = len(str(text_list))
                 chunk_size = 1000 if length_words > 1000 else int(length_words * 1)
@@ -143,7 +146,7 @@ def launch_app():
     
             Divide your answer when possible into paragraphs:
             • What is your answer to the question?
-            • Add citations when possible from the document that supports the answer at the end of your answer.
+            • Add citations when possible from the document that supports the answer.
             • Always add full references related to questions from the given documents only, in bullet points, each one separately, at the end of your answer.
     
             {{context}}

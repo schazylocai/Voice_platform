@@ -2,10 +2,11 @@ import streamlit as st
 from dotenv import load_dotenv
 load_dotenv() # read local .env file
 import stripe
+import smtplib
 from datetime import datetime
 import os
-#from src.Azure_storage import write_subscription_ids_to_azure_blob,read_subscription_from_azure_blob
-from src.Azure_storage import write_subscription_ids_to_azure_keyvault,read_subscription_from_azure_keyvault
+#from src.Azure_storage import write_subscription_ids_to_azure_blob, read_subscription_from_azure_blob
+from src.Azure_storage import write_subscription_ids_to_azure_keyvault,read_subscription_from_azure_keyvault,retrieve_password_from_azure_keyvault
 
 success_url="https://gptdocanalyzer.com/"
 cancel_url="https://gptdocanalyzer.com/"
@@ -290,3 +291,57 @@ def cancel_service_eng():
 
     st.sidebar.divider()
     return subscribed_user
+
+
+def forgot_password_eng():
+
+    def send_email(sender, recipient_email, body):
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.ehlo()
+            server.starttls()
+            server.login(os.environ["MY_EMAIL_ADDRESS"],os.environ["EMAIL_PASSWORD"])
+            server.sendmail(sender, recipient_email, body)
+
+    user = False
+
+    # Check customers
+    st.sidebar.write("")
+    st.sidebar.subheader(":violet[Forgot your password?]")
+    email = st.sidebar.text_input(":violet[Please enter your email address:]",key='email_find')
+    email = email.strip().lower()
+
+    if email_button := st.sidebar.button(":red[Submit]",key='submit_find_email'):
+
+        customers = stripe.Customer.list()
+
+        if len(customers.data) > 0:
+            for user in range(len(customers.data)):
+
+                customer = customers.data[user]
+                username = customer.email.strip().lower()
+
+                if username == email:
+
+                    # retrieve password
+                    username_azure,password_azure = retrieve_password_from_azure_keyvault(username)
+
+                    st.sidebar.write(':blue[Your password was sent to your email address!]')
+                    subject = 'You asked us for your password!'
+                    body = f"As requested, please find below your password for the website GPT Document Analyzer: \n\n {password_azure} \n\n All the best! \n The team at GPT Document Analyzer."
+                    send_email(os.environ["MY_EMAIL_ADDRESS"], email, f"Subject: {subject} \n\n{body}")
+                    user = True
+
+                    return password_azure
+
+                else: user = False
+
+            if not user:
+                st.sidebar.write(':red[email not found in our database!]')
+                return user
+
+        else:
+            st.sidebar.write(':red[email not found in our database!]')
+            return user
+
+    st.sidebar.divider()
+    return user

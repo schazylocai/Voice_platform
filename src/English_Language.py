@@ -106,13 +106,6 @@ def write_english_About():
     st.write("")
     Terms()
 
-    def send_email(sender, recipient, subject, body):
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.ehlo()
-            server.starttls()
-            server.login(sender, os.environ["EMAIL_PASSWORD"])
-            server.sendmail(sender, recipient, f"Subject: {subject}\n\n{body}")
-
     def contact_us_form():
 
         with st.expander(':violet[Contact Us!]'):
@@ -136,8 +129,8 @@ def write_english_About():
                 elif sender_message.strip() == '':
                     st.error(':red[Enter a message!]')
                 else:
-                    send_email(sender=os.environ["MY_EMAIL_ADDRESS"], recipient=os.environ["MY_EMAIL_ADDRESS"],
-                               subject="Contact Form Submission", body=sender_message)
+                    send_email_eng(sender=sender_name, recipient=os.environ["MY_EMAIL_ADDRESS"],
+                                   subject="Contact Form Submission", body=sender_message, sender_email=sender_email)
                     st.success(':violet[Form submitted successfully. We will get back to you as soon as possible!]')
 
     contact_us_form()
@@ -150,3 +143,11 @@ def write_english_About():
     st.write("")
     st.divider()
     st.markdown(":violet[© 2023 FAB DWC LLC. All rights reserved.]")
+
+
+def send_email_eng(sender, recipient, subject, body, sender_email):
+    with smtplib.SMTP("smtp.gmail.com", 587) as server:
+        server.ehlo()
+        server.starttls()
+        server.login(recipient, os.environ["EMAIL_PASSWORD"])
+        server.sendmail(sender, recipient, f"Subject: {subject}\n\n{sender}: {sender_email}\n\n{body}")

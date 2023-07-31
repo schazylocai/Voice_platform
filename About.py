@@ -8,8 +8,8 @@ from src.Change_Text_Style import change_text_style_arabic,change_text_style_eng
 
 st.set_page_config(layout="wide",initial_sidebar_state='expanded',page_icon="🔬")
 connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
-from src.stripe_functions_english import check_customers_eng,subscribe_to_service_eng,cancel_service_eng
-from src.stripe_functions_arabic import check_customers_ara,subscribe_to_service_ara,cancel_service_ara
+from src.stripe_functions_english import check_customers_eng,subscribe_to_service_eng,cancel_service_eng,forgot_password_eng
+from src.stripe_functions_arabic import check_customers_ara,subscribe_to_service_ara,cancel_service_ara,forgot_password_ara
 
 def first_page():
     status = False
@@ -56,12 +56,15 @@ def first_page():
         st.session_state.messages = []
         subscribe_to_service_eng()
         cancel_service_eng()
+        forgot_password_eng()
+
 
     else:
         st.session_state.subscribed_status = check_customers_ara()
         st.session_state.messages = []
         subscribe_to_service_ara()
         cancel_service_ara()
+        forgot_password_ara()
 
 
 first_page()
