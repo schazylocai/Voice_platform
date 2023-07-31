@@ -142,7 +142,7 @@ def launch_app():
             • Always reply in a polite and professional manner.
             • Don't connect or look for answers on the internet.
             • Only look for answers from the given documents and papers.
-            • If you don't know the answer to the question, then reply: "I can't be confident about my answer because I am missing the context or some information! Please try to be more precise and accurate in your query, and if need be, try to refer to the name of the document that you would like to query."
+            • If you don't know the answer to the question, then reply: "I can't be confident about my answer because I am missing the context or some information! Please try to be more precise and accurate in your query."
     
             Divide your answer when possible into paragraphs:
             • What is your answer to the question?
