@@ -4,7 +4,7 @@ import re
 import os
 from src.Change_Text_Style import change_text_style_english
 
-video_url_eng = "https://youtu.be/PgXjVwHmqbg"
+video_url_eng = "https://youtu.be/35GxvfPku0Y"
 
 
 def write_english_About():
