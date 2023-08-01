@@ -55,7 +55,7 @@ def launch_app():
     st.title(":violet[GPT Document Analyzer]")
     st.write(':violet[Upload your PDF files from the left menu & start querying the documents.]')
 
-    if 0 < len(file_to_upload) <= max_files:
+    if len(file_to_upload) <= max_files:
         for file in file_to_upload:
 
             # Check if the upload file is a pdf
@@ -66,13 +66,9 @@ def launch_app():
                     if len(text) > 5:
                         text_list.append(text)
                         st.subheader(f':blue[{file.name}]')
-                        # with st.expander(file.name):
-                        #     st.write(text)
-                        continue_analyze = True
 
                     else:
                         catch_exception(file.name)
-                        continue_analyze = False
 
                 # Check if the upload file is a Word docx
                 elif str(file.name).endswith('.docx'):
@@ -80,13 +76,9 @@ def launch_app():
                     if len(text) > 5:
                         text_list.append(text)
                         st.subheader(f':blue[{file.name}]')
-                        # with st.expander(file.name):
-                        #     st.write(text)
-                        continue_analyze = True
 
                     else:
                         catch_exception(file.name)
-                        continue_analyze = False
 
                 # Check if the upload file is a text txt
                 elif str(file.name).endswith('.txt'):
@@ -97,112 +89,103 @@ def launch_app():
                         if len(text) > 5:
                             st.subheader(f':blue[{file.name}]')
                             text_list.append(text.decode('utf-8'))
-                            # with st.expander(file.name):
-                            #     text_lines = text.decode('utf-8').splitlines()
-                            #     for line in text_lines:
-                            #         st.write(line)
-                            continue_analyze = True
 
                         else:
                             catch_exception(file.name)
-                            continue_analyze = False
 
                 else:
                     catch_exception(file.name)
-                    continue_analyze = False
 
             except Exception as e:
                 catch_exception(file.name)
-                continue_analyze = False
 
-        if continue_analyze:
+        with st.spinner(text=":red[Please wait while we process the documents...]"):
 
-            with st.spinner(text=":red[Please wait while we process the documents...]"):
-
-                length_words = len(str(text_list))
-                chunk_size = 1000 if length_words > 1000 else int(length_words * 1)
-                text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_size * 0.001, length_function=len)
-                chunks = text_splitter.split_text(text=str(text_list))
-                chunks = list(chunks)
+            length_words = len(str(text_list))
+            chunk_size = 1000 if length_words > 1000 else int(length_words * 1)
+            text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_size * 0.001, length_function=len)
+            chunks = text_splitter.split_text(text=str(text_list))
+            chunks = list(chunks)
 
 
-                llm = ChatOpenAI(temperature=0.3, model='gpt-4') # gpt-4 or gpt-3.5-turbo
-                embedding = OpenAIEmbeddings(openai_api_key=secret_key)
-                my_database = Chroma.from_texts(chunks, embedding)
-                retriever = my_database.as_retriever(search_kwargs={"k": 1})
-                memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+            llm = ChatOpenAI(temperature=0.3, model='gpt-4') # gpt-4 or gpt-3.5-turbo
+            embedding = OpenAIEmbeddings(openai_api_key=secret_key)
+            my_database = Chroma.from_texts(chunks, embedding)
+            retriever = my_database.as_retriever(search_kwargs={"k": 1})
+            memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
-            ########## RetrievalQA from chain type ##########
-            response_template = f"""
-            • You will act as a professional and a researcher in the {sector} Field.
-            • Your task is to read through research papers, documents, journals, manuals, articles, and presentations that are related to the {sector} sector.
-            • You should be analytical, thoughtful, and reply in depth and details to any question.
-            • If you suspect bias in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is biased". Explain why do yuo think it is biased.
-            • If you suspect incorrect or misleading information in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is incorrect or misleading". Explain why do yuo think it is incorrect or misleading.
-            • Always reply in a polite and professional manner.
-            • Don't connect or look for answers on the internet.
-            • Only look for answers from the given documents and papers.
-            • If you don't know the answer to the question, then reply: "I can't be confident about my answer because I am missing the context or some information! Please try to be more precise and accurate in your query."
-    
-            Divide your answer when possible into paragraphs:
-            • What is your answer to the question?
-            • Add citations when possible from the document that supports the answer.
-            • Always add full references related to questions from the given documents only, in bullet points, each one separately, at the end of your answer.
-    
-            {{context}}
-    
-            Question: {{question}}
-    
-            Answer:
-            """
+        ########## RetrievalQA from chain type ##########
 
-            if 'ChatOpenAI' not in st.session_state:
-                st.session_state['ChatOpenAI'] = llm
+        response_template = f"""
+        • You will act as a professional and a researcher in the {sector} Field.
+        • Your task is to read through research papers, documents, journals, manuals, articles, and presentations that are related to the {sector} sector.
+        • You should be analytical, thoughtful, and reply in depth and details to any question.
+        • If you suspect bias in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is biased". Explain why do yuo think it is biased.
+        • If you suspect incorrect or misleading information in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is incorrect or misleading". Explain why do yuo think it is incorrect or misleading.
+        • Always reply in a polite and professional manner.
+        • Don't connect or look for answers on the internet.
+        • Only look for answers from the given documents and papers.
+        • If you don't know the answer to the question, then reply: "I can't be confident about my answer because I am missing the context or some information! Please try to be more precise and accurate in your query."
 
-            if 'messages' not in st.session_state:
-                st.session_state.messages = []
+        Divide your answer when possible into paragraphs:
+        • What is your answer to the question?
+        • Add citations when possible from the document that supports the answer.
+        • Add references when possible related to questions from the given documents only, in bullet points, each one separately, at the end of your answer.
 
-            for message in st.session_state.messages:
-                with st.chat_message(message['role']):
-                    st.subheader(message['content'])
+        {{context}}
 
-            prompt = PromptTemplate(template=response_template, input_variables=["context", "question"])
-            chain_type_kwargs = {'prompt': prompt}
-            query_model = RetrievalQA.from_chain_type(
-                llm=st.session_state['ChatOpenAI'],
-                chain_type="stuff",
-                memory=memory,
-                return_source_documents=False,
-                retriever=retriever,
-                chain_type_kwargs=chain_type_kwargs,
-                verbose=False)
+        Question: {{question}}
 
-            def create_text_question():
+        Answer:
+        """
 
-                user_input = st.chat_input('Start querying the document here...')
-                if user_input:
-                    with st.chat_message('user'):
-                        st.markdown(user_input)
+        if 'ChatOpenAI' not in st.session_state:
+            st.session_state['ChatOpenAI'] = llm
 
-                    st.session_state.messages.append({'role':'user','content':user_input})
+        if 'messages' not in st.session_state:
+            st.session_state.messages = []
 
-                    with st.spinner(text=":red[Query submitted. This may take a :red[minute or two] while we query the documents...]"):
-                        with st.chat_message('assistant'):
-                            message_placeholder = st.empty()
-                            all_results = ''
-                            chat_history = [(user_input, "answer")]
-                            result = query_model({"query": user_input, "chat_history": chat_history})
-                            user_query = result['query']
-                            result = result['chat_history'][1].content
-                            all_results += result
-                            message_placeholder.subheader(f'{all_results}')
+        for message in st.session_state.messages:
+            with st.chat_message(message['role']):
+                st.subheader(message['content'])
 
-                            st.session_state.messages.append({'role':'assistant','content':all_results})
-                            return user_input, result, user_query
+        prompt = PromptTemplate(template=response_template, input_variables=["context", "question"])
+        chain_type_kwargs = {'prompt': prompt}
+        query_model = RetrievalQA.from_chain_type(
+            llm=st.session_state['ChatOpenAI'],
+            chain_type="stuff",
+            memory=memory,
+            return_source_documents=False,
+            retriever=retriever,
+            chain_type_kwargs=chain_type_kwargs,
+            verbose=False)
 
-            create_text_question()
+        def create_text_question():
 
-    elif len(file_to_upload) == 0:
+            user_input = st.chat_input('Start querying the document here...')
+            if user_input:
+                with st.chat_message('user'):
+                    st.markdown(user_input)
+
+                st.session_state.messages.append({'role':'user','content':user_input})
+
+                with st.spinner(text=":red[Query submitted. This may take a :red[minute or two] while we query the documents...]"):
+                    with st.chat_message('assistant'):
+                        message_placeholder = st.empty()
+                        all_results = ''
+                        chat_history = [(user_input, "answer")]
+                        result = query_model({"query": user_input, "chat_history": chat_history})
+                        user_query = result['query']
+                        result = result['chat_history'][1].content
+                        all_results += result
+                        message_placeholder.subheader(f'{all_results}')
+
+                        st.session_state.messages.append({'role':'assistant','content':all_results})
+                        return user_input, result, user_query
+
+        create_text_question()
+
+    if len(file_to_upload) == 0:
         st.sidebar.caption(":red[=> No file selected yet!]")
 
     elif len(file_to_upload) >= max_files:
