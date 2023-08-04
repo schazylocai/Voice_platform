@@ -111,7 +111,24 @@ def change_text_style_arabic_side(text_body, font_type, color):
     font_link = '<link href="https://fonts.googleapis.com/css2?family=Cairo+Play:wght@600;800&display=swap" rel="stylesheet">'
     font_family = "'Cairo Play', sans-serif"
 
-    if font_type == 'subhead_side':
+    if font_type == 'subhead_side_red':
+        st.sidebar.markdown(
+            f"""
+                        {font_link}
+                        <style>
+                            .sub-text_side_red {{
+                                font-family: {font_family};
+                                font-size: 22px;
+                                color: {color};
+                                text-align: right;
+                                line-height: 2;
+                                font-weight: 800;
+                            }}
+                        </style>
+                        <div class="sub-text_side_red"><bdi>{text_body}</bdi></div>
+                        """, unsafe_allow_html=True)
+
+    elif font_type == 'subhead_side':
         st.sidebar.markdown(
             f"""
                         {font_link}
@@ -145,6 +162,23 @@ def change_text_style_arabic_side(text_body, font_type, color):
                         <div class="normal-text_side"><bdi>{text_body}</bdi></div>
                         """, unsafe_allow_html=True)
 
+    elif font_type == 'text_violet_side_tight':
+        st.sidebar.markdown(
+            f"""
+                        {font_link}
+                        <style>
+                            .normal-text_side_tight {{
+                                font-family: {font_family};
+                                font-size: 16px;
+                                color: {color};
+                                text-align: right;
+                                line-height: 1.8;
+                                font-weight: 600;
+                            }}
+                        </style>
+                        <div class="normal-text_side_tight"><bdi>{text_body}</bdi></div>
+                        """, unsafe_allow_html=True)
+
     elif font_type == 'text_red_side':
         st.sidebar.markdown(
             f"""
@@ -162,6 +196,23 @@ def change_text_style_arabic_side(text_body, font_type, color):
                         <div class="bold-text_side"><bdi>{text_body}</bdi></div>
                         """, unsafe_allow_html=True)
 
+    elif font_type == 'bot_reply_text':
+        message_placeholder = st.empty()
+        message_placeholder.markdown(
+            f"""
+                        {font_link}
+                        <style>
+                            .bot_reply_text {{
+                                font-family: {font_family};
+                                font-size: 22px;
+                                color: 'white;
+                                text-align: right;
+                                line-height: 2;
+                                font-weight: 800;
+                            }}
+                        </style>
+                        <div class="bot_reply_text"><bdi>{text_body}</bdi></div>
+                        """, unsafe_allow_html=True)
 
 def change_text_style_english(text_body, font_type, color):
     font_link_eng = '<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">'

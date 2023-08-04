@@ -36,7 +36,7 @@ def check_customers_ara():
 
     # Check customers
     st.sidebar.write("")
-    change_text_style_arabic_side("أدخل معلوماتك للبد ء !",'subhead_side',red)
+    change_text_style_arabic_side("أدخل معلوماتك للبد ء !",'subhead_side_red',red)
     change_text_style_arabic_side("يرجى إدخال عنوان بريدك الإلكتروني", 'text_violet_side', violet)
     email = st.sidebar.text_input("email",key='email_add',label_visibility='collapsed')
     email = email.strip().lower()
@@ -47,10 +47,10 @@ def check_customers_ara():
     if len(email) == 0:
         change_text_style_arabic_side("أدخل بريدك الإلكتروني", 'text_violet_side', violet)
 
-    elif email_button := st.sidebar.button(":red[انقر هنا]",key='submit_add'):
+    elif email_button := st.sidebar.button(":red[انقر هنا]",key='submit_add',use_container_width=True):
 
         if len(password) < 4:
-            st.sidebar.write(":red[أدخل كلمة مرور صحيحة]")
+            change_text_style_arabic_side("أدخل كلمة مرور صحيحة", 'text_red_side', red)
 
         else:
             customers = stripe.Customer.list()
@@ -77,13 +77,13 @@ def check_customers_ara():
                             else: status = 'Unknown'
 
                             if status in ['active']:
-                                st.sidebar.write(':violet[Subscription is valid!]')
+                                change_text_style_arabic_side("الاشتراك ساري المفعول", 'text_violet_side', violet)
                                 customer_id = customer.id
                                 subscription = stripe.Subscription.list(customer=customer_id)
                                 days_left = get_days_left(subscription)
 
-                                st.sidebar.write(f":violet[{days_left} days left for this month.]")
-                                st.sidebar.title(':blue[Click at the top of this page on ] :red[GPTapp]:blue[ tab to start...]')
+                                change_text_style_arabic_side("الأيام المتبقية لهذا الشهر:" + " " + str(days_left), 'text_violet_side', violet)
+                                change_text_style_arabic_side("للبدء, انقر في الأعلى من هذه الصفحة على كلمة: GPTapp", 'subhead_side', violet)
                                 found = True
                                 pass_found = True
                                 user = True
@@ -95,15 +95,15 @@ def check_customers_ara():
                                 days_left = get_days_left(subscription)
 
                                 if days_left == 0 and status == 'canceled':
-                                    st.sidebar.write(':red[Subscription period ended after cancellation!]')
+                                    change_text_style_arabic_side("انتهت فترة الاشتراك بعد الإلغاء!", 'text_red_side', red)
                                     found = True
                                     pass_found = True
                                     user = False
                                     return user
 
                                 elif subscription['data'][0]['cancel_at_period_end']:
-                                    st.sidebar.write(f":red[Subscription will be canceled in {days_left} days.]")
-                                    st.sidebar.title(':blue[Click at the top of this page on ] :red[GPTapp]:blue[ tab to start...]')
+                                    change_text_style_arabic_side(":سيتم إلغاء الاشتراك في غضون" + " " + str(days_left),'text_violet_side', violet)
+                                    change_text_style_arabic_side("للبدء, انقر في الأعلى من هذه الصفحة على كلمة: GPTapp", 'subhead_side', violet)
 
                                     found = True
                                     pass_found = True
@@ -111,7 +111,7 @@ def check_customers_ara():
                                     return user
 
                                 else:
-                                    st.sidebar.write(f":red[Subscription is canceled.]")
+                                    change_text_style_arabic_side("تم إلغاء الاشتراك", 'text_red_side',red)
 
                                     found = True
                                     pass_found = True
@@ -119,21 +119,22 @@ def check_customers_ara():
                                     return user
 
                             elif status in ['trialing']:
-                                st.sidebar.write(':red[Subscription is on trial mode!]')
-                                st.sidebar.title(':blue[Click at the top of this page ] :red[GPTapp]:blue[ tab to start...]')
+                                change_text_style_arabic_side("الاشتراك في وضع التجربة!", 'text_red_side', red)
+                                change_text_style_arabic_side("للبدء, انقر في الأعلى من هذه الصفحة على كلمة: GPTapp", 'subhead_side', violet)
                                 found = True
                                 pass_found = True
                                 user = True
                                 return user
 
                             else:
-                                st.sidebar.write(':red[No active subscription found!]')
+                                change_text_style_arabic_side("لا يوجد اشتراك", 'text_red_side', red)
                                 found = True
                                 pass_found = True
                                 user = False
                                 return user
 
-                        else: st.sidebar.write(":red[Incorrect password]")
+                        else: change_text_style_arabic_side("أدخل كلمة مرور صحيحة", 'text_red_side', red)
+
                         found = True
                         pass_found = True
                         user = False
@@ -146,14 +147,14 @@ def check_customers_ara():
                         return user
 
                 if not found and not pass_found:
-                    st.sidebar.write(':red[Wrong credentials!]')
+                    change_text_style_arabic_side("بيانات الاعتماد غير صحيحة", 'text_red_side', red)
                     found = False
                     pass_found = False
                     user = False
                     return user
 
             else:
-                st.sidebar.write(':red[You are not subscribed to this service!]')
+                change_text_style_arabic_side("أنت غير مشترك في هذه الخدمة", 'text_red_side', red)
                 found = False
                 pass_found = False
                 user = False
@@ -178,33 +179,35 @@ def subscribe_to_service_ara():
             subscription_data = {'trial_period_days': 1})
 
         # Create a clickable link to the payment URL
-        pay_link = f'<a href="{session.url}" target="_blank">Click here to proceed to payment!</a>'
+        pay_link = f'<a href="{session.url}" target="_blank">انقر هنا للمتابعة إلى عملية الدفع!</a>'
         st.sidebar.write(pay_link, unsafe_allow_html=True)
 
     st.sidebar.divider()
-    st.sidebar.title(":violet[Want to subscribe?]")
+    change_text_style_arabic_side("هل ترغب في الاشتراك؟", 'subhead_side', violet)
     # Check if customer exists
-    email = st.sidebar.text_input(":violet[Enter your email address]", key='email_check')
+    change_text_style_arabic_side("يرجى إدخال عنوان بريدك الإلكتروني", 'text_violet_side', violet)
+    email = st.sidebar.text_input("email",key='email_check',label_visibility='collapsed')
     email = email.strip().lower()
-    password = st.sidebar.text_input(":violet[Create a password and save it]", key='password_check', type='password')
+    change_text_style_arabic_side("قم بإنشاء كلمة مرور واحفظها", 'text_violet_side', violet)
+    password = st.sidebar.text_input("password_check", type='password',label_visibility='collapsed')
     password = password.strip()
 
     if len(email) == 0:
-        st.sidebar.write(":violet[Enter your email]")
+        change_text_style_arabic_side("أدخل بريدك الإلكتروني", 'text_violet_side', violet)
 
     else:
-        if email_button := st.sidebar.button(":red[Submit]", key='submit_email_check'):
+        if email_button := st.sidebar.button(":red[انقر هنا]", key='submit_email_check',use_container_width=True):
             customers = stripe.Customer.list()
             if len(customers.data) > 0:
                 customer = customers.data[0]
                 username = customer.email.strip().lower()
 
                 if username == email:
-                    st.sidebar.write(":red[User already exists. Please login!]")
+                    change_text_style_arabic_side("المستخدم موجود. يرجى تسجيل الدخول!",'text_red_side', red)
 
             if len(password) < 4:
-                st.sidebar.write(":red[Enter a valid password]")
-                st.sidebar.write(":red[Password should be at least 4 numbers/characters)]")
+                change_text_style_arabic_side("أدخل كلمة مرور صحيحة", 'text_red_side', red)
+                change_text_style_arabic_side("يجب أن تتكون كلمة المرور من 4 أحرف / أرقام على الأقل", 'text_red_side', red)
 
             else:
                 # Write email & password to Azure blob
@@ -222,21 +225,23 @@ def cancel_service_ara():
 
     # Cancel subscription to the service
     st.sidebar.divider()
-    st.sidebar.subheader(":violet[Cancel subscription?]")
+    change_text_style_arabic_side("هل ترغب في إلغاء الاشتراك؟", 'subhead_side', violet)
     # Check if customer exists
-    email = st.sidebar.text_input(":violet[Please enter your email address:]",key='email_cancel')
+    change_text_style_arabic_side("يرجى إدخال عنوان بريدك الإلكتروني", 'text_violet_side', violet)
+    email = st.sidebar.text_input("email",key='email_cancel',label_visibility='collapsed')
     email = email.strip().lower()
-    password = st.sidebar.text_input(":violet[Enter your password]", key='password_cancel', type='password')
+    change_text_style_arabic_side("أدخل كلمة المرور", 'text_violet_side', violet)
+    password = st.sidebar.text_input("password_cancel", type='password',label_visibility='collapsed')
     password = password.strip()
 
     if len(email) == 0:
-        st.sidebar.write(":violet[Enter your email]")
+        change_text_style_arabic_side("أدخل بريدك الإلكتروني", 'text_violet_side', violet)
 
     else:
-        if email_button_cancel := st.sidebar.button(":red[Submit]",key='submit_cancel'):
+        if email_button_cancel := st.sidebar.button(":red[انقر هنا]",key='submit_cancel',use_container_width=True):
 
             if len(password) < 4:
-                    st.sidebar.write(":red[Enter a valid password]")
+                    change_text_style_arabic_side("أدخل كلمة مرور صحيحة", 'text_red_side', red)
 
             else:
                 customers = stripe.Customer.list()
@@ -270,8 +275,8 @@ def cancel_service_ara():
                                         if days_left == 0:
                                             stripe.Subscription.delete(subscription_id)
 
-                                        st.sidebar.write(':violet[Subscription cancelled successfully for the next billing cycle!]')
-                                        st.sidebar.write(f":red[{days_left} days left in the current subscription period.]")
+                                        change_text_style_arabic_side("تم إلغاء الاشتراك بنجاح لفترة الفوترة التالية!", 'text_violet_side',violet)
+                                        change_text_style_arabic_side("الأيام المتبقية لهذا الشهر:" + " " + str(days_left), 'text_violet_side',violet)
 
                                     elif status == 'trialing':
                                         customer_id = customer.id
@@ -280,17 +285,16 @@ def cancel_service_ara():
                                         stripe.Subscription.modify(subscription_id, cancel_at_period_end=False)
                                         stripe.Subscription.delete(subscription_id)
 
-                                        st.sidebar.write(
-                                            ':violet[Subscription cancelled successfully!]')
+                                        change_text_style_arabic_side("تم إلغاء الاشتراك بنجاح!",'text_violet_side', violet)
 
                                 else:
-                                    st.sidebar.write(':red[No active subscription found!]')
+                                    change_text_style_arabic_side("لا يوجد اشتراك", 'text_red_side', red)
 
                             else:
-                                st.sidebar.write(":red[Incorrect password]")
+                                change_text_style_arabic_side("أدخل كلمة مرور صحيحة", 'text_red_side', red)
 
                 else:
-                    st.sidebar.write(':red[No active subscription found!]')
+                    change_text_style_arabic_side("لا يوجد اشتراك", 'text_red_side', red)
 
     st.sidebar.divider()
     return subscribed_user
@@ -309,11 +313,12 @@ def forgot_password_ara():
 
     # Check customers
     st.sidebar.write("")
-    st.sidebar.subheader(":violet[Forgot your password?]")
-    email = st.sidebar.text_input(":violet[Please enter your email address:]",key='email_find')
+    change_text_style_arabic_side("هل نسيت كلمة المرور؟", 'subhead_side', violet)
+    change_text_style_arabic_side("يرجى إدخال عنوان بريدك الإلكتروني", 'text_violet_side', violet)
+    email = st.sidebar.text_input("email",key='email_find',label_visibility='collapsed')
     email = email.strip().lower()
 
-    if email_button := st.sidebar.button(":red[Submit]",key='submit_find_email'):
+    if email_button := st.sidebar.button(":red[انقر هنا]",key='submit_find_email',use_container_width=True):
 
         customers = stripe.Customer.list()
 
@@ -328,9 +333,10 @@ def forgot_password_ara():
                     # retrieve password
                     username_azure,password_azure = retrieve_password_from_azure_keyvault(username)
 
-                    st.sidebar.write(':blue[Your password was sent to your email address!]')
-                    subject = 'You asked us for your password!'
-                    body = f"As requested, please find below your password for the website GPT Document Analyzer: \n\n {password_azure} \n\n All the best! \n The team at GPT Document Analyzer."
+                    change_text_style_arabic_side("تم إرسال كلمة المرور إلى عنوان بريدك الإلكتروني", 'text_red_side', red)
+
+                    subject = 'طلبت منا كلمة المرور'
+                    body = f"GPT Document Analyzer :كما طلبت، يرجى العثور أدناه على كلمة المرور الخاصة بك للموقع: \n\n {password_azure} \n\n كل التوفيق \n GPT Document Analyzer الفريق"
                     send_email(os.environ["MY_EMAIL_ADDRESS"], email, f"Subject: {subject} \n\n{body}")
                     user = True
 
@@ -339,11 +345,11 @@ def forgot_password_ara():
                 else: user = False
 
             if not user:
-                st.sidebar.write(':red[email not found in our database!]')
+                change_text_style_arabic_side("البريد الإلكتروني غير موجود في قاعدة بياناتنا", 'text_red_side', red)
                 return user
 
         else:
-            st.sidebar.write(':red[email not found in our database!]')
+            change_text_style_arabic_side("البريد الإلكتروني غير موجود في قاعدة بياناتنا", 'text_red_side', red)
             return user
 
     st.sidebar.divider()

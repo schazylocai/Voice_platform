@@ -3,6 +3,7 @@ import smtplib
 import re
 import os
 from src.Change_Text_Style import change_text_style_arabic
+from email.mime.text import MIMEText
 
 video_url_ara = "https://youtu.be/35GxvfPku0Y"
 
@@ -19,7 +20,7 @@ def write_Arabic_About():
     with col3:
         change_text_style_arabic("استفد من قوة الذكاء الاصطناعي لتحليل وثائقك.", 'text_red', red)
         st.markdown("")
-        change_text_style_arabic("مرحبًا بك في محلل المستندات، التطبيق الثوري الذي يستغل قدرات النماذج اللغوية الكبيرة.",
+        change_text_style_arabic("أهلآً بك في محلل المستندات. التطبيق الثوري الذي يستغل قدرات النماذج اللغوية الكبيرة.",
                           'head', violet)
 
     with col2:
@@ -43,7 +44,7 @@ def write_Arabic_About():
     change_text_style_arabic("الاستخدام الكامل: 15 دولار أمريكي في الشهر + فترة تجربة مجانية لمدة يوم واحد", 'subhead', violet)
     change_text_style_arabic("اشترك للوصول إلى الإمكانات الكاملة لنموذج الذكاء الاصطناعي لدينا.", 'text_violet', violet)
 
-    def Terms():
+    def Terms_ara():
         # section 4
         change_text_style_arabic("الأسئلة والأجوبة / نصائح",'text_violet',violet)
         st.caption("")
@@ -100,17 +101,17 @@ def write_Arabic_About():
 
     st.write("")
     st.write("")
-    Terms()
+    Terms_ara()
 
-    def contact_us_form():
+    def contact_us_form_ara():
 
         change_text_style_arabic("اتصل بنا", 'text_violet', violet)
         st.caption("")
         with st.expander(""):
-            sender_name = st.text_input(':violet[الاسم]', key='name')
-            sender_email = st.text_input(':violet[البريد الإلكتروني]', key='email')
-            sender_message = st.text_area(':violet[الرسالة]', key='message')
-            submitted = st.button(':red[انقر هنا]')
+            sender_name = st.text_input(':violet[الاسم]', key='name_ara')
+            sender_email = st.text_input(':violet[البريد الإلكتروني]', key='email_ara')
+            sender_message = st.text_area(':violet[الرسالة]', key='message_ara')
+            submitted = st.button(':red[انقر هنا]',key='submitarabicform')
 
             def is_valid_email(sender_email):
                 # Use a regular expression pattern to validate the email address format
@@ -128,14 +129,14 @@ def write_Arabic_About():
                     st.error(':red[!أدخل رسالة]')
                 else:
                     send_email_ara(
-                        sender=sender_name,
+                        sender_name=str(sender_name.encode('UTF-8')),
                         recipient=os.environ["MY_EMAIL_ADDRESS"],
                         subject="Contact Form Submission",
                         body=sender_message.encode('UTF-8'),
                         sender_email=sender_email)
                     st.success(':violet[!تم إرسال الاستعلام بنجاح. سنعود إليك في أقرب وقت ممكن]')
 
-    contact_us_form()
+    contact_us_form_ara()
 
     st.write("")
     st.write("")
@@ -147,9 +148,9 @@ def write_Arabic_About():
     st.markdown(":violet[© 2023 FAB DWC LLC. جميع الحقوق محفوظة]")
 
 
-def send_email_ara(sender, recipient, subject, body, sender_email):
+def send_email_ara(sender_name, recipient, subject, body, sender_email):
     with smtplib.SMTP("smtp.gmail.com", 587) as server:
         server.ehlo()
         server.starttls()
         server.login(recipient, os.environ["EMAIL_PASSWORD"])
-        server.sendmail(sender, recipient, f"Subject: {subject}\n\n{sender}: {sender_email}\n\n{body}")
+        server.sendmail(sender_name, recipient, f"Subject: {subject}\n\n{sender_name}: {sender_email}\n\n{body}")

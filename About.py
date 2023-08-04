@@ -6,12 +6,12 @@ from src.English_Language import write_english_About
 from src.Arabic_Language import write_Arabic_About
 from src.Change_Text_Style import change_text_style_arabic,change_text_style_english
 
-st.set_page_config(layout="wide",initial_sidebar_state='expanded',page_icon="🔬")
+st.set_page_config(layout="wide",initial_sidebar_state='expanded',page_icon="🔬",page_title='GPT Document Analyzer')
 connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
 from src.stripe_functions_english import check_customers_eng,subscribe_to_service_eng,cancel_service_eng,forgot_password_eng
 from src.stripe_functions_arabic import check_customers_ara,subscribe_to_service_ara,cancel_service_ara,forgot_password_ara
 
-def first_page():
+def first_page(chosen_language_sys):
     status = False
     valid_email = False
     violet = "rgb(169, 131, 247)"
@@ -26,11 +26,15 @@ def first_page():
             change_text_style_english("GPT Document Analyzer",'title',violet)
             st.write("")
 
-        language = 'English'
+        language = chosen_language_sys
 
         # with col3:
         #
-        #     language = st.selectbox("/", options=('العربية','English'), label_visibility='hidden', key='language')
+        #     if language == 'English':
+        #         language = st.selectbox("/", options=('English','العربية'), label_visibility='hidden', key='language')
+        #
+        #     elif language == 'العربية':
+        #         language = st.selectbox("/", options=('العربية','English'), label_visibility='hidden', key='language')
 
         if language == 'English':
             # with col3:
@@ -39,12 +43,12 @@ def first_page():
             st.divider()
             write_english_About()
 
-        elif language == 'العربية':
-            with col3:
-                change_text_style_english("🌏Choose your language", 'head', violet)
-
-            st.divider()
-            write_Arabic_About()
+        # elif language == 'العربية':
+        #     with col3:
+        #         change_text_style_english("🌏  Choose your language", 'head', violet)
+        #
+        #     st.divider()
+        #     write_Arabic_About()
 
         return language
 
@@ -57,14 +61,21 @@ def first_page():
         subscribe_to_service_eng()
         cancel_service_eng()
         forgot_password_eng()
+        st.session_state.mylanguage = 'English'
 
 
-    else:
-        st.session_state.subscribed_status = check_customers_ara()
-        st.session_state.messages = []
-        subscribe_to_service_ara()
-        cancel_service_ara()
-        forgot_password_ara()
+    # elif language == 'العربية':
+    #     st.session_state.subscribed_status = check_customers_ara()
+    #     st.session_state.messages = []
+    #     subscribe_to_service_ara()
+    #     cancel_service_ara()
+    #     forgot_password_ara()
+    #     st.session_state.mylanguage = 'العربية'
 
 
-first_page()
+# if 'mylanguage' not in st.session_state:
+#     mylanguage = 'English'
+# else: mylanguage = st.session_state.mylanguage
+
+mylanguage = 'English'
+first_page(mylanguage)
