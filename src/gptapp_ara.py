@@ -52,7 +52,7 @@ def launch_app_ara():
     change_text_style_arabic_side(" حمل PDF, word, أو أي نص", 'text_violet_side_tight', violet)
     file_to_upload = st.sidebar.file_uploader(label=':violet[➜]', type=['pdf','docx','txt'],
                                                   accept_multiple_files=True, key='files')
-    change_text_style_arabic_side("على سبيل القاعدة العامة، لا يجب أن تحتوي الملفات على صور تزيد عن 40% من المحتوى الكلي.", 'text_violet_side_tight', violet)
+    change_text_style_arabic_side("يرجى تحميل ملف واحد تلو الآخر وليس كلها في نفس الوقت.", 'text_violet_side_tight', violet)
     st.sidebar.markdown("")
     clear = st.sidebar.button(':red[مسح المحادثة]',key='clear',use_container_width=True)
     if clear:

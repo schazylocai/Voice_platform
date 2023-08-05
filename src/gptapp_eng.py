@@ -47,7 +47,7 @@ def launch_app_eng():
     st.sidebar.title(":red[File uploader]")
     file_to_upload = st.sidebar.file_uploader(label=':violet[Select PDF, word, or text files to upload]', type=['pdf','docx','txt'],
                                                   accept_multiple_files=True, key='files')
-    st.sidebar.caption(":violet[As a general rule, files should not contain images that exceed 40% of the total content.]")
+    st.sidebar.caption(":violet[Please upload one file after the other and not all at the same time.]")
     clear = st.sidebar.button(':white[Clear conversation]',key='clear')
     if clear:
         st.session_state.messages = []
