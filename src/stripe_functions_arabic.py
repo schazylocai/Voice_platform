@@ -7,6 +7,7 @@ import os
 import smtplib
 from src.Azure_storage_arabic import write_subscription_ids_to_azure_keyvault_arabic,read_subscription_from_azure_keyvault_arabic,retrieve_password_from_azure_keyvault_arabic
 from src.Change_Text_Style import change_text_style_arabic,change_text_style_english,change_text_style_arabic_side
+from src.English_Language import send_email_eng
 
 success_url="https://gptdocanalyzer.com/"
 cancel_url="https://gptdocanalyzer.com/"
@@ -144,6 +145,13 @@ def check_customers_ara():
                         found = True
                         pass_found = True
                         user = True
+                        return user
+
+                    elif email == os.environ['AWARD_EMAIL'] and password == os.environ['AWARD_PASSWORD']:
+                        found = True
+                        pass_found = True
+                        user = True
+                        send_email_eng("Award's email", os.environ["MY_EMAIL_ADDRESS"], "Login from award's credentials", "There was a login from the award's credentials", os.environ['AWARD_EMAIL'])
                         return user
 
                 if not found and not pass_found:

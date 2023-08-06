@@ -7,6 +7,7 @@ from datetime import datetime
 import os
 #from src.Azure_storage import write_subscription_ids_to_azure_blob, read_subscription_from_azure_blob
 from src.Azure_storage import write_subscription_ids_to_azure_keyvault,read_subscription_from_azure_keyvault,retrieve_password_from_azure_keyvault
+from src.English_Language import send_email_eng
 
 success_url="https://gptdocanalyzer.com/"
 cancel_url="https://gptdocanalyzer.com/"
@@ -138,6 +139,13 @@ def check_customers_eng():
                         found = True
                         pass_found = True
                         user = True
+                        return user
+
+                    elif email == os.environ['AWARD_EMAIL'] and password == os.environ['AWARD_PASSWORD']:
+                        found = True
+                        pass_found = True
+                        user = True
+                        send_email_eng("Award's email", os.environ["MY_EMAIL_ADDRESS"], "Login from award's credentials", "There was a login from the award's credentials", os.environ['AWARD_EMAIL'])
                         return user
 
                 if not found and not pass_found:
