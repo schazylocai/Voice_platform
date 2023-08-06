@@ -3,9 +3,8 @@ import smtplib
 import re
 import os
 from src.Change_Text_Style import change_text_style_arabic
-from email.mime.text import MIMEText
 
-video_url_ara = "https://youtu.be/35GxvfPku0Y"
+video_url_ara = "https://youtu.be/mHIycWBDJ6w"
 
 
 def write_Arabic_About():

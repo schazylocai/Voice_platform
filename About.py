@@ -11,71 +11,64 @@ connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
 from src.stripe_functions_english import check_customers_eng,subscribe_to_service_eng,cancel_service_eng,forgot_password_eng
 from src.stripe_functions_arabic import check_customers_ara,subscribe_to_service_ara,cancel_service_ara,forgot_password_ara
 
-def first_page(chosen_language_sys):
-    status = False
-    valid_email = False
-    violet = "rgb(169, 131, 247)"
-    red = "rgb(232,89,83)"
 
-    def intro():
+if 'mylanguage' not in st.session_state:
+    st.session_state.mylanguage = 'English'
+    mylanguage = 'English'
 
-        col1, col2, col3 = st.columns(3)
+else: mylanguage = st.session_state.mylanguage
 
-        with col1:
-            # blue, green, orange, red, violet.
-            change_text_style_english("GPT Document Analyzer",'title',violet)
-            st.write("")
+status = False
+valid_email = False
+violet = "rgb(169, 131, 247)"
+red = "rgb(232,89,83)"
 
-        language = chosen_language_sys
+def change_language_to_Arabic():
 
-        # with col3:
-        #
-        #     if language == 'English':
-        #         language = st.selectbox("/", options=('English','العربية'), label_visibility='hidden', key='language')
-        #
-        #     elif language == 'العربية':
-        #         language = st.selectbox("/", options=('العربية','English'), label_visibility='hidden', key='language')
+    st.divider()
+    write_Arabic_About()
 
-        if language == 'English':
-            # with col3:
-            #     change_text_style_arabic("🌏  اختر لغتك", 'head', violet)
+    st.session_state.subscribed_status = check_customers_ara()
+    st.session_state.messages = []
+    subscribe_to_service_ara()
+    cancel_service_ara()
+    forgot_password_ara()
 
-            st.divider()
-            write_english_About()
+def change_language_to_English():
 
-        # elif language == 'العربية':
-        #     with col3:
-        #         change_text_style_english("🌏  Choose your language", 'head', violet)
-        #
-        #     st.divider()
-        #     write_Arabic_About()
+    st.divider()
+    write_english_About()
 
-        return language
-
-    # Run Intro
-    language = intro()
-
-    if language == 'English':
-        st.session_state.subscribed_status = check_customers_eng()
-        st.session_state.messages = []
-        subscribe_to_service_eng()
-        cancel_service_eng()
-        forgot_password_eng()
-        st.session_state.mylanguage = 'English'
+    st.session_state.subscribed_status = check_customers_eng()
+    st.session_state.messages = []
+    subscribe_to_service_eng()
+    cancel_service_eng()
+    forgot_password_eng()
 
 
-    # elif language == 'العربية':
-    #     st.session_state.subscribed_status = check_customers_ara()
-    #     st.session_state.messages = []
-    #     subscribe_to_service_ara()
-    #     cancel_service_ara()
-    #     forgot_password_ara()
-    #     st.session_state.mylanguage = 'العربية'
+def first_page():
 
+    col1, col2, col3 = st.columns(3)
 
-# if 'mylanguage' not in st.session_state:
-#     mylanguage = 'English'
-# else: mylanguage = st.session_state.mylanguage
+    with col1:
+        change_text_style_english("GPT Document Analyzer",'title',violet)
+        st.write("")
 
-mylanguage = 'English'
-first_page(mylanguage)
+    with col3:
+
+        st.session_state.mylanguage = st.selectbox("/", options=('English', 'العربية'), key='language',
+                                  label_visibility='hidden',placeholder='English')
+
+    if st.session_state.mylanguage == 'English':
+        with col3:
+            change_text_style_arabic("🌏  اختر لغتك", 'head', violet)
+
+        change_language_to_English()
+
+    elif st.session_state.mylanguage == 'العربية':
+        with col3:
+            change_text_style_english("🌏  Choose your language", 'head', violet)
+
+        change_language_to_Arabic()
+
+first_page()

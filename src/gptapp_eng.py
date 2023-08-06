@@ -27,7 +27,6 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
 
-st.session_state.mylanguage = 'English'
 def launch_app_eng():
 
     continue_analyze = False
@@ -38,10 +37,10 @@ def launch_app_eng():
     global text_list
     st.session_state.setdefault(key='start')
 
-    # Choose domain
-    sector = st.sidebar.selectbox(":red[Choose your Domain]",("Education & Training","Business & Management",
-                                                        "Technology & Engineering","Healthcare & Medicine",
-                                                        "Creative & Media","Retail & Commerce"))
+    # # Choose domain
+    # sector = st.sidebar.selectbox(":red[Choose your Domain]",("Education & Training","Business & Management",
+    #                                                     "Technology & Engineering","Healthcare & Medicine",
+    #                                                     "Creative & Media","Retail & Commerce"))
 
     # upload files
     st.sidebar.title(":red[File uploader]")
@@ -101,7 +100,7 @@ def launch_app_eng():
         with st.spinner(text=":red[Please wait while we process the documents...]"):
 
             length_words = len(str(text_list))
-            chunk_size = 1000 if length_words > 1000 else int(length_words * 1)
+            chunk_size = 500
             text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_size * 0.001, length_function=len)
             chunks = text_splitter.split_text(text=str(text_list))
             chunks = list(chunks)
@@ -116,8 +115,8 @@ def launch_app_eng():
         ########## RetrievalQA from chain type ##########
 
         response_template = f"""
-        • You will act as a professional and a researcher in the {sector} Field.
-        • Your task is to read through research papers, documents, journals, manuals, articles, and presentations that are related to the {sector} sector.
+        • You will act as a professional and a researcher.
+        • Your task is to read through research papers, documents, journals, manuals, articles, and presentations.
         • You should be analytical, thoughtful, and reply in depth and details to any question.
         • If you suspect bias in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is biased". Explain why do yuo think it is biased.
         • If you suspect incorrect or misleading information in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is incorrect or misleading". Explain why do yuo think it is incorrect or misleading.

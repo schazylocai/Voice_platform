@@ -11,14 +11,11 @@ st.set_page_config(layout="wide",initial_sidebar_state='expanded',page_icon="ğŸ”
 violet = "rgb(169, 131, 247)"
 red = "rgb(232,89,83)"
 
-mylanguage = 'English'
-
 # Check if a user is subscribed to launch the GPTapp
 if "subscribed_status" in st.session_state and not client_started:
     subscribed_user = st.session_state.subscribed_status
 
-    # if st.session_state.mylanguage == 'English':
-    if mylanguage == 'English':
+    if st.session_state.mylanguage == 'English':
 
         if subscribed_user:
             launch_app_eng()

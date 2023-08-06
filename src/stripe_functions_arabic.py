@@ -5,7 +5,7 @@ import stripe
 from datetime import datetime
 import os
 import smtplib
-from src.Azure_storage import write_subscription_ids_to_azure_keyvault,read_subscription_from_azure_keyvault,retrieve_password_from_azure_keyvault
+from src.Azure_storage_arabic import write_subscription_ids_to_azure_keyvault_arabic,read_subscription_from_azure_keyvault_arabic,retrieve_password_from_azure_keyvault_arabic
 from src.Change_Text_Style import change_text_style_arabic,change_text_style_english,change_text_style_arabic_side
 
 success_url="https://gptdocanalyzer.com/"
@@ -66,7 +66,7 @@ def check_customers_ara():
                     if username == email:
 
                         # Check password
-                        username_azure,password_azure = read_subscription_from_azure_keyvault(username,password)
+                        username_azure,password_azure = read_subscription_from_azure_keyvault_arabic(username,password)
                         if password_azure == password:
 
                             # Check subscription
@@ -211,7 +211,7 @@ def subscribe_to_service_ara():
 
             else:
                 # Write email & password to Azure blob
-                email, password = write_subscription_ids_to_azure_keyvault(email, password)
+                email, password = write_subscription_ids_to_azure_keyvault_arabic(email, password)
 
                 # Proceed to pay
                 proceed_to_payment()
@@ -256,7 +256,7 @@ def cancel_service_ara():
                         if username == email:
 
                             # Check password
-                            username_azure, password_azure = read_subscription_from_azure_keyvault(username,password)
+                            username_azure, password_azure = read_subscription_from_azure_keyvault_arabic(username,password)
                             if password_azure == password:
 
                                 subscriptions = stripe.Subscription.list(customer=customer.id)
@@ -331,7 +331,7 @@ def forgot_password_ara():
                 if username == email:
 
                     # retrieve password
-                    username_azure,password_azure = retrieve_password_from_azure_keyvault(username)
+                    username_azure,password_azure = retrieve_password_from_azure_keyvault_arabic(username)
 
                     change_text_style_arabic_side("تم إرسال كلمة المرور إلى عنوان بريدك الإلكتروني", 'text_red_side', red)
 

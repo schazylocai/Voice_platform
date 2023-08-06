@@ -30,8 +30,6 @@ from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
 from src.Change_Text_Style import change_text_style_arabic,change_text_style_arabic_side
 
-st.session_state.mylanguage = 'العربية'
-
 def launch_app_ara():
 
     continue_analyze = False
@@ -42,11 +40,11 @@ def launch_app_ara():
     global text_list
     st.session_state.setdefault(key='start')
 
-    # Choose domain
-    change_text_style_arabic_side("اختر مجالك", 'text_violet_side_tight', violet)
-    sector = st.sidebar.selectbox(":violet[➜]",("التعليم والتدريب","الأعمال والإدارة",
-                                                        "التكنولوجيا والهندسة","الرعاية الصحية والطب",
-                                                        "الإبداع والإعلام","التجزئة والتجارة"))
+    # # Choose domain
+    # change_text_style_arabic_side("اختر مجالك", 'text_violet_side_tight', violet)
+    # sector = st.sidebar.selectbox(":violet[➜]",("التعليم والتدريب","الأعمال والإدارة",
+    #                                                     "التكنولوجيا والهندسة","الرعاية الصحية والطب",
+    #                                                     "الإبداع والإعلام","التجزئة والتجارة"))
 
     # upload files
     change_text_style_arabic_side(" حمل PDF, word, أو أي نص", 'text_violet_side_tight', violet)
@@ -107,13 +105,13 @@ def launch_app_ara():
         with st.spinner(text=":red[يرجى الانتظار بينما نحلل المستندات...]"):
 
             length_words = len(str(text_list))
-            chunk_size = 1000 if length_words > 1000 else int(length_words * 1)
+            chunk_size = 500
             text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_size * 0.001, length_function=len)
             chunks = text_splitter.split_text(text=str(text_list))
             chunks = list(chunks)
 
 
-            llm = ChatOpenAI(temperature=0.3, model='gpt-3.5-turbo') # gpt-4 or gpt-3.5-turbo
+            llm = ChatOpenAI(temperature=0.3, model='gpt-4') # gpt-4 or gpt-3.5-turbo
             embedding = OpenAIEmbeddings(openai_api_key=secret_key)
             my_database = Chroma.from_texts(chunks, embedding)
             retriever = my_database.as_retriever(search_kwargs={"k": 1})
@@ -122,16 +120,16 @@ def launch_app_ara():
         ########## RetrievalQA from chain type ##########
 
         response_template = f"""
-        • You will act as a professional and a researcher in the {sector} Field.
-        • Your task is to reply in Arabic.
-        • Your task is to read through research papers, documents, journals, manuals, articles, and presentations that are related to the {sector} sector.
+        • You will act as an Arabic professional and a researcher.
+        • Your task is to reply only in Arabic even if the question is in another language.
+        • Your task is to read through research papers, documents, journals, manuals, articles, and presentations.
         • You should be analytical, thoughtful, and reply in depth and details to any question.
         • If you suspect bias in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is biased". Explain why do yuo think it is biased.
         • If you suspect incorrect or misleading information in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is incorrect or misleading". Explain why do yuo think it is incorrect or misleading.
         • Always reply in a polite and professional manner.
         • Don't connect or look for answers on the internet.
         • Only look for answers from the given documents and papers.
-        • If you don't know the answer to the question, then reply: "I can't be confident about my answer because I am missing the context or some information! Please try to be more precise and accurate in your query."
+        • If you don't know the answer to the question, then reply: "أنا لست واثقًا من الإجابة على هذا السؤال بسبب غياب بعض المعلومات. حاول تحديد السؤال بطريقة اخرى."
 
         Divide your answer when possible into paragraphs:
         • What is your answer to the question?
