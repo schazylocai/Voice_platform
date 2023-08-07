@@ -51,7 +51,7 @@ def launch_app_ara():
     file_to_upload = st.sidebar.file_uploader(label=':violet[➜]', type=['pdf','docx','txt'],
                                                   accept_multiple_files=True, key='files')
     change_text_style_arabic_side("يرجى تحميل ملف واحد تلو الآخر وليس كلها في نفس الوقت.", 'text_violet_side_tight', violet)
-    change_text_style_arabic_side("إذا حدث خطأ Axios يُرجى تحديث الصفحة وتسجيل الدخول مرة أخرى.",'text_violet_side_tight', violet)
+    change_text_style_arabic_side("إذا حدث خطأ Axios قم إما بحذف الملف وتحميله مرة أخرى أو قم بتحديث الصفحة وتسجيل الدخول مرة أخرى",'text_violet_side_tight', violet)
     st.sidebar.markdown("")
     clear = st.sidebar.button(':red[مسح المحادثة]',key='clear',use_container_width=True)
     if clear:

@@ -169,7 +169,7 @@ def change_text_style_arabic_side(text_body, font_type, color):
                         <style>
                             .normal-text_side_tight {{
                                 font-family: {font_family};
-                                font-size: 16px;
+                                font-size: 15px;
                                 color: {color};
                                 text-align: right;
                                 line-height: 1.8;

@@ -47,7 +47,7 @@ def launch_app_eng():
     file_to_upload = st.sidebar.file_uploader(label=':violet[Select PDF, word, or text files to upload]', type=['pdf','docx','txt'],
                                                   accept_multiple_files=True, key='files')
     st.sidebar.caption(":violet[Please upload one file after the other and not all at the same time.]")
-    st.sidebar.caption(":violet[if you get an Axios error, then please refresh the page and login again!]")
+    st.sidebar.caption(":violet[if you get an Axios error, either delete the file and uploaded it again or refresh the page and login again!]")
     clear = st.sidebar.button(':white[Clear conversation]',key='clear')
     if clear:
         st.session_state.messages = []
