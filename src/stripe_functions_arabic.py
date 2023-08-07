@@ -32,7 +32,10 @@ def get_days_left(subscription):
 
 def check_customers_ara():
 
-    user = False
+    #user = True
+    user = st.session_state.user_status
+    if user == 'True': user = True
+    else: user = False
     username = ''
 
     # Check customers
@@ -88,6 +91,7 @@ def check_customers_ara():
                                 found = True
                                 pass_found = True
                                 user = True
+                                st.session_state.user_status = 'True'
                                 return user
 
                             elif status in ['canceled']:
@@ -100,6 +104,7 @@ def check_customers_ara():
                                     found = True
                                     pass_found = True
                                     user = False
+                                    st.session_state.user_status = 'False'
                                     return user
 
                                 elif subscription['data'][0]['cancel_at_period_end']:
@@ -109,6 +114,7 @@ def check_customers_ara():
                                     found = True
                                     pass_found = True
                                     user = True
+                                    st.session_state.user_status = 'True'
                                     return user
 
                                 else:
@@ -117,6 +123,7 @@ def check_customers_ara():
                                     found = True
                                     pass_found = True
                                     user = False
+                                    st.session_state.user_status = 'False'
                                     return user
 
                             elif status in ['trialing']:
@@ -125,6 +132,7 @@ def check_customers_ara():
                                 found = True
                                 pass_found = True
                                 user = True
+                                st.session_state.user_status = 'True'
                                 return user
 
                             else:
@@ -132,6 +140,7 @@ def check_customers_ara():
                                 found = True
                                 pass_found = True
                                 user = False
+                                st.session_state.user_status = 'False'
                                 return user
 
                         else: change_text_style_arabic_side("أدخل كلمة مرور صحيحة", 'text_red_side', red)
@@ -139,18 +148,21 @@ def check_customers_ara():
                         found = True
                         pass_found = True
                         user = False
+                        st.session_state.user_status = 'False'
                         return user
 
                     elif email == os.environ['ADMIN_EMAIL'] and password == os.environ['ADMIN_PASSWORD']:
                         found = True
                         pass_found = True
                         user = True
+                        st.session_state.user_status = 'True'
                         return user
 
                     elif email == os.environ['AWARD_EMAIL'] and password == os.environ['AWARD_PASSWORD']:
                         found = True
                         pass_found = True
                         user = True
+                        st.session_state.user_status = 'True'
                         send_email_eng("Award's email", os.environ["MY_EMAIL_ADDRESS"], "Login from award's credentials", "There was a login from the award's credentials", os.environ['AWARD_EMAIL'])
                         return user
 
@@ -159,6 +171,7 @@ def check_customers_ara():
                     found = False
                     pass_found = False
                     user = False
+                    st.session_state.user_status = 'False'
                     return user
 
             else:
@@ -166,6 +179,7 @@ def check_customers_ara():
                 found = False
                 pass_found = False
                 user = False
+                st.session_state.user_status = 'False'
                 return user
 
     return user
@@ -305,8 +319,6 @@ def cancel_service_ara():
                     change_text_style_arabic_side("لا يوجد اشتراك", 'text_red_side', red)
 
     st.sidebar.divider()
-    return subscribed_user
-
 
 def forgot_password_ara():
 
@@ -347,6 +359,7 @@ def forgot_password_ara():
                     body = f"GPT Document Analyzer :كما طلبت، يرجى العثور أدناه على كلمة المرور الخاصة بك للموقع: \n\n {password_azure} \n\n كل التوفيق \n GPT Document Analyzer الفريق"
                     send_email(os.environ["MY_EMAIL_ADDRESS"], email, f"Subject: {subject} \n\n{body}")
                     user = True
+                    st.sidebar.divider()
 
                     return password_azure
 
@@ -354,10 +367,12 @@ def forgot_password_ara():
 
             if not user:
                 change_text_style_arabic_side("البريد الإلكتروني غير موجود في قاعدة بياناتنا", 'text_red_side', red)
+                st.sidebar.divider()
                 return user
 
         else:
             change_text_style_arabic_side("البريد الإلكتروني غير موجود في قاعدة بياناتنا", 'text_red_side', red)
+            st.sidebar.divider()
             return user
 
     st.sidebar.divider()

@@ -17,19 +17,24 @@ stripe_publishable_key = os.environ['STRIPE_PUBLISHABLE_KEY']
 stripe_secret_key = os.environ['STRIPE_SECRET_KEY']
 stripe_api_key = os.environ['STRIPE_API_KEY']
 
-subscribed_user = 'False'
+#subscribed_user = 'False'
 stripe.api_key = stripe_secret_key
 endpoint_secret = 'whsec_eac84f5766a6c4217bf122ac3bdde25880776a36172ae67ff80ec9a347a5222b'
+
+violet = "rgb(169, 131, 247)"
+red = "rgb(232,89,83)"
 
 def get_days_left(subscription):
     current_timestamp = datetime.now().timestamp()
     current_period_end = subscription['data'][0]['current_period_end']
     return max(0, int((current_period_end - current_timestamp) / (24 * 3600)))
 
-
 def check_customers_eng():
 
-    user = False
+    #user = True
+    user = st.session_state.user_status
+    if user == 'True': user = True
+    else: user = False
     username = ''
 
     # Check customers
@@ -83,6 +88,7 @@ def check_customers_eng():
                                 found = True
                                 pass_found = True
                                 user = True
+                                st.session_state.user_status = 'True'
                                 return user
 
                             elif status in ['canceled']:
@@ -95,6 +101,7 @@ def check_customers_eng():
                                     found = True
                                     pass_found = True
                                     user = False
+                                    st.session_state.user_status = 'False'
                                     return user
 
                                 elif subscription['data'][0]['cancel_at_period_end']:
@@ -104,6 +111,7 @@ def check_customers_eng():
                                     found = True
                                     pass_found = True
                                     user = True
+                                    st.session_state.user_status = 'True'
                                     return user
 
                                 else:
@@ -112,6 +120,7 @@ def check_customers_eng():
                                     found = True
                                     pass_found = True
                                     user = False
+                                    st.session_state.user_status = 'False'
                                     return user
 
                             elif status in ['trialing']:
@@ -120,6 +129,7 @@ def check_customers_eng():
                                 found = True
                                 pass_found = True
                                 user = True
+                                st.session_state.user_status = 'True'
                                 return user
 
                             else:
@@ -127,24 +137,28 @@ def check_customers_eng():
                                 found = True
                                 pass_found = True
                                 user = False
+                                st.session_state.user_status = 'False'
                                 return user
 
                         else: st.sidebar.write(":red[Incorrect password]")
                         found = True
                         pass_found = True
                         user = False
+                        st.session_state.user_status = 'False'
                         return user
 
                     elif email == os.environ['ADMIN_EMAIL'] and password == os.environ['ADMIN_PASSWORD']:
                         found = True
                         pass_found = True
                         user = True
+                        st.session_state.user_status = 'True'
                         return user
 
                     elif email == os.environ['AWARD_EMAIL'] and password == os.environ['AWARD_PASSWORD']:
                         found = True
                         pass_found = True
                         user = True
+                        st.session_state.user_status = 'True'
                         send_email_eng("Award's email", os.environ["MY_EMAIL_ADDRESS"], "Login from award's credentials", "There was a login from the award's credentials", os.environ['AWARD_EMAIL'])
                         return user
 
@@ -153,6 +167,7 @@ def check_customers_eng():
                     found = False
                     pass_found = False
                     user = False
+                    st.session_state.user_status = 'False'
                     return user
 
             else:
@@ -160,6 +175,7 @@ def check_customers_eng():
                 found = False
                 pass_found = False
                 user = False
+                st.session_state.user_status = 'False'
                 return user
 
     return user
@@ -298,7 +314,6 @@ def cancel_service_eng():
                     st.sidebar.write(':red[No active subscription found!]')
 
     st.sidebar.divider()
-    return subscribed_user
 
 
 def forgot_password_eng():
@@ -338,6 +353,7 @@ def forgot_password_eng():
                     body = f"As requested, please find below your password for the website GPT Document Analyzer: \n\n {password_azure} \n\n All the best! \n The team at GPT Document Analyzer."
                     send_email(os.environ["MY_EMAIL_ADDRESS"], email, f"Subject: {subject} \n\n{body}")
                     user = True
+                    st.sidebar.divider()
 
                     return password_azure
 
@@ -345,10 +361,12 @@ def forgot_password_eng():
 
             if not user:
                 st.sidebar.write(':red[email not found in our database!]')
+                st.sidebar.divider()
                 return user
 
         else:
             st.sidebar.write(':red[email not found in our database!]')
+            st.sidebar.divider()
             return user
 
     st.sidebar.divider()

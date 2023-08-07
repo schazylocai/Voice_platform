@@ -196,6 +196,23 @@ def change_text_style_arabic_side(text_body, font_type, color):
                         <div class="bold-text_side"><bdi>{text_body}</bdi></div>
                         """, unsafe_allow_html=True)
 
+    elif font_type == 'text_red_side_big':
+        st.sidebar.markdown(
+            f"""
+                        {font_link}
+                        <style>
+                            .bold-text_side_big {{
+                                font-family: {font_family};
+                                font-size: 20px;
+                                color: {color};
+                                text-align: right;
+                                line-height: 2.2;
+                                font-weight: 800;
+                            }}
+                        </style>
+                        <div class="bold-text_side_big"><bdi>{text_body}</bdi></div>
+                        """, unsafe_allow_html=True)
+
     elif font_type == 'bot_reply_text':
         message_placeholder = st.empty()
         message_placeholder.markdown(

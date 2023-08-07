@@ -14,11 +14,11 @@ from src.stripe_functions_arabic import check_customers_ara,subscribe_to_service
 
 if 'mylanguage' not in st.session_state:
     st.session_state.mylanguage = 'English'
-    mylanguage = 'English'
 
-else: mylanguage = st.session_state.mylanguage
+if 'user_status' not in st.session_state:
+    st.session_state.user_status = 'False'
 
-status = False
+#status = False
 valid_email = False
 violet = "rgb(169, 131, 247)"
 red = "rgb(232,89,83)"
@@ -56,19 +56,26 @@ def first_page():
 
     with col3:
 
-        st.session_state.mylanguage = st.selectbox("/", options=('English', 'العربية'), key='language',
-                                  label_visibility='hidden',placeholder='English')
+        if st.session_state.mylanguage == 'English':
+            my_language = st.selectbox("/", options=('English', 'العربية'), key='language',
+                                      label_visibility='hidden',placeholder='English')
+        else:
+            my_language = st.selectbox("/", options=('العربية', 'English'), key='language',
+                                       label_visibility='hidden', placeholder='English')
 
-    if st.session_state.mylanguage == 'English':
+    if my_language == 'English':
         with col3:
             change_text_style_arabic("🌏  اختر لغتك", 'head', violet)
+            st.session_state.mylanguage = 'English'
 
         change_language_to_English()
 
-    elif st.session_state.mylanguage == 'العربية':
+    elif my_language == 'العربية':
         with col3:
             change_text_style_english("🌏  Choose your language", 'head', violet)
+            st.session_state.mylanguage = 'العربية'
 
         change_language_to_Arabic()
+
 
 first_page()

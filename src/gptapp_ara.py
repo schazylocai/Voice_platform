@@ -34,7 +34,7 @@ def launch_app_ara():
 
     continue_analyze = False
     def catch_exception(file_name):
-        change_text_style_arabic_side(("لم يمكن تحميل الملف. يحتوي الملف"+" "+ file_name +" "+ "على بعض الشوائب!"),'text_red_side',red)
+        change_text_style_arabic_side(("لم يمكن تحميل الملف. يحتوي الملف"+" "+ file_name +" "+ "على بعض الشوائب!"),'text_red_side_big',red)
         return False
 
     global text_list
@@ -51,6 +51,7 @@ def launch_app_ara():
     file_to_upload = st.sidebar.file_uploader(label=':violet[➜]', type=['pdf','docx','txt'],
                                                   accept_multiple_files=True, key='files')
     change_text_style_arabic_side("يرجى تحميل ملف واحد تلو الآخر وليس كلها في نفس الوقت.", 'text_violet_side_tight', violet)
+    change_text_style_arabic_side("إذا حدث خطأ Axios يُرجى تحديث الصفحة وتسجيل الدخول مرة أخرى.",'text_violet_side_tight', violet)
     st.sidebar.markdown("")
     clear = st.sidebar.button(':red[مسح المحادثة]',key='clear',use_container_width=True)
     if clear:
@@ -67,6 +68,9 @@ def launch_app_ara():
                     pdf_reader = PyPDF2.PdfReader(file)
                     text = "".join(page.extract_text() for page in pdf_reader.pages)
                     if len(text) > 5:
+                        text_list.append(f"File: {file.name}")
+                        text_list.append(f"Document name: {file.name}")
+                        text_list.append(f"Document title: {os.path.splitext(file.name)[0]}")
                         text_list.append(text)
                         st.subheader(f':blue[{file.name}]')
 
@@ -77,6 +81,9 @@ def launch_app_ara():
                 elif str(file.name).endswith('.docx'):
                     text = docx2txt.process(file)
                     if len(text) > 5:
+                        text_list.append(f"File: {file.name}")
+                        text_list.append(f"Document name: {file.name}")
+                        text_list.append(f"Document title: {os.path.splitext(file.name)[0]}")
                         text_list.append(text)
                         st.subheader(f':blue[{file.name}]')
 
@@ -91,6 +98,9 @@ def launch_app_ara():
                         text = textract.process(tmp.name, method='txt')
                         if len(text) > 5:
                             st.subheader(f':blue[{file.name}]')
+                            text_list.append(f"File: {file.name}")
+                            text_list.append(f"Document name: {file.name}")
+                            text_list.append(f"Document title: {os.path.splitext(file.name)[0]}")
                             text_list.append(text.decode('utf-8'))
 
                         else:
@@ -104,18 +114,24 @@ def launch_app_ara():
 
         with st.spinner(text=":red[يرجى الانتظار بينما نحلل المستندات...]"):
 
-            length_words = len(str(text_list))
-            chunk_size = 500
-            text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_size * 0.001, length_function=len)
-            chunks = text_splitter.split_text(text=str(text_list))
-            chunks = list(chunks)
+            try:
 
+                length_words = len(str(text_list))
+                chunk_size = 100
+                text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=0,
+                                                               length_function=len)
+                chunks = text_splitter.split_text(text=str(text_list))
+                chunks = list(chunks)
 
-            llm = ChatOpenAI(temperature=0.3, model='gpt-4') # gpt-4 or gpt-3.5-turbo
-            embedding = OpenAIEmbeddings(openai_api_key=secret_key)
-            my_database = Chroma.from_texts(chunks, embedding)
-            retriever = my_database.as_retriever(search_kwargs={"k": 1})
-            memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+                llm = ChatOpenAI(temperature=0.3, model='gpt-4')  # gpt-4 or gpt-3.5-turbo
+                embedding = OpenAIEmbeddings(openai_api_key=secret_key)
+                my_database = Chroma.from_texts(chunks, embedding)
+                retriever = my_database.as_retriever(search_kwargs={"k": 1})
+
+            except Exception as e:
+                change_text_style_arabic("حدث خطأ. يرجى حذف الملف المحمّل ثم إعادة تحميله مرة أخرى.",'subhead',red)
+
+        memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
         ########## RetrievalQA from chain type ##########
 

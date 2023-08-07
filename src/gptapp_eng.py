@@ -31,7 +31,7 @@ def launch_app_eng():
 
     continue_analyze = False
     def catch_exception(file_name):
-        st.sidebar.write(f":red[File {file_name} couldn't be loaded. The file has some irregularities!]")
+        st.sidebar.header(f":red[File {file_name} couldn't be loaded. The file has some irregularities!]")
         return False
 
     global text_list
@@ -47,6 +47,7 @@ def launch_app_eng():
     file_to_upload = st.sidebar.file_uploader(label=':violet[Select PDF, word, or text files to upload]', type=['pdf','docx','txt'],
                                                   accept_multiple_files=True, key='files')
     st.sidebar.caption(":violet[Please upload one file after the other and not all at the same time.]")
+    st.sidebar.caption(":violet[if you get an Axios error, then please refresh the page and login again!]")
     clear = st.sidebar.button(':white[Clear conversation]',key='clear')
     if clear:
         st.session_state.messages = []
@@ -62,6 +63,9 @@ def launch_app_eng():
                     pdf_reader = PyPDF2.PdfReader(file)
                     text = "".join(page.extract_text() for page in pdf_reader.pages)
                     if len(text) > 5:
+                        text_list.append(f"File: {file.name}")
+                        text_list.append(f"Document name: {file.name}")
+                        text_list.append(f"Document title: {os.path.splitext(file.name)[0]}")
                         text_list.append(text)
                         st.subheader(f':blue[{file.name}]')
 
@@ -72,6 +76,9 @@ def launch_app_eng():
                 elif str(file.name).endswith('.docx'):
                     text = docx2txt.process(file)
                     if len(text) > 5:
+                        text_list.append(f"File: {file.name}")
+                        text_list.append(f"Document name: {file.name}")
+                        text_list.append(f"Document Title: {os.path.splitext(file.name)[0]}")
                         text_list.append(text)
                         st.subheader(f':blue[{file.name}]')
 
@@ -85,7 +92,10 @@ def launch_app_eng():
                         tmp.seek(0)
                         text = textract.process(tmp.name, method='txt')
                         if len(text) > 5:
+                            text_list.append(f"File: {file.name}")
                             st.subheader(f':blue[{file.name}]')
+                            text_list.append(f"Document name: {file.name}")
+                            text_list.append(f"Document title: {os.path.splitext(file.name)[0]}")
                             text_list.append(text.decode('utf-8'))
 
                         else:
@@ -99,23 +109,30 @@ def launch_app_eng():
 
         with st.spinner(text=":red[Please wait while we process the documents...]"):
 
-            length_words = len(str(text_list))
-            chunk_size = 500
-            text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_size * 0.001, length_function=len)
-            chunks = text_splitter.split_text(text=str(text_list))
-            chunks = list(chunks)
+            try:
+
+                length_words = len(str(text_list))
+                chunk_size = 100
+                text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=0, length_function=len)
+                chunks = text_splitter.split_text(text=str(text_list))
+                chunks = list(chunks)
 
 
-            llm = ChatOpenAI(temperature=0.3, model='gpt-4') # gpt-4 or gpt-3.5-turbo
-            embedding = OpenAIEmbeddings(openai_api_key=secret_key)
-            my_database = Chroma.from_texts(chunks, embedding)
-            retriever = my_database.as_retriever(search_kwargs={"k": 1})
-            memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+                llm = ChatOpenAI(temperature=0.3, model='gpt-4') # gpt-4 or gpt-3.5-turbo
+                embedding = OpenAIEmbeddings(openai_api_key=secret_key)
+                my_database = Chroma.from_texts(chunks, embedding)
+                retriever = my_database.as_retriever(search_kwargs={"k": 1})
+
+            except Exception as e:
+                st.subheader(":red[An error occured. Please delete the uploaded file, and then uploaded it again]")
+
+        memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
         ########## RetrievalQA from chain type ##########
 
         response_template = f"""
-        • You will act as a professional and a researcher.
+        • You will act as an English professional and a researcher.
+        • Your task is to reply only in English even if the question is in another language.
         • Your task is to read through research papers, documents, journals, manuals, articles, and presentations.
         • You should be analytical, thoughtful, and reply in depth and details to any question.
         • If you suspect bias in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is biased". Explain why do yuo think it is biased.
@@ -167,7 +184,7 @@ def launch_app_eng():
 
                 st.session_state.messages.append({'role':'user','content':user_input})
 
-                with st.spinner(text=":red[Query submitted. This may take a :red[minute or two] while we query the documents...]"):
+                with st.spinner(text=":red[Query submitted. This may take a minute while we query the documents...]"):
                     with st.chat_message('assistant'):
                         message_placeholder = st.empty()
                         all_results = ''
