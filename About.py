@@ -13,7 +13,7 @@ from src.stripe_functions_arabic import check_customers_ara,subscribe_to_service
 
 
 if 'mylanguage' not in st.session_state:
-    st.session_state.mylanguage = 'English'
+    st.session_state.mylanguage = 'العربية'
 
 if 'user_status' not in st.session_state:
     st.session_state.user_status = 'False'
