@@ -30,6 +30,7 @@ from langchain.memory import ConversationBufferMemory
 def launch_app_eng():
 
     continue_analyze = False
+    retriever = None
     def catch_exception(file_name):
         st.sidebar.header(f":red[File {file_name} couldn't be loaded. The file has some irregularities!]")
         return False

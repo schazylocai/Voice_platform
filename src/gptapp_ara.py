@@ -33,6 +33,7 @@ from src.Change_Text_Style import change_text_style_arabic,change_text_style_ara
 def launch_app_ara():
 
     continue_analyze = False
+    retriever = None
     def catch_exception(file_name):
         change_text_style_arabic_side(("لم يمكن تحميل الملف. يحتوي الملف"+" "+ file_name +" "+ "على بعض الشوائب!"),'text_red_side_big',red)
         return False
