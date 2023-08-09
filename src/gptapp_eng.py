@@ -18,6 +18,8 @@ stripe.api_key = strip_secret_key
 text_list = []
 max_files = 5
 final_result = {"query":"","answer":""}
+violet = "rgb(169, 131, 247)"
+red = "rgb(232,89,83)"
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import RetrievalQA
@@ -30,7 +32,7 @@ from langchain.memory import ConversationBufferMemory
 def launch_app_eng():
 
     continue_analyze = False
-    retriever = None
+    file_uploaded = False
     def catch_exception(file_name):
         st.sidebar.header(f":red[File {file_name} couldn't be loaded. The file has some irregularities!]")
         return False
@@ -69,9 +71,11 @@ def launch_app_eng():
                         text_list.append(f"Document title: {os.path.splitext(file.name)[0]}")
                         text_list.append(text)
                         st.subheader(f':blue[{file.name}]')
+                        file_uploaded = True
 
                     else:
                         catch_exception(file.name)
+                        file_uploaded = False
 
                 # Check if the upload file is a Word docx
                 elif str(file.name).endswith('.docx'):
@@ -82,9 +86,11 @@ def launch_app_eng():
                         text_list.append(f"Document Title: {os.path.splitext(file.name)[0]}")
                         text_list.append(text)
                         st.subheader(f':blue[{file.name}]')
+                        file_uploaded = True
 
                     else:
                         catch_exception(file.name)
+                        file_uploaded = False
 
                 # Check if the upload file is a text txt
                 elif str(file.name).endswith('.txt'):
@@ -98,35 +104,41 @@ def launch_app_eng():
                             text_list.append(f"Document name: {file.name}")
                             text_list.append(f"Document title: {os.path.splitext(file.name)[0]}")
                             text_list.append(text.decode('utf-8'))
+                            file_uploaded = True
 
                         else:
                             catch_exception(file.name)
+                            file_uploaded = False
 
                 else:
                     catch_exception(file.name)
+                    file_uploaded = False
 
             except Exception as e:
                 catch_exception(file.name)
+                file_uploaded = False
 
-        with st.spinner(text=":red[Please wait while we process the documents...]"):
+        if file_uploaded:
 
-            try:
+            with st.spinner(text=":red[Please wait while we process the documents...]"):
 
-                length_words = len(str(text_list))
-                chunk_size = 100
-                text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=0, length_function=len)
+                try:
 
-                chunks = text_splitter.split_text(text=str(text_list))
-                chunks = list(chunks)
+                    length_words = len(str(text_list))
+                    chunk_size = 100
+                    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=0, length_function=len)
 
-                llm = ChatOpenAI(temperature=0.3, model='gpt-4') # gpt-4 or gpt-3.5-turbo
-                embedding = OpenAIEmbeddings(openai_api_key=secret_key)
-                my_database = Chroma.from_texts(chunks, embedding)
+                    chunks = text_splitter.split_text(text=str(text_list))
+                    chunks = list(chunks)
 
-                continue_analyze = True
+                    llm = ChatOpenAI(temperature=0.3, model='gpt-4') # gpt-4 or gpt-3.5-turbo
+                    embedding = OpenAIEmbeddings(openai_api_key=secret_key)
+                    my_database = Chroma.from_texts(chunks, embedding)
 
-            except Exception as e:
-                st.subheader(":red[An error occured. Please delete the uploaded file, and then uploaded it again]")
+                    continue_analyze = True
+
+                except Exception as e:
+                    st.subheader(":red[An error occurred. Please delete the uploaded file, and then uploaded it again]")
 
         if continue_analyze:
             retriever = my_database.as_retriever(search_kwargs={"k": 1})

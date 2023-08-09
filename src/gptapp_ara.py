@@ -33,6 +33,7 @@ from src.Change_Text_Style import change_text_style_arabic,change_text_style_ara
 def launch_app_ara():
 
     continue_analyze = False
+    file_uploaded = False
     def catch_exception(file_name):
         change_text_style_arabic_side(("لم يمكن تحميل الملف. يحتوي الملف"+" "+ file_name +" "+ "على بعض الشوائب!"),'text_red_side_big',red)
         return False
@@ -73,9 +74,11 @@ def launch_app_ara():
                         text_list.append(f"Document title: {os.path.splitext(file.name)[0]}")
                         text_list.append(text)
                         st.subheader(f':blue[{file.name}]')
+                        file_uploaded = True
 
                     else:
                         catch_exception(file.name)
+                        file_uploaded = False
 
                 # Check if the upload file is a Word docx
                 elif str(file.name).endswith('.docx'):
@@ -86,9 +89,11 @@ def launch_app_ara():
                         text_list.append(f"Document title: {os.path.splitext(file.name)[0]}")
                         text_list.append(text)
                         st.subheader(f':blue[{file.name}]')
+                        file_uploaded = True
 
                     else:
                         catch_exception(file.name)
+                        file_uploaded = False
 
                 # Check if the upload file is a text txt
                 elif str(file.name).endswith('.txt'):
@@ -97,40 +102,46 @@ def launch_app_ara():
                         tmp.seek(0)
                         text = textract.process(tmp.name, method='txt')
                         if len(text) > 5:
-                            st.subheader(f':blue[{file.name}]')
                             text_list.append(f"File: {file.name}")
+                            st.subheader(f':blue[{file.name}]')
                             text_list.append(f"Document name: {file.name}")
                             text_list.append(f"Document title: {os.path.splitext(file.name)[0]}")
                             text_list.append(text.decode('utf-8'))
+                            file_uploaded = True
 
                         else:
                             catch_exception(file.name)
+                            file_uploaded = False
 
                 else:
                     catch_exception(file.name)
+                    file_uploaded = False
 
             except Exception as e:
                 catch_exception(file.name)
+                file_uploaded = False
 
-        with st.spinner(text=":red[يرجى الانتظار بينما نحلل المستندات...]"):
+        if file_uploaded:
 
-            try:
+            with st.spinner(text=":red[يرجى الانتظار بينما نحلل المستندات...]"):
 
-                length_words = len(str(text_list))
-                chunk_size = 100
-                text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=0,
-                                                               length_function=len)
-                chunks = text_splitter.split_text(text=str(text_list))
-                chunks = list(chunks)
+                try:
 
-                llm = ChatOpenAI(temperature=0.3, model='gpt-4')  # gpt-4 or gpt-3.5-turbo
-                embedding = OpenAIEmbeddings(openai_api_key=secret_key)
-                my_database = Chroma.from_texts(chunks, embedding)
+                    length_words = len(str(text_list))
+                    chunk_size = 100
+                    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=0, length_function=len)
 
-                continue_analyze = True
+                    chunks = text_splitter.split_text(text=str(text_list))
+                    chunks = list(chunks)
 
-            except Exception as e:
-                change_text_style_arabic("حدث خطأ. يرجى حذف الملف المحمّل ثم إعادة تحميله مرة أخرى.",'subhead',red)
+                    llm = ChatOpenAI(temperature=0.3, model='gpt-4')  # gpt-4 or gpt-3.5-turbo
+                    embedding = OpenAIEmbeddings(openai_api_key=secret_key)
+                    my_database = Chroma.from_texts(chunks, embedding)
+
+                    continue_analyze = True
+
+                except Exception as e:
+                    change_text_style_arabic("حدث خطأ. يرجى حذف الملف المحمّل ثم إعادة تحميله مرة أخرى.",'subhead',red)
 
         if continue_analyze:
             retriever = my_database.as_retriever(search_kwargs={"k": 1})
@@ -170,7 +181,6 @@ def launch_app_ara():
 
             for message in st.session_state.messages:
                 with st.chat_message(message['role']):
-                    #st.subheader(message['content'])
                     change_text_style_arabic_side(message['content'], 'bot_reply_text', 'white')
 
             prompt = PromptTemplate(template=response_template, input_variables=["context", "question"])
