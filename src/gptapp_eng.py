@@ -6,6 +6,7 @@ import PyPDF2
 import docx2txt
 import textract
 import tempfile
+from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 load_dotenv() # read local .env file
 secret_key = os.environ['OPENAI_API_KEY']
@@ -40,20 +41,18 @@ def launch_app_eng():
     global text_list
     st.session_state.setdefault(key='start')
 
-    # # Choose domain
-    # sector = st.sidebar.selectbox(":red[Choose your Domain]",("Education & Training","Business & Management",
-    #                                                     "Technology & Engineering","Healthcare & Medicine",
-    #                                                     "Creative & Media","Retail & Commerce"))
-
     # upload files
     st.sidebar.title(":red[File uploader]")
     file_to_upload = st.sidebar.file_uploader(label=':violet[Select PDF, word, or text files to upload]', type=['pdf','docx','txt'],
                                                   accept_multiple_files=True, key='files')
     st.sidebar.caption(":violet[Please upload one file after the other and not all at the same time.]")
-    st.sidebar.caption(":violet[if you get an Axios error, either delete the file and uploaded it again or refresh the page and login again!]")
-    clear = st.sidebar.button(':white[Clear conversation]',key='clear')
+    st.sidebar.caption(":violet[if you get an Axios error, either delete the file and uploaded it again or refresh the page and login again or try again after some time!]")
+    clear = st.sidebar.button(':white[Clear conversation & memory]',key='clear')
+
     if clear:
         st.session_state.messages = []
+        text_list = []
+
     st.title(":violet[GPT Document Analyzer]")
     st.write(':violet[Upload your PDF files from the left menu & start querying the documents.]')
 
@@ -120,22 +119,35 @@ def launch_app_eng():
 
         if file_uploaded:
 
-            with st.spinner(text=":red[Please wait while we process the documents...]"):
-
-                try:
-
-                    length_words = len(str(text_list))
-                    chunk_size = 100
-                    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=0, length_function=len)
-
+            try:
+                with st.spinner(text=":red[Please wait while we read the documents...]"):
+                    chunk_size = 5000
+                    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=0,
+                                                                   length_function=len)
                     chunks = text_splitter.split_text(text=str(text_list))
                     chunks = list(chunks)
 
-                    llm = ChatOpenAI(temperature=0.3, model='gpt-4') # gpt-4 or gpt-3.5-turbo
+                    llm = ChatOpenAI(temperature=0.3, model='gpt-4')  # gpt-4 or gpt-3.5-turbo
                     embedding = OpenAIEmbeddings(openai_api_key=secret_key)
                     my_database = Chroma.from_texts(chunks, embedding)
 
                     continue_analyze = True
+
+            except Exception:
+                try:
+                    with st.spinner(text=":red[Please wait while we read the documents...]"):
+                        # Retry with a smaller chunk size of 50 if the above code failed
+                        chunk_size = 50
+                        text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=0,
+                                                                       length_function=len)
+                        chunks = text_splitter.split_text(text=str(text_list))
+                        chunks = list(chunks)
+
+                        llm = ChatOpenAI(temperature=0.3, model='gpt-3.5-turbo')  # gpt-4 or gpt-3.5-turbo
+                        embedding = OpenAIEmbeddings(openai_api_key=secret_key)
+                        my_database = Chroma.from_texts(chunks, embedding)
+
+                        continue_analyze = True
 
                 except Exception as e:
                     st.subheader(":red[An error occurred. Please delete the uploaded file, and then uploaded it again]")
@@ -191,6 +203,7 @@ def launch_app_eng():
                 chain_type_kwargs=chain_type_kwargs,
                 verbose=False)
 
+            @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(5))
             def create_text_question():
 
                 user_input = st.chat_input('Start querying the document here...')

@@ -50,31 +50,40 @@ def first_page():
 
     col1, col2, col3 = st.columns(3)
 
-    with col1:
-        change_text_style_english("GPT Document Analyzer",'title',violet)
-        st.write("")
-
     with col3:
 
         if st.session_state.mylanguage == 'English':
-            my_language = st.selectbox("/", options=('English', 'العربية'), key='language',
-                                      label_visibility='hidden',placeholder='English')
+            language_options = ('English', 'العربية')
         else:
-            my_language = st.selectbox("/", options=('العربية', 'English'), key='language',
-                                       label_visibility='hidden', placeholder='English')
+            language_options = ('العربية', 'English')
+
+        my_language = st.selectbox("/", options=language_options,
+                                   label_visibility='hidden')
 
     if my_language == 'English':
+
+        with col1:
+
+            change_text_style_english("GPT Document Analyzer",'title',violet)
+            st.write("")
+
         with col3:
             change_text_style_arabic("🌏  اختر لغتك", 'head', violet)
-            st.session_state.mylanguage = 'English'
 
+        st.session_state.mylanguage = 'English'
         change_language_to_English()
 
-    elif my_language == 'العربية':
+    if my_language == 'العربية':
+
+        with col1:
+
+            change_text_style_arabic("محلل المستندات", 'title', violet)
+            change_text_style_arabic("جي بي تي", 'title', violet)
+
         with col3:
             change_text_style_english("🌏  Choose your language", 'head', violet)
-            st.session_state.mylanguage = 'العربية'
 
+        st.session_state.mylanguage = 'العربية'
         change_language_to_Arabic()
 
 

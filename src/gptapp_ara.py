@@ -6,6 +6,7 @@ import PyPDF2
 import docx2txt
 import textract
 import tempfile
+from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 load_dotenv() # read local .env file
 secret_key = os.environ['OPENAI_API_KEY']
@@ -41,22 +42,19 @@ def launch_app_ara():
     global text_list
     st.session_state.setdefault(key='start')
 
-    # # Choose domain
-    # change_text_style_arabic_side("اختر مجالك", 'text_violet_side_tight', violet)
-    # sector = st.sidebar.selectbox(":violet[➜]",("التعليم والتدريب","الأعمال والإدارة",
-    #                                                     "التكنولوجيا والهندسة","الرعاية الصحية والطب",
-    #                                                     "الإبداع والإعلام","التجزئة والتجارة"))
-
     # upload files
     change_text_style_arabic_side(" حمل PDF, word, أو أي نص", 'text_violet_side_tight', violet)
     file_to_upload = st.sidebar.file_uploader(label=':violet[➜]', type=['pdf','docx','txt'],
                                                   accept_multiple_files=True, key='files')
     change_text_style_arabic_side("يرجى تحميل ملف واحد تلو الآخر وليس كلها في نفس الوقت.", 'text_violet_side_tight', violet)
-    change_text_style_arabic_side("إذا حدث خطأ Axios قم إما بحذف الملف وتحميله مرة أخرى أو قم بتحديث الصفحة وتسجيل الدخول مرة أخرى",'text_violet_side_tight', violet)
+    change_text_style_arabic_side("إذا حدث خطأ Axios قم إما بحذف الملف وتحميله مرة أخرى أو قم بتحديث الصفحة وتسجيل الدخول مرة أخرى أو عاود المحاولة بعد فترة من الوقت",'text_violet_side_tight', violet)
     st.sidebar.markdown("")
-    clear = st.sidebar.button(':red[مسح المحادثة]',key='clear',use_container_width=True)
+
+    clear = st.sidebar.button(':red[مسح المحادثة والذاكرة]',key='clear',use_container_width=True)
     if clear:
         st.session_state.messages = []
+        text_list = []
+
     change_text_style_arabic(("GPT"+" "+"محلل المستندات"),'title',red)
     change_text_style_arabic("قم بتحميل ملفاتك من القائمة اليسرى وابدأ في تحليل المستندات.", 'text_violet', violet)
 
@@ -123,25 +121,38 @@ def launch_app_ara():
 
         if file_uploaded:
 
-            with st.spinner(text=":red[يرجى الانتظار بينما نحلل المستندات...]"):
-
-                try:
-
-                    length_words = len(str(text_list))
-                    chunk_size = 100
-                    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=0, length_function=len)
-
+            try:
+                with st.spinner(text=":red[يرجى الانتظار بينما نقرء المستندات...]"):
+                    chunk_size = 5000
+                    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=0,
+                                                                   length_function=len)
                     chunks = text_splitter.split_text(text=str(text_list))
                     chunks = list(chunks)
 
-                    llm = ChatOpenAI(temperature=0.3, model='gpt-4')  # gpt-4 or gpt-3.5-turbo
+                    llm = ChatOpenAI(temperature=0.3, model='gpt-3.5-turbo')  # gpt-4 or gpt-3.5-turbo
                     embedding = OpenAIEmbeddings(openai_api_key=secret_key)
                     my_database = Chroma.from_texts(chunks, embedding)
 
                     continue_analyze = True
 
+            except Exception:
+                try:
+                    with st.spinner(text=":red[يرجى الانتظار بينما نقرء المستندات...]"):
+                        # Retry with a smaller chunk size of 50 if the above code failed
+                        chunk_size = 50
+                        text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=0,
+                                                                       length_function=len)
+                        chunks = text_splitter.split_text(text=str(text_list))
+                        chunks = list(chunks)
+
+                        llm = ChatOpenAI(temperature=0.3, model='gpt-4')  # gpt-4 or gpt-3.5-turbo
+                        embedding = OpenAIEmbeddings(openai_api_key=secret_key)
+                        my_database = Chroma.from_texts(chunks, embedding)
+
+                        continue_analyze = True
+
                 except Exception as e:
-                    change_text_style_arabic("حدث خطأ. يرجى حذف الملف المحمّل ثم إعادة تحميله مرة أخرى.",'subhead',red)
+                    change_text_style_arabic("حدث خطأ. يرجى حذف الملف المحمّل ثم إعادة تحميله مرة أخرى.", 'subhead','red')
 
         if continue_analyze:
             retriever = my_database.as_retriever(search_kwargs={"k": 1})
@@ -194,6 +205,7 @@ def launch_app_ara():
                 chain_type_kwargs=chain_type_kwargs,
                 verbose=False)
 
+            @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(5))
             def create_text_question():
 
                 user_input = st.chat_input('ابدأ المحادثة هنا...')
