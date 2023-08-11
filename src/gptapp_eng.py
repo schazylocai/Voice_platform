@@ -121,7 +121,8 @@ def launch_app_eng():
 
             try:
                 with st.spinner(text=":red[Please wait while we read the documents...]"):
-                    chunk_size = 5000
+
+                    chunk_size = 250
                     text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=0,
                                                                    length_function=len)
                     chunks = text_splitter.split_text(text=str(text_list))
@@ -133,24 +134,8 @@ def launch_app_eng():
 
                     continue_analyze = True
 
-            except Exception:
-                try:
-                    with st.spinner(text=":red[Please wait while we read the documents...]"):
-                        # Retry with a smaller chunk size of 50 if the above code failed
-                        chunk_size = 50
-                        text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=0,
-                                                                       length_function=len)
-                        chunks = text_splitter.split_text(text=str(text_list))
-                        chunks = list(chunks)
-
-                        llm = ChatOpenAI(temperature=0.3, model='gpt-3.5-turbo')  # gpt-4 or gpt-3.5-turbo
-                        embedding = OpenAIEmbeddings(openai_api_key=secret_key)
-                        my_database = Chroma.from_texts(chunks, embedding)
-
-                        continue_analyze = True
-
-                except Exception as e:
-                    st.subheader(":red[An error occurred. Please delete the uploaded file, and then uploaded it again]")
+            except Exception as e:
+                st.subheader(":red[An error occurred. Please delete the uploaded file, and then uploaded it again]")
 
         if continue_analyze:
             retriever = my_database.as_retriever(search_kwargs={"k": 1})
