@@ -70,7 +70,9 @@ def launch_app_ara():
                         text_list.append(f"File: {file.name}")
                         text_list.append(f"Document name: {file.name}")
                         text_list.append(f"Document title: {os.path.splitext(file.name)[0]}")
+                        text_list.append('<| beginning of text |>')
                         text_list.append(text)
+                        text_list.append('<| end of text |>')
                         st.subheader(f':blue[{file.name}]')
                         file_uploaded = True
 
@@ -85,7 +87,9 @@ def launch_app_ara():
                         text_list.append(f"File: {file.name}")
                         text_list.append(f"Document name: {file.name}")
                         text_list.append(f"Document title: {os.path.splitext(file.name)[0]}")
+                        text_list.append('<| beginning of text |>')
                         text_list.append(text)
+                        text_list.append('<| end of text |>')
                         st.subheader(f':blue[{file.name}]')
                         file_uploaded = True
 
@@ -101,10 +105,12 @@ def launch_app_ara():
                         text = textract.process(tmp.name, method='txt')
                         if len(text) > 5:
                             text_list.append(f"File: {file.name}")
-                            st.subheader(f':blue[{file.name}]')
                             text_list.append(f"Document name: {file.name}")
                             text_list.append(f"Document title: {os.path.splitext(file.name)[0]}")
+                            text_list.append('<| beginning of text |>')
                             text_list.append(text.decode('utf-8'))
+                            text_list.append('<| end of text |>')
+                            st.subheader(f':blue[{file.name}]')
                             file_uploaded = True
 
                         else:
@@ -124,13 +130,13 @@ def launch_app_ara():
             try:
                 with st.spinner(text=":red[يرجى الانتظار بينما نقرء المستندات...]"):
 
-                    chunk_size = 250
-                    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=0,
+                    chunk_size = 4000
+                    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=100,
                                                                    length_function=len)
                     chunks = text_splitter.split_text(text=str(text_list))
                     chunks = list(chunks)
 
-                    llm = ChatOpenAI(temperature=0.3, model='gpt-4')  # gpt-4 or gpt-3.5-turbo
+                    llm = ChatOpenAI(temperature=0.2, model='gpt-4')  # gpt-4 or gpt-3.5-turbo
                     embedding = OpenAIEmbeddings(openai_api_key=secret_key)
                     my_database = Chroma.from_texts(chunks, embedding)
 
