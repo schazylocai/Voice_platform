@@ -8,7 +8,16 @@ import textract
 import tempfile
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
-load_dotenv() # read local .env file
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.chains import RetrievalQA
+from langchain.chat_models import ChatOpenAI
+from langchain.vectorstores import Chroma
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.prompts import PromptTemplate
+from langchain.memory import ConversationBufferMemory
+from src.Change_Text_Style import change_text_style_arabic, change_text_style_arabic_side
+
+load_dotenv()  # read local .env file
 secret_key = os.environ['OPENAI_API_KEY']
 
 stripe_publishable_key = os.environ['STRIPE_PUBLISHABLE_KEY']
@@ -18,25 +27,18 @@ stripe.api_key = strip_secret_key
 
 text_list = []
 max_files = 5
-final_result = {"query":"","answer":""}
+final_result = {"query": "", "answer": ""}
 violet = "rgb(169, 131, 247)"
 red = "rgb(232,89,83)"
 
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.chains import RetrievalQA
-from langchain.chat_models import ChatOpenAI
-from langchain.vectorstores import Chroma
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.prompts import PromptTemplate
-from langchain.memory import ConversationBufferMemory
-from src.Change_Text_Style import change_text_style_arabic,change_text_style_arabic_side
 
 def launch_app_ara():
-
     continue_analyze = False
     file_uploaded = False
+
     def catch_exception(file_name):
-        change_text_style_arabic_side(("لم يمكن تحميل الملف. يحتوي الملف"+" "+ file_name +" "+ "على بعض الشوائب!"),'text_red_side_big',red)
+        change_text_style_arabic_side(("لم يمكن تحميل الملف. يحتوي الملف" + " " + file_name + " " + "على بعض الشوائب!"),
+                                      'text_red_side_big', red)
         return False
 
     global text_list
@@ -44,18 +46,22 @@ def launch_app_ara():
 
     # upload files
     change_text_style_arabic_side(" حمل PDF, word, أو أي نص", 'text_violet_side_tight', violet)
-    file_to_upload = st.sidebar.file_uploader(label=':violet[➜]', type=['pdf','docx','txt'],
-                                                  accept_multiple_files=True, key='files')
-    change_text_style_arabic_side("يرجى تحميل ملف واحد تلو الآخر وليس كلها في نفس الوقت.", 'text_violet_side_tight', violet)
-    change_text_style_arabic_side("إذا حدث خطأ Axios قم إما بحذف الملف وتحميله مرة أخرى أو قم بتحديث الصفحة وتسجيل الدخول مرة أخرى أو عاود المحاولة بعد فترة من الوقت",'text_violet_side_tight', violet)
+    file_to_upload = st.sidebar.file_uploader(label=':violet[➜]', type=['pdf', 'docx', 'txt'],
+                                              accept_multiple_files=True, key='files')
+    change_text_style_arabic_side("يرجى تحميل ملف واحد تلو الآخر وليس كلها في نفس الوقت.", 'text_violet_side_tight',
+                                  violet)
+    change_text_style_arabic_side(
+        "إذا حدث خطأ Axios قم إما بحذف الملف وتحميله مرة أخرى أو قم بتحديث الصفحة وتسجيل الدخول مرة أخرى أو عاود "
+        "المحاولة بعد فترة من الوقت",
+        'text_violet_side_tight', violet)
     st.sidebar.markdown("")
 
-    clear = st.sidebar.button(':red[مسح المحادثة والذاكرة]',key='clear',use_container_width=True)
+    clear = st.sidebar.button(':red[مسح المحادثة والذاكرة]', key='clear', use_container_width=True)
     if clear:
         st.session_state.messages = []
         text_list = []
 
-    change_text_style_arabic(("GPT"+" "+"محلل المستندات"),'title',red)
+    change_text_style_arabic(("GPT" + " " + "محلل المستندات"), 'title', red)
     change_text_style_arabic("قم بتحميل ملفاتك من القائمة اليسرى وابدأ في تحليل المستندات.", 'text_violet', violet)
 
     if len(file_to_upload) <= max_files:
@@ -130,7 +136,7 @@ def launch_app_ara():
             try:
                 with st.spinner(text=":red[يرجى الانتظار بينما نقرء المستندات...]"):
 
-                    chunk_size = 4000
+                    chunk_size = 2000
                     text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=100,
                                                                    length_function=len)
                     chunks = text_splitter.split_text(text=str(text_list))
@@ -143,13 +149,13 @@ def launch_app_ara():
                     continue_analyze = True
 
             except Exception as e:
-                change_text_style_arabic("حدث خطأ. يرجى حذف الملف المحمّل ثم إعادة تحميله مرة أخرى.", 'subhead','red')
+                change_text_style_arabic("حدث خطأ. يرجى حذف الملف المحمّل ثم إعادة تحميله مرة أخرى.", 'subhead', 'red')
 
         if continue_analyze:
             retriever = my_database.as_retriever(search_kwargs={"k": 1})
             memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
-            ########## RetrievalQA from chain type ##########
+            # RetrievalQA from chain type ##########
 
             response_template = f"""
             • You will act as an Arabic professional and a researcher.
@@ -202,11 +208,10 @@ def launch_app_ara():
                 user_input = st.chat_input('ابدأ المحادثة هنا...')
                 if user_input:
                     with st.chat_message('user'):
-                        #st.markdown(user_input)
+                        # st.markdown(user_input)
                         change_text_style_arabic_side(user_input, 'bot_reply_text', 'white')
 
-
-                    st.session_state.messages.append({'role':'user','content':user_input})
+                    st.session_state.messages.append({'role': 'user', 'content': user_input})
 
                     with st.spinner(text=":red[تم إرسال المحادثة. قد يستغرق ذلك حوالي دقيقة لتحليل المستندات...]"):
                         with st.chat_message('assistant'):
@@ -217,8 +222,9 @@ def launch_app_ara():
                             user_query = result['query']
                             result = result['chat_history'][1].content
                             all_results += result
-                            #message_placeholder.subheader(f'{all_results}')
-                            font_link = '<link href="https://fonts.googleapis.com/css2?family=Cairo+Play:wght@600;800&display=swap" rel="stylesheet">'
+                            # message_placeholder.subheader(f'{all_results}')
+                            font_link = '<link href="https://fonts.googleapis.com/css2?family=Cairo+Play:wght@600;800' \
+                                        '&display=swap" rel="stylesheet">'
                             font_family = "'Cairo Play', sans-serif"
                             message_placeholder.markdown(
                                 f"""
@@ -235,9 +241,9 @@ def launch_app_ara():
                                                     </style>
                                                     <div class="bot_reply_text"><bdi>{all_results}</bdi></div>
                                                     """, unsafe_allow_html=True)
-                            #change_text_style_arabic_side(all_results,'bot_reply_text','white')
+                            # change_text_style_arabic_side(all_results,'bot_reply_text','white')
 
-                            st.session_state.messages.append({'role':'assistant','content':all_results})
+                            st.session_state.messages.append({'role': 'assistant', 'content': all_results})
                             return user_input, result, user_query
 
             create_text_question()
@@ -246,5 +252,6 @@ def launch_app_ara():
         change_text_style_arabic_side("لم يتم تحميل أي ملف حتى الآن", 'text_red_side', red)
 
     elif len(file_to_upload) >= max_files:
-        change_text_style_arabic_side(("الحد الأقصى لعدد الملفات المحملة هو"+" "+str(max_files)), 'text_red_side', red)
-        change_text_style_arabic_side(("يرجى إزالة بعض الملفات"), 'text_red_side',red)
+        change_text_style_arabic_side(("الحد الأقصى لعدد الملفات المحملة هو" + " " + str(max_files)), 'text_red_side',
+                                      red)
+        change_text_style_arabic_side(("يرجى إزالة بعض الملفات"), 'text_red_side', red)

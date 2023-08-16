@@ -8,7 +8,15 @@ import textract
 import tempfile
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
-load_dotenv() # read local .env file
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.chains import RetrievalQA
+from langchain.chat_models import ChatOpenAI
+from langchain.vectorstores import Chroma
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.prompts import PromptTemplate
+from langchain.memory import ConversationBufferMemory
+
+load_dotenv()  # read local .env file
 secret_key = os.environ['OPENAI_API_KEY']
 
 stripe_publishable_key = os.environ['STRIPE_PUBLISHABLE_KEY']
@@ -18,22 +26,15 @@ stripe.api_key = strip_secret_key
 
 text_list = []
 max_files = 5
-final_result = {"query":"","answer":""}
+final_result = {"query": "", "answer": ""}
 violet = "rgb(169, 131, 247)"
 red = "rgb(232,89,83)"
 
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.chains import RetrievalQA
-from langchain.chat_models import ChatOpenAI
-from langchain.vectorstores import Chroma
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.prompts import PromptTemplate
-from langchain.memory import ConversationBufferMemory
 
 def launch_app_eng():
-
     continue_analyze = False
     file_uploaded = False
+
     def catch_exception(file_name):
         st.sidebar.header(f":red[File {file_name} couldn't be loaded. The file has some irregularities!]")
         return False
@@ -43,11 +44,14 @@ def launch_app_eng():
 
     # upload files
     st.sidebar.title(":red[File uploader]")
-    file_to_upload = st.sidebar.file_uploader(label=':violet[Select PDF, word, or text files to upload]', type=['pdf','docx','txt'],
-                                                  accept_multiple_files=True, key='files')
+    file_to_upload = st.sidebar.file_uploader(label=':violet[Select PDF, word, or text files to upload]',
+                                              type=['pdf', 'docx', 'txt'],
+                                              accept_multiple_files=True, key='files')
     st.sidebar.caption(":violet[Please upload one file after the other and not all at the same time.]")
-    st.sidebar.caption(":violet[if you get an Axios error, either delete the file and uploaded it again or refresh the page and login again or try again after some time!]")
-    clear = st.sidebar.button(':white[Clear conversation & memory]',key='clear')
+    st.sidebar.caption(
+        ":violet[if you get an Axios error, either delete the file and uploaded it again or refresh the page and "
+        "login again or try again after some time!]")
+    clear = st.sidebar.button(':white[Clear conversation & memory]', key='clear')
 
     if clear:
         st.session_state.messages = []
@@ -128,7 +132,7 @@ def launch_app_eng():
             try:
                 with st.spinner(text=":red[Please wait while we read the documents...]"):
 
-                    chunk_size = 4000
+                    chunk_size = 2000
                     text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=100,
                                                                    length_function=len)
                     chunks = text_splitter.split_text(text=str(text_list))
@@ -147,7 +151,7 @@ def launch_app_eng():
             retriever = my_database.as_retriever(search_kwargs={"k": 1})
             memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
-            ########## RetrievalQA from chain type ##########
+            # RetrievalQA from chain type ##########
 
             response_template = f"""
             • You will act as an English professional and a researcher.
@@ -202,9 +206,10 @@ def launch_app_eng():
                     with st.chat_message('user'):
                         st.markdown(user_input)
 
-                    st.session_state.messages.append({'role':'user','content':user_input})
+                    st.session_state.messages.append({'role': 'user', 'content': user_input})
 
-                    with st.spinner(text=":red[Query submitted. This may take a minute while we query the documents...]"):
+                    with st.spinner(
+                            text=":red[Query submitted. This may take a minute while we query the documents...]"):
                         with st.chat_message('assistant'):
                             message_placeholder = st.empty()
                             all_results = ''
@@ -215,7 +220,7 @@ def launch_app_eng():
                             all_results += result
                             message_placeholder.subheader(f'{all_results}')
 
-                            st.session_state.messages.append({'role':'assistant','content':all_results})
+                            st.session_state.messages.append({'role': 'assistant', 'content': all_results})
                             return user_input, result, user_query
 
             create_text_question()
