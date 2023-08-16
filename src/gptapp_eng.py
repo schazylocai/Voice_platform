@@ -139,7 +139,7 @@ def launch_app_eng():
                     chunks = list(chunks)
 
                     llm = ChatOpenAI(temperature=0.2, model='gpt-4')  # gpt-4 or gpt-3.5-turbo
-                    embedding = OpenAIEmbeddings(openai_api_key=secret_key)
+                    embedding = OpenAIEmbeddings()
                     my_database = Chroma.from_texts(chunks, embedding)
 
                     continue_analyze = True

@@ -18,3 +18,4 @@ azure.identity==1.14.0
 azure.keyvault.secrets==4.7.0
 pydantic==v1.10.0a1
 tenacity==8.2.3
+numpy==1.25.1

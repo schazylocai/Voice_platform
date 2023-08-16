@@ -143,12 +143,13 @@ def launch_app_ara():
                     chunks = list(chunks)
 
                     llm = ChatOpenAI(temperature=0.2, model='gpt-4')  # gpt-4 or gpt-3.5-turbo
-                    embedding = OpenAIEmbeddings(openai_api_key=secret_key)
+                    embedding = OpenAIEmbeddings()
                     my_database = Chroma.from_texts(chunks, embedding)
 
                     continue_analyze = True
 
             except Exception as e:
+                st.write(e)
                 change_text_style_arabic("حدث خطأ. يرجى حذف الملف المحمّل ثم إعادة تحميله مرة أخرى.", 'subhead', 'red')
 
         if continue_analyze:

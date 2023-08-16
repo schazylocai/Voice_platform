@@ -1,13 +1,14 @@
 import streamlit as st
-from dotenv import load_dotenv
-load_dotenv() # read local .env file
+
 import stripe
 import smtplib
 from datetime import datetime
 import os
-#from src.Azure_storage import write_subscription_ids_to_azure_blob, read_subscription_from_azure_blob
 from src.Azure_storage import write_subscription_ids_to_azure_keyvault,read_subscription_from_azure_keyvault,retrieve_password_from_azure_keyvault
 from src.English_Language import send_email_eng
+
+from dotenv import load_dotenv
+load_dotenv() # read local .env file
 
 success_url="https://gptdocanalyzer.com/"
 cancel_url="https://gptdocanalyzer.com/"

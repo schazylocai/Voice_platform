@@ -1,13 +1,13 @@
 import streamlit as st
 import os
-from dotenv import load_dotenv
-load_dotenv() # read local .env file
-#from azure.storage.blob import BlobServiceClient
-#import json
 
 import azure.identity
 import azure.keyvault.secrets
 import re
+
+from dotenv import load_dotenv
+load_dotenv()  # read local .env file
+
 
 tenant_id = os.environ["AZURE_TENANT_ID"]
 client_id = os.environ["AZURE_CLIENT_ID"]
@@ -15,11 +15,12 @@ client_secret = os.environ["AZURE_CLIENT_SECRET"]
 keyvault_name = os.environ["AZURE_KEYVAULT_NAME"]
 keyvault_uri = os.environ["AZURE_KEYVAULT_URI"]
 
-_credential = azure.identity.ClientSecretCredential(tenant_id=tenant_id,client_id=client_id,client_secret=client_secret)
+_credential = azure.identity.ClientSecretCredential(tenant_id=tenant_id, client_id=client_id,
+                                                    client_secret=client_secret)
 client = azure.keyvault.secrets.SecretClient(vault_url=keyvault_uri, credential=_credential)
 
 
-def read_subscription_from_azure_keyvault(user_email,user_password):
+def read_subscription_from_azure_keyvault(user_email, user_password):
     try:
         # Clean the user_email to use it as the secret name
         username = re.sub(r'\W+', '', user_email)
@@ -27,15 +28,16 @@ def read_subscription_from_azure_keyvault(user_email,user_password):
         try:
             existing_secret = client.get_secret(username)
             existing_password = existing_secret.value
-            return user_email,existing_password
+            return user_email, existing_password
 
         except Exception as ex:
             # If the secret doesn't exist, write it to the Key Vault
-            return user_email,user_password
+            return user_email, user_password
 
     except Exception as e:
         st.write(":red[Error retrieving data from Azure Key Vault!]")
-        return None,None
+        return None, None
+
 
 def write_subscription_ids_to_azure_keyvault(user_email, user_password):
     try:
@@ -45,7 +47,7 @@ def write_subscription_ids_to_azure_keyvault(user_email, user_password):
         # Check if the secret already exists in the Key Vault
         try:
             existing_secret = client.get_secret(username)
-            return 'exists','exists'
+            return 'exists', 'exists'
 
         except Exception as ex:
             # If the secret doesn't exist, write it to the Key Vault
@@ -67,16 +69,15 @@ def retrieve_password_from_azure_keyvault(user_email):
         try:
             existing_secret = client.get_secret(username)
             existing_password = existing_secret.value
-            return existing_secret,existing_password
+            return existing_secret, existing_password
 
         except Exception as ex:
             # If the secret doesn't exist, write it to the Key Vault
-            return user_email,"Password not found!"
+            return user_email, "Password not found!"
 
     except Exception as e:
         st.write(":red[Error retrieving data from Azure Key Vault!]")
-        return user_email,"Password not found!"
-
+        return user_email, "Password not found!"
 
 # connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
 # container_name = "llmidcontainer"
@@ -183,7 +184,6 @@ def retrieve_password_from_azure_keyvault(user_email):
 #
 #     except Exception as e:
 #         st.error(f"An error occurred while reading the file: {str(e)}")
-
 
 
 # # Read subscription from Azure Key Vault

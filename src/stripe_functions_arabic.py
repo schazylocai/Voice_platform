@@ -1,6 +1,4 @@
 import streamlit as st
-from dotenv import load_dotenv
-load_dotenv() # read local .env file
 import stripe
 from datetime import datetime
 import os
@@ -8,6 +6,9 @@ import smtplib
 from src.Azure_storage_arabic import write_subscription_ids_to_azure_keyvault_arabic,read_subscription_from_azure_keyvault_arabic,retrieve_password_from_azure_keyvault_arabic
 from src.Change_Text_Style import change_text_style_arabic,change_text_style_english,change_text_style_arabic_side
 from src.English_Language import send_email_eng
+
+from dotenv import load_dotenv
+load_dotenv() # read local .env file
 
 success_url="https://gptdocanalyzer.com/"
 cancel_url="https://gptdocanalyzer.com/"
