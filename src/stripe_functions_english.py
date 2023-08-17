@@ -4,44 +4,47 @@ import stripe
 import smtplib
 from datetime import datetime
 import os
-from src.Azure_storage import write_subscription_ids_to_azure_keyvault,read_subscription_from_azure_keyvault,retrieve_password_from_azure_keyvault
+from src.Azure_storage import write_subscription_ids_to_azure_keyvault, read_subscription_from_azure_keyvault, \
+    retrieve_password_from_azure_keyvault
 from src.English_Language import send_email_eng
 
 from dotenv import load_dotenv
-load_dotenv() # read local .env file
 
-success_url="https://gptdocanalyzer.com/"
-cancel_url="https://gptdocanalyzer.com/"
+load_dotenv()  # read local .env file
+
+success_url = "https://gptdocanalyzer.com/"
+cancel_url = "https://gptdocanalyzer.com/"
 user_email = ""
 
 stripe_publishable_key = os.environ['STRIPE_PUBLISHABLE_KEY']
 stripe_secret_key = os.environ['STRIPE_SECRET_KEY']
 stripe_api_key = os.environ['STRIPE_API_KEY']
 
-#subscribed_user = 'False'
 stripe.api_key = stripe_secret_key
 endpoint_secret = 'whsec_eac84f5766a6c4217bf122ac3bdde25880776a36172ae67ff80ec9a347a5222b'
 
 violet = "rgb(169, 131, 247)"
 red = "rgb(232,89,83)"
 
+
 def get_days_left(subscription):
     current_timestamp = datetime.now().timestamp()
     current_period_end = subscription['data'][0]['current_period_end']
     return max(0, int((current_period_end - current_timestamp) / (24 * 3600)))
 
-def check_customers_eng():
 
-    #user = True
+def check_customers_eng():
     user = st.session_state.user_status
-    if user == 'True': user = True
-    else: user = False
+    if user == 'True':
+        user = True
+    else:
+        user = False
     username = ''
 
     # Check customers
     st.sidebar.write("")
     st.sidebar.title(":red[Login to start!]")
-    email = st.sidebar.text_input(":violet[Please enter your email address:]",key='email_add')
+    email = st.sidebar.text_input(":violet[Please enter your email address:]", key='email_add')
     email = email.strip().lower()
     password = st.sidebar.text_input(":violet[Enter your password]", key='password_add', type='password')
     password = password.strip()
@@ -49,7 +52,7 @@ def check_customers_eng():
     if len(email) == 0:
         st.sidebar.write(":violet[Enter your email]")
 
-    elif email_button := st.sidebar.button(":red[Submit]",key='submit_add'):
+    elif email_button := st.sidebar.button(":red[Submit]", key='submit_add'):
 
         if len(password) < 4:
             st.sidebar.write(":red[Enter a valid password]")
@@ -68,7 +71,7 @@ def check_customers_eng():
                     if username == email:
 
                         # Check password
-                        username_azure,password_azure = read_subscription_from_azure_keyvault(username,password)
+                        username_azure, password_azure = read_subscription_from_azure_keyvault(username, password)
                         if password_azure == password:
 
                             # Check subscription
@@ -76,7 +79,8 @@ def check_customers_eng():
                             status = stripe.Subscription.list(customer=customer.id)['data']
                             if status:
                                 status = status[0]['status']
-                            else: status = 'Unknown'
+                            else:
+                                status = 'Unknown'
 
                             if status in ['active']:
                                 st.sidebar.write(':violet[Subscription is valid!]')
@@ -85,7 +89,8 @@ def check_customers_eng():
                                 days_left = get_days_left(subscription)
 
                                 st.sidebar.write(f":violet[{days_left} days left for this month.]")
-                                st.sidebar.title(':blue[Click at the top of this page on ] :red[GPTapp]:blue[ tab to start...]')
+                                st.sidebar.title(
+                                    ':blue[Click at the top of this page on ] :red[GPTapp]:blue[ tab to start...]')
                                 found = True
                                 pass_found = True
                                 user = True
@@ -107,7 +112,8 @@ def check_customers_eng():
 
                                 elif subscription['data'][0]['cancel_at_period_end']:
                                     st.sidebar.write(f":red[Subscription will be canceled in {days_left} days.]")
-                                    st.sidebar.title(':blue[Click at the top of this page on ] :red[GPTapp]:blue[ tab to start...]')
+                                    st.sidebar.title(
+                                        ':blue[Click at the top of this page on ] :red[GPTapp]:blue[ tab to start...]')
 
                                     found = True
                                     pass_found = True
@@ -126,7 +132,8 @@ def check_customers_eng():
 
                             elif status in ['trialing']:
                                 st.sidebar.write(':red[Subscription is on trial mode!]')
-                                st.sidebar.title(':blue[Click at the top of this page ] :red[GPTapp]:blue[ tab to start...]')
+                                st.sidebar.title(
+                                    ':blue[Click at the top of this page ] :red[GPTapp]:blue[ tab to start...]')
                                 found = True
                                 pass_found = True
                                 user = True
@@ -141,7 +148,8 @@ def check_customers_eng():
                                 st.session_state.user_status = 'False'
                                 return user
 
-                        else: st.sidebar.write(":red[Incorrect password]")
+                        else:
+                            st.sidebar.write(":red[Incorrect password]")
                         found = True
                         pass_found = True
                         user = False
@@ -160,7 +168,9 @@ def check_customers_eng():
                         pass_found = True
                         user = True
                         st.session_state.user_status = 'True'
-                        send_email_eng("Award's email", os.environ["MY_EMAIL_ADDRESS"], "Login from award's credentials", "There was a login from the award's credentials", os.environ['AWARD_EMAIL'])
+                        send_email_eng("Award's email", os.environ["MY_EMAIL_ADDRESS"],
+                                       "Login from award's credentials",
+                                       "There was a login from the award's credentials", os.environ['AWARD_EMAIL'])
                         return user
 
                 if not found and not pass_found:
@@ -183,8 +193,8 @@ def check_customers_eng():
 
 
 def subscribe_to_service_eng():
-
     username = ''
+
     def proceed_to_payment():
 
         # Open stripe session
@@ -195,7 +205,7 @@ def subscribe_to_service_eng():
             mode="subscription",
             success_url=success_url,
             cancel_url=cancel_url,
-            subscription_data = {'trial_period_days': 1})
+            subscription_data={'trial_period_days': 1})
 
         # Create a clickable link to the payment URL
         pay_link = f'<a href="{session.url}" target="_blank">Click here to proceed to payment!</a>'
@@ -235,18 +245,17 @@ def subscribe_to_service_eng():
                     # Proceed to pay
                     proceed_to_payment()
 
-    return email,password
+    return email, password
 
 
 def cancel_service_eng():
-
     username = ''
 
     # Cancel subscription to the service
     st.sidebar.divider()
     st.sidebar.subheader(":violet[Cancel subscription?]")
     # Check if customer exists
-    email = st.sidebar.text_input(":violet[Please enter your email address:]",key='email_cancel')
+    email = st.sidebar.text_input(":violet[Please enter your email address:]", key='email_cancel')
     email = email.strip().lower()
     password = st.sidebar.text_input(":violet[Enter your password]", key='password_cancel', type='password')
     password = password.strip()
@@ -255,10 +264,10 @@ def cancel_service_eng():
         st.sidebar.write(":violet[Enter your email]")
 
     else:
-        if email_button_cancel := st.sidebar.button(":red[Submit]",key='submit_cancel'):
+        if email_button_cancel := st.sidebar.button(":red[Submit]", key='submit_cancel'):
 
             if len(password) < 4:
-                    st.sidebar.write(":red[Enter a valid password]")
+                st.sidebar.write(":red[Enter a valid password]")
 
             else:
                 customers = stripe.Customer.list()
@@ -273,7 +282,7 @@ def cancel_service_eng():
                         if username == email:
 
                             # Check password
-                            username_azure, password_azure = read_subscription_from_azure_keyvault(username,password)
+                            username_azure, password_azure = read_subscription_from_azure_keyvault(username, password)
                             if password_azure == password:
 
                                 subscriptions = stripe.Subscription.list(customer=customer.id)
@@ -292,8 +301,10 @@ def cancel_service_eng():
                                         if days_left == 0:
                                             stripe.Subscription.delete(subscription_id)
 
-                                        st.sidebar.write(':violet[Subscription cancelled successfully for the next billing cycle!]')
-                                        st.sidebar.write(f":red[{days_left} days left in the current subscription period.]")
+                                        st.sidebar.write(
+                                            ':violet[Subscription cancelled successfully for the next billing cycle!]')
+                                        st.sidebar.write(
+                                            f":red[{days_left} days left in the current subscription period.]")
 
                                     elif status == 'trialing':
                                         customer_id = customer.id
@@ -318,12 +329,11 @@ def cancel_service_eng():
 
 
 def forgot_password_eng():
-
     def send_email(sender, recipient_email, body):
         with smtplib.SMTP("smtp.gmail.com", 587) as server:
             server.ehlo()
             server.starttls()
-            server.login(os.environ["MY_EMAIL_ADDRESS"],os.environ["EMAIL_PASSWORD"])
+            server.login(os.environ["MY_EMAIL_ADDRESS"], os.environ["EMAIL_PASSWORD"])
             server.sendmail(sender, recipient_email, body)
 
     user = False
@@ -331,10 +341,10 @@ def forgot_password_eng():
     # Check customers
     st.sidebar.write("")
     st.sidebar.subheader(":violet[Forgot your password?]")
-    email = st.sidebar.text_input(":violet[Please enter your email address:]",key='email_find')
+    email = st.sidebar.text_input(":violet[Please enter your email address:]", key='email_find')
     email = email.strip().lower()
 
-    if email_button := st.sidebar.button(":red[Submit]",key='submit_find_email'):
+    if email_button := st.sidebar.button(":red[Submit]", key='submit_find_email'):
 
         customers = stripe.Customer.list()
 
@@ -347,7 +357,7 @@ def forgot_password_eng():
                 if username == email:
 
                     # retrieve password
-                    username_azure,password_azure = retrieve_password_from_azure_keyvault(username)
+                    username_azure, password_azure = retrieve_password_from_azure_keyvault(username)
 
                     st.sidebar.write(':blue[Your password was sent to your email address!]')
                     subject = 'You asked us for your password!'
@@ -358,7 +368,8 @@ def forgot_password_eng():
 
                     return password_azure
 
-                else: user = False
+                else:
+                    user = False
 
             if not user:
                 st.sidebar.write(':red[email not found in our database!]')
