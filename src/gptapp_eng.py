@@ -148,7 +148,7 @@ def launch_app_eng():
                 st.subheader(":red[An error occurred. Please delete the uploaded file, and then uploaded it again]")
 
         if continue_analyze:
-            retriever = my_database.as_retriever(search_kwargs={"k": 1})
+            retriever = my_database.as_retriever(search_kwargs={"k": 3})
             memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
             # RetrievalQA from chain type ##########
