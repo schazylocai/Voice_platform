@@ -132,7 +132,7 @@ def launch_app_eng():
             try:
                 with st.spinner(text=":red[Please wait while we read the documents...]"):
 
-                    chunk_size = 2000
+                    chunk_size = 2500
                     text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=100,
                                                                    length_function=len)
                     chunks = text_splitter.split_text(text=str(text_list))
@@ -148,7 +148,7 @@ def launch_app_eng():
                 st.subheader(":red[An error occurred. Please delete the uploaded file, and then uploaded it again]")
 
         if continue_analyze:
-            retriever = my_database.as_retriever(search_kwargs={"k": 3})
+            retriever = my_database.as_retriever(search_kwargs={"k": 2})
             memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
             # RetrievalQA from chain type ##########
