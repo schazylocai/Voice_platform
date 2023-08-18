@@ -152,6 +152,7 @@ def launch_app_ara():
 
             except Exception as e:
                 change_text_style_arabic("حدث خطأ. يرجى حذف الملف المحمّل ثم إعادة تحميله مرة أخرى.", 'subhead', 'red')
+                st.markdown(e)
 
             if continue_analyze:
                 # RetrievalQA from chain type ##########

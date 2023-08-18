@@ -149,6 +149,7 @@ def launch_app_eng():
 
             except Exception as e:
                 st.subheader(":red[An error occurred. Please delete the uploaded file, and then uploaded it again]")
+                st.markdown(e)
 
             if continue_analyze:
                 # RetrievalQA from chain type ##########
