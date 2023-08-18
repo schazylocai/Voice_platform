@@ -149,7 +149,7 @@ def launch_app_eng():
 
             except Exception as e:
                 st.subheader(":red[An error occurred. Please delete the uploaded file, and then uploaded it again]")
-                st.markdown(e)
+                # st.markdown(e)
 
             if continue_analyze:
                 # RetrievalQA from chain type ##########
@@ -202,7 +202,7 @@ def launch_app_eng():
                 @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(5))
                 def create_text_question():
 
-                    user_input = st.chat_input('Start querying the document here...')
+                    user_input = st.chat_input('Start querying the document here...', max_chars=1000)
                     if user_input:
                         with st.chat_message('user'):
                             st.markdown(user_input)

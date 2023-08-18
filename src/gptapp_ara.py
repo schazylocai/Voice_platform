@@ -152,7 +152,7 @@ def launch_app_ara():
 
             except Exception as e:
                 change_text_style_arabic("حدث خطأ. يرجى حذف الملف المحمّل ثم إعادة تحميله مرة أخرى.", 'subhead', 'red')
-                st.markdown(e)
+                # st.markdown(e)
 
             if continue_analyze:
                 # RetrievalQA from chain type ##########
@@ -205,7 +205,7 @@ def launch_app_ara():
                 @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(5))
                 def create_text_question():
 
-                    user_input = st.chat_input('ابدأ المحادثة هنا...')
+                    user_input = st.chat_input('ابدأ المحادثة هنا...', max_chars=1000)
                     if user_input:
                         with st.chat_message('user'):
                             change_text_style_arabic_side(user_input, 'bot_reply_text', 'white')
