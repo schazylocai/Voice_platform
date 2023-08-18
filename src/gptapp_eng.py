@@ -11,10 +11,11 @@ from tenacity import retry, stop_after_attempt, wait_random_exponential
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import RetrievalQA
 from langchain.chat_models import ChatOpenAI
-from langchain.vectorstores import Chroma
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
+from langchain.vectorstores import SKLearnVectorStore
+
 
 load_dotenv()  # read local .env file
 secret_key = os.environ['OPENAI_API_KEY']
@@ -140,90 +141,89 @@ def launch_app_eng():
 
                     llm = ChatOpenAI(temperature=0.2, model='gpt-4')  # gpt-4 or gpt-3.5-turbo
                     embedding = OpenAIEmbeddings()
-                    my_database = Chroma.from_texts(chunks, embedding)
 
+                    vector_store = SKLearnVectorStore.from_texts(texts=chunks, embedding=embedding)
+                    retriever = vector_store.as_retriever(search_kwargs={"k": 2})
+                    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
                     continue_analyze = True
 
             except Exception as e:
                 st.subheader(":red[An error occurred. Please delete the uploaded file, and then uploaded it again]")
 
-        if continue_analyze:
-            retriever = my_database.as_retriever(search_kwargs={"k": 2})
-            memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+            if continue_analyze:
+                # RetrievalQA from chain type ##########
 
-            # RetrievalQA from chain type ##########
+                response_template = f"""
+                • You will act as an English professional and a researcher.
+                • Your task is to reply only in English even if the question is in another language.
+                • Your task is to read through research papers, documents, journals, manuals, articles, and presentations.
+                • You should be analytical, thoughtful, and reply in depth and details to any question.
+                • If you suspect bias in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is biased". Explain why do yuo think it is biased.
+                • If you suspect incorrect or misleading information in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is incorrect or misleading". Explain why do yuo think it is incorrect or misleading.
+                • Always reply in a polite and professional manner.
+                • Don't connect or look for answers on the internet.
+                • Only look for answers from the given documents and papers.
+                • If you don't know the answer to the question, then reply: "I can't be confident about my answer because I am missing the context or some information! Please try to be more precise and accurate in your query."
 
-            response_template = f"""
-            • You will act as an English professional and a researcher.
-            • Your task is to reply only in English even if the question is in another language.
-            • Your task is to read through research papers, documents, journals, manuals, articles, and presentations.
-            • You should be analytical, thoughtful, and reply in depth and details to any question.
-            • If you suspect bias in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is biased". Explain why do yuo think it is biased.
-            • If you suspect incorrect or misleading information in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is incorrect or misleading". Explain why do yuo think it is incorrect or misleading.
-            • Always reply in a polite and professional manner.
-            • Don't connect or look for answers on the internet.
-            • Only look for answers from the given documents and papers.
-            • If you don't know the answer to the question, then reply: "I can't be confident about my answer because I am missing the context or some information! Please try to be more precise and accurate in your query."
-    
-            Divide your answer when possible into paragraphs:
-            • What is your answer to the question?
-            • Add citations when possible from the document that supports the answer.
-            • Add references when possible related to questions from the given documents only, in bullet points, each one separately, at the end of your answer.
-    
-            {{context}}
-    
-            Question: {{question}}
-    
-            Answer:
-            """
+                Divide your answer when possible into paragraphs:
+                • What is your answer to the question?
+                • Add citations when possible from the document that supports the answer.
+                • Add references when possible related to questions from the given documents only, in bullet points, each one separately, at the end of your answer.
 
-            if 'ChatOpenAI' not in st.session_state:
-                st.session_state['ChatOpenAI'] = llm
+                {{context}}
 
-            if 'messages' not in st.session_state:
-                st.session_state.messages = []
+                Question: {{question}}
 
-            for message in st.session_state.messages:
-                with st.chat_message(message['role']):
-                    st.subheader(message['content'])
+                Answer:
+                """
 
-            prompt = PromptTemplate(template=response_template, input_variables=["context", "question"])
-            chain_type_kwargs = {'prompt': prompt}
-            query_model = RetrievalQA.from_chain_type(
-                llm=st.session_state['ChatOpenAI'],
-                chain_type="stuff",
-                memory=memory,
-                return_source_documents=False,
-                retriever=retriever,
-                chain_type_kwargs=chain_type_kwargs,
-                verbose=False)
+                if 'ChatOpenAI' not in st.session_state:
+                    st.session_state['ChatOpenAI'] = llm
 
-            @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(5))
-            def create_text_question():
+                if 'messages' not in st.session_state:
+                    st.session_state.messages = []
 
-                user_input = st.chat_input('Start querying the document here...')
-                if user_input:
-                    with st.chat_message('user'):
-                        st.markdown(user_input)
+                for message in st.session_state.messages:
+                    with st.chat_message(message['role']):
+                        st.subheader(message['content'])
 
-                    st.session_state.messages.append({'role': 'user', 'content': user_input})
+                prompt = PromptTemplate(template=response_template, input_variables=["context", "question"])
+                chain_type_kwargs = {'prompt': prompt}
+                query_model = RetrievalQA.from_chain_type(
+                    llm=st.session_state['ChatOpenAI'],
+                    chain_type="stuff",
+                    memory=memory,
+                    return_source_documents=False,
+                    retriever=retriever,
+                    chain_type_kwargs=chain_type_kwargs,
+                    verbose=False)
 
-                    with st.spinner(
-                            text=":red[Query submitted. This may take a minute while we query the documents...]"):
-                        with st.chat_message('assistant'):
-                            message_placeholder = st.empty()
-                            all_results = ''
-                            chat_history = [(user_input, "answer")]
-                            result = query_model({"query": user_input, "chat_history": chat_history})
-                            user_query = result['query']
-                            result = result['chat_history'][1].content
-                            all_results += result
-                            message_placeholder.subheader(f'{all_results}')
+                @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(5))
+                def create_text_question():
 
-                            st.session_state.messages.append({'role': 'assistant', 'content': all_results})
-                            return user_input, result, user_query
+                    user_input = st.chat_input('Start querying the document here...')
+                    if user_input:
+                        with st.chat_message('user'):
+                            st.markdown(user_input)
 
-            create_text_question()
+                        st.session_state.messages.append({'role': 'user', 'content': user_input})
+
+                        with st.spinner(
+                                text=":red[Query submitted. This may take a minute while we query the documents...]"):
+                            with st.chat_message('assistant'):
+                                message_placeholder = st.empty()
+                                all_results = ''
+                                chat_history = [(user_input, "answer")]
+                                result = query_model({"query": user_input, "chat_history": chat_history})
+                                user_query = result['query']
+                                result = result['chat_history'][1].content
+                                all_results += result
+                                message_placeholder.subheader(f'{all_results}')
+
+                                st.session_state.messages.append({'role': 'assistant', 'content': all_results})
+                                return user_input, result, user_query
+
+                create_text_question()
 
     if len(file_to_upload) == 0:
         st.sidebar.caption(":red[=> No file selected yet!]")
