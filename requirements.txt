@@ -8,3 +8,6 @@ docx2txt==0.8
 textract==1.6.5
 numpy==1.25.1
 langchain==0.0.267
+azure.identity==1.14.0
+azure.keyvault.secrets==4.7.0
+validate_email==1.3
