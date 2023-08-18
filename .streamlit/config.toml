@@ -7,5 +7,5 @@ font="sans serif"
 base="dark"
 [server]
 maxUploadSize = 15
-enableXsrfProtection = false
+enableXsrfProtection = true
 enableCORS = false
