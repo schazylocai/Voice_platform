@@ -1,3 +1,5 @@
+import io
+
 import streamlit as st
 import os
 from dotenv import load_dotenv
@@ -15,7 +17,7 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
 from langchain.vectorstores import SKLearnVectorStore
-
+from langchain.chains.summarize import load_summarize_chain
 
 load_dotenv()  # read local .env file
 secret_key = os.environ['OPENAI_API_KEY']
@@ -48,7 +50,6 @@ def launch_app_eng():
     file_to_upload = st.sidebar.file_uploader(label=':violet[Select PDF, word, or text files to upload]',
                                               type=['pdf', 'docx', 'txt'],
                                               accept_multiple_files=True, key='files')
-    st.sidebar.caption(":violet[Please upload one file after the other and not all at the same time.]")
     st.sidebar.caption(
         ":violet[if you get an Axios error, either delete the file and uploaded it again or refresh the page and "
         "login again or try again after some time!]")
@@ -59,7 +60,7 @@ def launch_app_eng():
         text_list = []
 
     st.title(":violet[GPT Document Analyzer]")
-    st.write(':violet[Upload your PDF files from the left menu & start querying the documents.]')
+    st.write(':violet[Upload your files from the left menu & start querying the documents.]')
 
     if len(file_to_upload) <= max_files:
         for file in file_to_upload:
@@ -127,23 +128,24 @@ def launch_app_eng():
             except Exception as e:
                 catch_exception(file.name)
                 file_uploaded = False
+                st.write(e)
 
-        if file_uploaded:
+        if file_uploaded and len(file_to_upload) > 0:
 
             try:
                 with st.spinner(text=":red[Please wait while we read the documents...]"):
 
-                    chunk_size = 2500
-                    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=100,
+                    chunk_size = 1500
+                    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=200,
                                                                    length_function=len)
                     chunks = text_splitter.split_text(text=str(text_list))
                     chunks = list(chunks)
 
-                    llm = ChatOpenAI(temperature=0.2, model='gpt-4')  # gpt-4 or gpt-3.5-turbo
+                    llm = ChatOpenAI(temperature=0.2, model='gpt-3.5-turbo')  # gpt-4 or gpt-3.5-turbo
                     embedding = OpenAIEmbeddings()
 
                     vector_store = SKLearnVectorStore.from_texts(texts=chunks, embedding=embedding)
-                    retriever = vector_store.as_retriever(search_kwargs={"k": 2})
+                    retriever = vector_store.as_retriever(search_kwargs={"k": 3})
                     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
                     continue_analyze = True
 
@@ -163,7 +165,6 @@ def launch_app_eng():
                 • If you suspect incorrect or misleading information in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is incorrect or misleading". Explain why do yuo think it is incorrect or misleading.
                 • Always reply in a polite and professional manner.
                 • Don't connect or look for answers on the internet.
-                • Only look for answers from the given documents and papers.
                 • If you don't know the answer to the question, then reply: "I can't be confident about my answer because I am missing the context or some information! Please try to be more precise and accurate in your query."
 
                 Divide your answer when possible into paragraphs:
@@ -184,6 +185,9 @@ def launch_app_eng():
                 if 'messages' not in st.session_state:
                     st.session_state.messages = []
 
+                if 'chat_history' not in st.session_state:
+                    st.session_state.chat_history = []
+
                 for message in st.session_state.messages:
                     with st.chat_message(message['role']):
                         st.subheader(message['content'])
@@ -202,7 +206,7 @@ def launch_app_eng():
                 @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(5))
                 def create_text_question():
 
-                    user_input = st.chat_input('Start querying the document here...', max_chars=1000)
+                    user_input = st.chat_input('Start querying the document here...', max_chars=500)
                     if user_input:
                         with st.chat_message('user'):
                             st.markdown(user_input)
@@ -214,10 +218,11 @@ def launch_app_eng():
                             with st.chat_message('assistant'):
                                 message_placeholder = st.empty()
                                 all_results = ''
-                                chat_history = [(user_input, "answer")]
+                                chat_history = st.session_state.chat_history
                                 result = query_model({"query": user_input, "chat_history": chat_history})
                                 user_query = result['query']
                                 result = result['chat_history'][1].content
+                                st.session_state.chat_history.append((user_query, result))
                                 all_results += result
                                 message_placeholder.subheader(f'{all_results}')
 
@@ -228,6 +233,8 @@ def launch_app_eng():
 
     if len(file_to_upload) == 0:
         st.sidebar.caption(":red[=> No file selected yet!]")
+        st.session_state.messages = []
+        text_list = []
 
     elif len(file_to_upload) >= max_files:
         st.sidebar.caption(f":red[=> Maximum number of uploaded files is {max_files}. Please remove some files!]")

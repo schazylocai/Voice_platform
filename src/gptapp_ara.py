@@ -48,8 +48,6 @@ def launch_app_ara():
     change_text_style_arabic_side(" حمل PDF, word, أو أي نص", 'text_violet_side_tight', violet)
     file_to_upload = st.sidebar.file_uploader(label=':violet[➜]', type=['pdf', 'docx', 'txt'],
                                               accept_multiple_files=True, key='files')
-    change_text_style_arabic_side("يرجى تحميل ملف واحد تلو الآخر وليس كلها في نفس الوقت.", 'text_violet_side_tight',
-                                  violet)
     change_text_style_arabic_side(
         "إذا حدث خطأ Axios قم إما بحذف الملف وتحميله مرة أخرى أو قم بتحديث الصفحة وتسجيل الدخول مرة أخرى أو عاود "
         "المحاولة بعد فترة من الوقت",
@@ -131,22 +129,22 @@ def launch_app_ara():
                 catch_exception(file.name)
                 file_uploaded = False
 
-        if file_uploaded:
+        if file_uploaded and len(file_to_upload) > 0:
 
             try:
                 with st.spinner(text=":red[يرجى الانتظار بينما نقرء المستندات...]"):
 
-                    chunk_size = 2500
-                    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=100,
+                    chunk_size = 1500
+                    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=200,
                                                                    length_function=len)
                     chunks = text_splitter.split_text(text=str(text_list))
                     chunks = list(chunks)
 
-                    llm = ChatOpenAI(temperature=0.2, model='gpt-4')  # gpt-4 or gpt-3.5-turbo
+                    llm = ChatOpenAI(temperature=0.2, model='gpt-3.5-turbo')  # gpt-4 or gpt-3.5-turbo
                     embedding = OpenAIEmbeddings()
 
                     vector_store = SKLearnVectorStore.from_texts(texts=chunks, embedding=embedding)
-                    retriever = vector_store.as_retriever(search_kwargs={"k": 2})
+                    retriever = vector_store.as_retriever(search_kwargs={"k": 3})
                     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
                     continue_analyze = True
 
@@ -166,7 +164,6 @@ def launch_app_ara():
                 • If you suspect incorrect or misleading information in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is incorrect or misleading". Explain why do yuo think it is incorrect or misleading.
                 • Always reply in a polite and professional manner.
                 • Don't connect or look for answers on the internet.
-                • Only look for answers from the given documents and papers.
                 • If you don't know the answer to the question, then reply: "أنا لست واثقًا من الإجابة على هذا السؤال بسبب غياب بعض المعلومات. حاول تحديد السؤال بطريقة اخرى."
     
                 Divide your answer when possible into paragraphs:
@@ -187,6 +184,9 @@ def launch_app_ara():
                 if 'messages' not in st.session_state:
                     st.session_state.messages = []
 
+                if 'chat_history' not in st.session_state:
+                    st.session_state.chat_history = []
+
                 for message in st.session_state.messages:
                     with st.chat_message(message['role']):
                         change_text_style_arabic_side(message['content'], 'bot_reply_text', 'white')
@@ -205,7 +205,7 @@ def launch_app_ara():
                 @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(5))
                 def create_text_question():
 
-                    user_input = st.chat_input('ابدأ المحادثة هنا...', max_chars=1000)
+                    user_input = st.chat_input('ابدأ المحادثة هنا...', max_chars=500)
                     if user_input:
                         with st.chat_message('user'):
                             change_text_style_arabic_side(user_input, 'bot_reply_text', 'white')
@@ -216,12 +216,12 @@ def launch_app_ara():
                             with st.chat_message('assistant'):
                                 message_placeholder = st.empty()
                                 all_results = ''
-                                chat_history = [(user_input, "answer")]
+                                chat_history = st.session_state.chat_history
                                 result = query_model({"query": user_input, "chat_history": chat_history})
                                 user_query = result['query']
                                 result = result['chat_history'][1].content
+                                st.session_state.chat_history.append((user_query, result))
                                 all_results += result
-                                # message_placeholder.subheader(f'{all_results}')
                                 font_link = '<link href="https://fonts.googleapis.com/css2?family=Cairo+Play:wght@600;800' \
                                             '&display=swap" rel="stylesheet">'
                                 font_family = "'Cairo Play', sans-serif"
@@ -240,7 +240,6 @@ def launch_app_ara():
                                                         </style>
                                                         <div class="bot_reply_text"><bdi>{all_results}</bdi></div>
                                                         """, unsafe_allow_html=True)
-                                # change_text_style_arabic_side(all_results,'bot_reply_text','white')
 
                                 st.session_state.messages.append({'role': 'assistant', 'content': all_results})
                                 return user_input, result, user_query
@@ -249,6 +248,8 @@ def launch_app_ara():
 
     if len(file_to_upload) == 0:
         change_text_style_arabic_side("لم يتم تحميل أي ملف حتى الآن", 'text_red_side', red)
+        st.session_state.messages = []
+        text_list = []
 
     elif len(file_to_upload) >= max_files:
         change_text_style_arabic_side(("الحد الأقصى لعدد الملفات المحملة هو" + " " + str(max_files)), 'text_red_side',
