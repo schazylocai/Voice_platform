@@ -45,9 +45,27 @@ def launch_app_ara():
     st.session_state.setdefault(key='start')
 
     # upload files
+    file_to_upload = []
     change_text_style_arabic_side(" حمل PDF, word, أو أي نص", 'text_violet_side_tight', violet)
-    file_to_upload = st.sidebar.file_uploader(label=':violet[➜]', type=['pdf', 'docx', 'txt'],
-                                              accept_multiple_files=True, key='files')
+    file_to_upload_1 = st.sidebar.file_uploader(label=':violet[Select PDF, word, or text files to upload]',
+                                                type=['pdf', 'docx', 'txt'], label_visibility='hidden',
+                                                accept_multiple_files=False, key='file_1')
+    change_text_style_arabic_side(" حمل PDF, word, أو أي نص", 'text_violet_side_tight', violet)
+    file_to_upload_2 = st.sidebar.file_uploader(label=':violet[Select PDF, word, or text files to upload]',
+                                                type=['pdf', 'docx', 'txt'], label_visibility='hidden',
+                                                accept_multiple_files=False, key='file_2')
+    change_text_style_arabic_side(" حمل PDF, word, أو أي نص", 'text_violet_side_tight', violet)
+    file_to_upload_3 = st.sidebar.file_uploader(label=':violet[Select PDF, word, or text files to upload]',
+                                                type=['pdf', 'docx', 'txt'], label_visibility='hidden',
+                                                accept_multiple_files=False, key='file_3')
+
+    if file_to_upload_1:
+        file_to_upload.append(file_to_upload_1)
+    if file_to_upload_2:
+        file_to_upload.append(file_to_upload_2)
+    if file_to_upload_3:
+        file_to_upload.append(file_to_upload_3)
+
     change_text_style_arabic_side(
         "إذا حدث خطأ Axios قم إما بحذف الملف وتحميله مرة أخرى أو قم بتحديث الصفحة وتسجيل الدخول مرة أخرى أو عاود "
         "المحاولة بعد فترة من الوقت",
@@ -62,7 +80,7 @@ def launch_app_ara():
     change_text_style_arabic(("GPT" + " " + "محلل المستندات"), 'title', red)
     change_text_style_arabic("قم بتحميل ملفاتك من القائمة اليسرى وابدأ في تحليل المستندات.", 'text_violet', violet)
 
-    if len(file_to_upload) <= max_files:
+    if len(file_to_upload) <= max_files and file_to_upload:
         for file in file_to_upload:
 
             # Check if the upload file is a pdf
@@ -71,12 +89,11 @@ def launch_app_ara():
                     pdf_reader = PyPDF2.PdfReader(file)
                     text = "".join(page.extract_text() for page in pdf_reader.pages)
                     if len(text) > 5:
+                        text = text.replace("<|endofprompt|>", "")
                         text_list.append(f"File: {file.name}")
                         text_list.append(f"Document name: {file.name}")
                         text_list.append(f"Document title: {os.path.splitext(file.name)[0]}")
-                        text_list.append('<| beginning of text |>')
                         text_list.append(text)
-                        text_list.append('<| end of text |>')
                         st.subheader(f':blue[{file.name}]')
                         file_uploaded = True
 
@@ -91,9 +108,7 @@ def launch_app_ara():
                         text_list.append(f"File: {file.name}")
                         text_list.append(f"Document name: {file.name}")
                         text_list.append(f"Document title: {os.path.splitext(file.name)[0]}")
-                        text_list.append('<| beginning of text |>')
                         text_list.append(text)
-                        text_list.append('<| end of text |>')
                         st.subheader(f':blue[{file.name}]')
                         file_uploaded = True
 
@@ -111,9 +126,7 @@ def launch_app_ara():
                             text_list.append(f"File: {file.name}")
                             text_list.append(f"Document name: {file.name}")
                             text_list.append(f"Document title: {os.path.splitext(file.name)[0]}")
-                            text_list.append('<| beginning of text |>')
                             text_list.append(text.decode('utf-8'))
-                            text_list.append('<| end of text |>')
                             st.subheader(f':blue[{file.name}]')
                             file_uploaded = True
 
@@ -128,8 +141,9 @@ def launch_app_ara():
             except Exception as e:
                 catch_exception(file.name)
                 file_uploaded = False
+                # st.write(e)
 
-        if file_uploaded and len(file_to_upload) > 0:
+        if file_uploaded and file_to_upload:
 
             try:
                 with st.spinner(text=":red[يرجى الانتظار بينما نقرء المستندات...]"):
@@ -140,7 +154,7 @@ def launch_app_ara():
                     chunks = text_splitter.split_text(text=str(text_list))
                     chunks = list(chunks)
 
-                    llm = ChatOpenAI(temperature=0.2, model='gpt-3.5-turbo')  # gpt-4 or gpt-3.5-turbo
+                    llm = ChatOpenAI(temperature=0.5, model='gpt-4')  # gpt-4 or gpt-3.5-turbo
                     embedding = OpenAIEmbeddings()
 
                     vector_store = SKLearnVectorStore.from_texts(texts=chunks, embedding=embedding)
@@ -246,7 +260,7 @@ def launch_app_ara():
 
                 create_text_question()
 
-    if len(file_to_upload) == 0:
+    if not file_to_upload:
         change_text_style_arabic_side("لم يتم تحميل أي ملف حتى الآن", 'text_red_side', red)
         st.session_state.messages = []
         text_list = []
