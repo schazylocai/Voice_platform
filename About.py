@@ -33,7 +33,7 @@ def change_language_to_Arabic():
     write_Arabic_About()
 
     st.session_state.subscribed_status = check_customers_ara()
-    st.session_state.messages = []
+    st.session_state.messages_files = []
     subscribe_to_service_ara()
     cancel_service_ara()
     forgot_password_ara()
@@ -44,7 +44,7 @@ def change_language_to_English():
     write_english_About()
 
     st.session_state.subscribed_status = check_customers_eng()
-    st.session_state.messages = []
+    st.session_state.messages_files = []
     subscribe_to_service_eng()
     cancel_service_eng()
     forgot_password_eng()
