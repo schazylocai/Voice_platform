@@ -277,7 +277,7 @@ def launch_app_ara():
                                  'text_violet', violet)
         st.session_state.function_choice = st.selectbox(label='Select',
                                                         options=(['تحميل الملفات', 'الروابط على الإنترنت']),
-                                                        label_visibility='hidden')
+                                                        label_visibility='hidden', key='choice_type_ara')
         if st.session_state.function_choice == 'تحميل الملفات':
             st.session_state.function_choice = 'Documents'
         elif st.session_state.function_choice == 'الروابط على الإنترنت':
@@ -297,19 +297,19 @@ def launch_app_ara():
             change_text_style_arabic_side(" حمل PDF, word, أو أي نص", 'text_violet_side_tight', violet)
             file_1 = st.sidebar.file_uploader(label=':violet[Select PDF, word, or text files to upload]',
                                               type=['pdf', 'docx', 'txt'], label_visibility='hidden',
-                                              accept_multiple_files=False, key='file_1')
+                                              accept_multiple_files=False, key='file_1_ara')
             st.session_state.file_to_upload_1 = file_1 or None
 
             change_text_style_arabic_side(" حمل PDF, word, أو أي نص", 'text_violet_side_tight', violet)
             file_2 = st.sidebar.file_uploader(label=':violet[Select PDF, word, or text files to upload]',
                                               type=['pdf', 'docx', 'txt'], label_visibility='hidden',
-                                              accept_multiple_files=False, key='file_2')
+                                              accept_multiple_files=False, key='file_2_ara')
             st.session_state.file_to_upload_2 = file_2 or None
 
             change_text_style_arabic_side(" حمل PDF, word, أو أي نص", 'text_violet_side_tight', violet)
             file_3 = st.sidebar.file_uploader(label=':violet[Select PDF, word, or text files to upload]',
                                               type=['pdf', 'docx', 'txt'], label_visibility='hidden',
-                                              accept_multiple_files=False, key='file_3')
+                                              accept_multiple_files=False, key='file_3_ara')
             st.session_state.file_to_upload_3 = file_3 or None
 
         ################################# If choice is weblinks #################################
@@ -328,22 +328,22 @@ def launch_app_ara():
             st.sidebar.write("")
 
             change_text_style_arabic_side("الرابط رقم ١", 'text_violet_side_tight', violet)
-            st.session_state.weblink_1 = st.sidebar.text_input(label=':violet[weblink 1]', key='web_1',
+            st.session_state.weblink_1 = st.sidebar.text_input(label=':violet[weblink 1]', key='web_1_ara',
                                                                label_visibility='hidden')
             weblink_button_1 = st.sidebar.button(label=':violet[قم بتحميل الرابط الإلكتروني]', use_container_width=True,
-                                                 key='web_s_1')
+                                                 key='web_s_1_ara')
 
             change_text_style_arabic_side("الرابط رقم ٢", 'text_violet_side_tight', violet)
-            st.session_state.weblink_2 = st.sidebar.text_input(label=':violet[weblink 2]', key='web_2',
+            st.session_state.weblink_2 = st.sidebar.text_input(label=':violet[weblink 2]', key='web_2_ara',
                                                                label_visibility='hidden')
             weblink_button_2 = st.sidebar.button(label=':violet[قم بتحميل الرابط الإلكتروني]', use_container_width=True,
-                                                 key='web_s_2')
+                                                 key='web_s_2_ara')
 
             change_text_style_arabic_side("الرابط رقم ٣", 'text_violet_side_tight', violet)
-            st.session_state.weblink_3 = st.sidebar.text_input(label=':violet[weblink 3]', key='web_3',
+            st.session_state.weblink_3 = st.sidebar.text_input(label=':violet[weblink 3]', key='web_3_ara',
                                                                label_visibility='hidden')
             weblink_button_3 = st.sidebar.button(label=':violet[قم بتحميل الرابط الإلكتروني]', use_container_width=True,
-                                                 key='web_s_3')
+                                                 key='web_s_3_ara')
 
             if weblink_button_1 and st.session_state.weblink_1:
                 st.session_state.web_text_list_1 = is_web_link(st.session_state.weblink_1)
@@ -516,7 +516,7 @@ def launch_app_ara():
                 def create_text_question():
 
                     user_input = st.chat_input('...ابدأ المحادثة هنا', max_chars=500,
-                                               key='files_input')
+                                               key='files_input_ara')
                     if user_input:
                         with st.chat_message('user'):
                             st.markdown(user_input)
@@ -601,7 +601,7 @@ def launch_app_ara():
                 def create_text_question():
 
                     user_input = st.chat_input('...ابدأ المحادثة هنا', max_chars=500,
-                                               key='weblinks_input')
+                                               key='weblinks_input_ara')
                     if user_input:
                         with st.chat_message('user'):
                             st.markdown(user_input)

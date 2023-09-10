@@ -30,6 +30,8 @@ red = "rgb(232,89,83)"
 
 def change_language_to_Arabic():
     st.divider()
+    change_text_style_arabic("الآن، يمكنك أيضًا التفاعل مباشرة مع أي موقع على الإنترنت واستعلام المعلومات التي يقدمه الموقع...", 'subhead', violet)
+    st.divider()
     write_Arabic_About()
 
     st.session_state.subscribed_status = check_customers_ara()
@@ -40,6 +42,9 @@ def change_language_to_Arabic():
 
 
 def change_language_to_English():
+    st.divider()
+    st.subheader(
+        ':violet[Now, you can as well interact directly with any website and query the information it provides...]')
     st.divider()
     write_english_About()
 

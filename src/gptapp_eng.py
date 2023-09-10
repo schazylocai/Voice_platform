@@ -271,7 +271,7 @@ def launch_app_eng():
         st.subheader(':violet[Choose between :red[Documents] or :red[Weblinks]]')
         st.write(':violet[Upload your files or weblinks from the left menu with the arrow.]')
         st.session_state.function_choice = st.selectbox(label='Select', options=(['Documents', 'Weblinks']),
-                                                        label_visibility='hidden')
+                                                        label_visibility='hidden', key='choice_type_eng')
 
         ################################# If choice is documents #################################
         if st.session_state.function_choice == 'Documents':
@@ -288,21 +288,21 @@ def launch_app_eng():
                 label=':violet[Select PDF, word, or text'
                       'files to upload]',
                 type=['pdf', 'docx', 'txt'],
-                accept_multiple_files=False, key='file_1',
+                accept_multiple_files=False, key='file_1_eng',
                 label_visibility='hidden')
             st.session_state.file_to_upload_1 = file_1 or None
 
             file_2 = st.sidebar.file_uploader(
                 label=':violet[Select PDF, word, or text files to upload]',
                 type=['pdf', 'docx', 'txt'],
-                accept_multiple_files=False, key='file_2',
+                accept_multiple_files=False, key='file_2_eng',
                 label_visibility='hidden')
             st.session_state.file_to_upload_2 = file_2 or None
 
             file_3 = st.sidebar.file_uploader(
                 label=':violet[Select PDF, word, or text files to upload]',
                 type=['pdf', 'docx', 'txt'],
-                accept_multiple_files=False, key='file_3',
+                accept_multiple_files=False, key='file_3_eng',
                 label_visibility='hidden')
             st.session_state.file_to_upload_3 = file_3 or None
 
@@ -319,15 +319,15 @@ def launch_app_eng():
 
             st.sidebar.write(
                 ':violet[Please copy the :red[http] or :red[https] link from your browser and paste it here]')
-            st.session_state.weblink_1 = st.sidebar.text_input(label=':violet[weblink 1]', key='web_1')
+            st.session_state.weblink_1 = st.sidebar.text_input(label=':violet[weblink 1]', key='web_1_eng')
             weblink_button_1 = st.sidebar.button(label=':violet[Upload weblink]', use_container_width=True,
-                                                 key='web_s_1')
-            st.session_state.weblink_2 = st.sidebar.text_input(label=':violet[weblink 2]', key='web_2')
+                                                 key='web_s_1_eng')
+            st.session_state.weblink_2 = st.sidebar.text_input(label=':violet[weblink 2]', key='web_2_eng')
             weblink_button_2 = st.sidebar.button(label=':violet[Upload weblink]', use_container_width=True,
-                                                 key='web_s_2')
-            st.session_state.weblink_3 = st.sidebar.text_input(label=':violet[weblink 3]', key='web_3')
+                                                 key='web_s_2_eng')
+            st.session_state.weblink_3 = st.sidebar.text_input(label=':violet[weblink 3]', key='web_3_eng')
             weblink_button_3 = st.sidebar.button(label=':violet[Upload weblink]', use_container_width=True,
-                                                 key='web_s_3')
+                                                 key='web_s_3_eng')
 
             if weblink_button_1 and st.session_state.weblink_1:
                 st.session_state.web_text_list_1 = is_web_link(st.session_state.weblink_1)
@@ -499,7 +499,7 @@ def launch_app_eng():
                 def create_text_question():
 
                     user_input = st.chat_input('Start querying the document here...', max_chars=500,
-                                               key='files_input')
+                                               key='files_input_eng')
                     if user_input:
                         with st.chat_message('user'):
                             st.markdown(user_input)
@@ -567,7 +567,7 @@ def launch_app_eng():
                 def create_text_question():
 
                     user_input = st.chat_input('Start querying the document here...', max_chars=500,
-                                               key='weblinks_input')
+                                               key='weblinks_input_eng')
                     if user_input:
                         with st.chat_message('user'):
                             st.markdown(user_input)
