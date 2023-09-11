@@ -55,6 +55,23 @@ def change_text_style_arabic(text_body, font_type, color):
                         <div class="sub-text"><bdi>{text_body}</bdi></div>
                         """, unsafe_allow_html=True)
 
+    elif font_type == 'subhead_new_item':
+        st.markdown(
+            f"""
+                        {font_link}
+                        <style>
+                            .sub-text_new_item {{
+                                font-family: {font_family};
+                                font-size: 24px;
+                                color: {color};
+                                text-align: right;
+                                line-height: 2;
+                                font-weight: 600;
+                            }}
+                        </style>
+                        <div class="sub-text_new_item"><bdi>{text_body}</bdi></div>
+                        """, unsafe_allow_html=True)
+
     elif font_type == 'text_violet':
         st.markdown(
             f"""
@@ -70,6 +87,23 @@ def change_text_style_arabic(text_body, font_type, color):
                             }}
                         </style>
                         <div class="normal-text"><bdi>{text_body}</bdi></div>
+                        """, unsafe_allow_html=True)
+
+    elif font_type == 'main_text_white':
+        st.markdown(
+            f"""
+                        {font_link}
+                        <style>
+                            .light-text {{
+                                font-family: {font_family};
+                                font-size: 18px;
+                                color: {color};
+                                text-align: right;
+                                line-height: 2.2;
+                                font-weight: 600;
+                            }}
+                        </style>
+                        <div class="light-text"><bdi>{text_body}</bdi></div>
                         """, unsafe_allow_html=True)
 
     elif font_type == 'text_white':
@@ -231,6 +265,7 @@ def change_text_style_arabic_side(text_body, font_type, color):
                         <div class="bot_reply_text"><bdi>{text_body}</bdi></div>
                         """, unsafe_allow_html=True)
 
+
 def change_text_style_english(text_body, font_type, color):
     font_link_eng = '<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">'
     font_family_eng = "'Roboto', sans-serif"
@@ -319,3 +354,20 @@ def change_text_style_english(text_body, font_type, color):
                             </style>
                             <div class="bold-text"><bdi>{text_body}</bdi></div>
                             """, unsafe_allow_html=True)
+
+    elif font_type == 'main_text_white':
+        st.markdown(
+            f"""
+                {font_link_eng}
+                <style>
+                    .bold-text {{
+                        font-family: {font_family_eng};
+                        font-size: 22px;
+                        color: {color};
+                        text-align: left;
+                        line-height: 2.2;
+                        font-weight: 400;
+                    }}
+                </style>
+                <div class="bold-text"><bdi>{text_body}</bdi></div>
+                """, unsafe_allow_html=True)

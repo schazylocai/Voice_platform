@@ -16,8 +16,12 @@ load_dotenv()  # read local .env file
 st.set_page_config(layout="wide", initial_sidebar_state='expanded', page_icon="🔬", page_title='GPT Document Analyzer')
 connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
 
+st.session_state.setdefault("mylanguage", 'العربية')
+
 if 'mylanguage' not in st.session_state:
     st.session_state.mylanguage = 'العربية'
+
+st.session_state.setdefault("user_status", 'False')
 
 if 'user_status' not in st.session_state:
     st.session_state.user_status = 'False'
@@ -30,12 +34,11 @@ red = "rgb(232,89,83)"
 
 def change_language_to_Arabic():
     st.divider()
-    change_text_style_arabic("الآن، يمكنك أيضًا التفاعل مباشرة مع أي موقع على الإنترنت واستعلام المعلومات التي يقدمه الموقع...", 'subhead', violet)
+    change_text_style_arabic('☘️︎ يمكنك الآن التفاعل مباشرة مع أي موقع على الإنترنت واستعلام المعلومات التي يقدمه الموقع عبر الضغط على "GPTwebApp"', 'subhead_new_item', violet)
     st.divider()
     write_Arabic_About()
 
     st.session_state.subscribed_status = check_customers_ara()
-    st.session_state.messages_files = []
     subscribe_to_service_ara()
     cancel_service_ara()
     forgot_password_ara()
@@ -44,12 +47,11 @@ def change_language_to_Arabic():
 def change_language_to_English():
     st.divider()
     st.subheader(
-        ':violet[Now, you can as well interact directly with any website and query the information it provides...]')
+        ':violet[☘️ You can now interact with any website and query the information it provides by click on "GPTwebApp"]')
     st.divider()
     write_english_About()
 
     st.session_state.subscribed_status = check_customers_eng()
-    st.session_state.messages_files = []
     subscribe_to_service_eng()
     cancel_service_eng()
     forgot_password_eng()
