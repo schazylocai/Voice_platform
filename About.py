@@ -47,7 +47,7 @@ def change_language_to_Arabic():
 def change_language_to_English():
     st.divider()
     st.subheader(
-        ':violet[☘️ You can now interact with any website and query the information it provides by click on "GPTwebApp"]')
+        ':violet[☘️ You can now interact with any website and query the information it provides by clicking on "GPTwebApp"]')
     st.divider()
     write_english_About()
 

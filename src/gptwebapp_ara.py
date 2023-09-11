@@ -198,7 +198,7 @@ def launch_web_app_ara():
                 embedding = OpenAIEmbeddings()
 
                 vector_store = SKLearnVectorStore.from_texts(texts=chunks, embedding=embedding)
-                retriever = vector_store.as_retriever(search_kwargs={"k": 3})
+                retriever = vector_store.as_retriever(search_kwargs={"k": 1})
                 memory_weblinks = ConversationBufferMemory(memory_key="chat_history_weblinks_ara", return_messages=True)
                 st.session_state.continue_analysis_weblink_ara = True
 
