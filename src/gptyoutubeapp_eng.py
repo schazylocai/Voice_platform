@@ -106,19 +106,19 @@ def launch_youtube_app_eng():
                         if result:
                             return result
                         st.subheader(":red[Couldn't extract any information from this website]")
-                        return [], []
+                        return []
 
                     except Exception as e:
-                        return [], []
+                        return []
 
                 else:
                     st.subheader(
                         f":red[This website: {url} didn't give us permission to access it. Response:")
-                return [], []
+                return []
 
             except requests.exceptions.RequestException:
                 st.sidebar.subheader(':red[Not a valid weblink!]')
-                return [], []
+                return []
 
         else:
             st.sidebar.subheader(':red[Not a valid weblink!]')

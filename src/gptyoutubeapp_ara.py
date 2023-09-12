@@ -110,10 +110,10 @@ def launch_youtube_app_ara():
                         if result:
                             return result
                         change_text_style_arabic("لم يمكن استخراج أي معلومات من هذا الموقع", 'text_red', red)
-                        return [], []
+                        return []
 
                     except Exception as e:
-                        return [], []
+                        return []
 
                 else:
                     change_text_style_arabic(
@@ -121,11 +121,11 @@ def launch_youtube_app_ara():
                         'text_red',
                         red,
                     )
-                return [], []
+                return []
 
             except requests.exceptions.RequestException:
                 change_text_style_arabic_side("هذا الرابط غير صالح", 'subhead_side_red', red)
-                return [], []
+                return []
 
         else:
             change_text_style_arabic_side("هذا الرابط غير صالح", 'subhead_side_red', red)
