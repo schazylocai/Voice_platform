@@ -34,7 +34,7 @@ red = "rgb(232,89,83)"
 
 def change_language_to_Arabic():
     st.divider()
-    change_text_style_arabic('☘️︎ يمكنك الآن التفاعل مباشرة مع أي موقع على الإنترنت واستعلام المعلومات التي يقدمه الموقع عبر الضغط على "GPTwebApp"', 'subhead_new_item', violet)
+    change_text_style_arabic('☘️︎ بإستطاعتك الآن التفاعل مباشرة مع أي ملف أو أي موقع على الإنترنت أو أي شريط ڤيديو من موقع يوتيوب عبر الضغط على "GPTdoc" أو "GPTweb" أو "GPTyoutube"', 'subhead_new_item', violet)
     st.divider()
     write_Arabic_About()
 
@@ -47,7 +47,7 @@ def change_language_to_Arabic():
 def change_language_to_English():
     st.divider()
     st.subheader(
-        ':violet[☘️ You can now interact with any website and query the information it provides by clicking on "GPTwebApp"]')
+        ':violet[☘️ You can now interact with any document, website, or Youtube video by clicking on "GPTdoc", "GPTweb" or "GPTyoutube".]')
     st.divider()
     write_english_About()
 

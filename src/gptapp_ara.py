@@ -80,7 +80,7 @@ def launch_app_ara():
         with col2:
             change_text_style_arabic(
                 ("لم يمكن تحميل الملف. يحتوي الملف" + " " + file_name + " " + ".على بعض الشوائب!" + " " + "يرجى حذفه."),
-                'subhead', red)
+                'subhead', 'red')
         return False
 
     ######################################### Clear all files #########################################

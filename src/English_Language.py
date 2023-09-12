@@ -16,16 +16,16 @@ def write_english_About():
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.write(":red[Unlock the Power of AI & ] :blue[GPT4]:red[ to Query Your Documents.]")
+        st.write(":red[Unlock the Power of AI & ] :blue[GPT4].")
         st.header(
             ":violet[Welcome to GPT Document Analyzer, a revolutionary application that leverages the capabilities of Large Language Models.]")
 
     with col2:
         st.write(":red[What can this model do for you?]")
         st.subheader(
-            ":violet[With this cutting-edge tool, you can effortlessly upload multiple PDF, word, or text documents and interact with them like never before.]")
+            ":violet[With this cutting-edge tool, you can effortlessly upload documents, web links, or Youtube videos to interact with them like never before.]")
         st.write(
-            ":violet[Pose questions, extract valuable information, analyze content, and generate concise summaries directly from your uploaded documents.]")
+            ":violet[Pose questions, extract valuable information, analyze content, and generate concise summaries.]")
         st.write(":violet[➜ Watch the video to see how this model works!]")
 
     with col3:
@@ -39,38 +39,38 @@ def write_english_About():
         ":violet[Cancellation must be initiated before the 1-day trial period elapses if you do not wish to continue.]")
 
     def Terms():
-        # section 4
-        with st.expander(":violet[Q&A / Tips]"):
-            st.write(":violet[A- What is GPT-Doc Analyzer?]")
-            st.caption(
-                "GPT-Doc Analyzer is a tool that uses large language models GPT4 to analyze and summarize documents. It can be used to extract key insights from documents, identify important topics, and generate summaries that are both accurate and concise.")
-            st.write(":violet[B- How does GPT-Doc Analyzer work?]")
-            st.caption(
-                "GPT-Doc Analyzer uses a large language model to process the text of a document. The language model is trained on a massive dataset of text and code, and it can learn to recognize patterns and relationships in language. This allows the language model to extract key insights from documents, identify important topics, and generate summaries that are both accurate and concise.")
-            st.write(":violet[C- What are the benefits of using GPT-Doc Analyzer?]")
-            st.caption("There are many benefits to using GPT-Doc Analyzer, including:")
-            st.caption(
-                "• Increased productivity: GPT-Doc Analyzer can help you to save time by automating the process of analyzing and summarizing documents.")
-            st.caption(
-                "• Improved accuracy: GPT-Doc Analyzer can help you to produce more accurate summaries by identifying the most important information in a document.")
-            st.caption(
-                "• Better insights: GPT-Doc Analyzer can help you to gain new insights into documents by identifying patterns and relationships in the text.")
-            st.write(":violet[D- How can I use GPT-Doc Analyzer?]")
-            st.caption(
-                "GPT-Doc Analyzer is easy to use. Simply upload a document to the website, ask a question related to the uploaded document, and GPT-Doc Analyzer will analyze the document.")
-            st.write(":violet[E- What are the limitations of GPT-Doc Analyzer?]")
-            st.caption(
-                "GPT-Doc Analyzer is a powerful tool, but it has some limitations. It is not able to handle all types of documents. Here are some specific limitations to keep in mind:")
-            st.caption(
-                "• As a general rule, the uploaded documents should contain images that do not exceed 40% of the total content.")
-            st.caption("• If the document hangs and stops from uploading, then delete it and try again.")
-            st.caption(
-                "• This model is suitable for research papers, text-based documents, and not illustrative books and stories.")
-            st.write(":violet[F- Here are some tips for using GPT-Doc Analyzer]")
-            st.caption("• Choose documents that are well-written and easy to understand.")
-            st.caption("• Avoid documents that are too long or too complex.")
-            st.caption(
-                "• If you are not sure if a document is suitable for GPT-Doc Analyzer, try uploading a small portion of it first.")
+        # # section 4
+        # with st.expander(":violet[Q&A / Tips]"):
+        #     st.write(":violet[A- What is GPT-Doc Analyzer?]")
+        #     st.caption(
+        #         "GPT-Doc Analyzer is a tool that uses large language models GPT4 to analyze and summarize documents. It can be used to extract key insights from documents, identify important topics, and generate summaries that are both accurate and concise.")
+        #     st.write(":violet[B- How does GPT-Doc Analyzer work?]")
+        #     st.caption(
+        #         "GPT-Doc Analyzer uses a large language model to process the text of a document. The language model is trained on a massive dataset of text and code, and it can learn to recognize patterns and relationships in language. This allows the language model to extract key insights from documents, identify important topics, and generate summaries that are both accurate and concise.")
+        #     st.write(":violet[C- What are the benefits of using GPT-Doc Analyzer?]")
+        #     st.caption("There are many benefits to using GPT-Doc Analyzer, including:")
+        #     st.caption(
+        #         "• Increased productivity: GPT-Doc Analyzer can help you to save time by automating the process of analyzing and summarizing documents.")
+        #     st.caption(
+        #         "• Improved accuracy: GPT-Doc Analyzer can help you to produce more accurate summaries by identifying the most important information in a document.")
+        #     st.caption(
+        #         "• Better insights: GPT-Doc Analyzer can help you to gain new insights into documents by identifying patterns and relationships in the text.")
+        #     st.write(":violet[D- How can I use GPT-Doc Analyzer?]")
+        #     st.caption(
+        #         "GPT-Doc Analyzer is easy to use. Simply upload a document to the website, ask a question related to the uploaded document, and GPT-Doc Analyzer will analyze the document.")
+        #     st.write(":violet[E- What are the limitations of GPT-Doc Analyzer?]")
+        #     st.caption(
+        #         "GPT-Doc Analyzer is a powerful tool, but it has some limitations. It is not able to handle all types of documents. Here are some specific limitations to keep in mind:")
+        #     st.caption(
+        #         "• As a general rule, the uploaded documents should contain images that do not exceed 40% of the total content.")
+        #     st.caption("• If the document hangs and stops from uploading, then delete it and try again.")
+        #     st.caption(
+        #         "• This model is suitable for research papers, text-based documents, and not illustrative books and stories.")
+        #     st.write(":violet[F- Here are some tips for using GPT-Doc Analyzer]")
+        #     st.caption("• Choose documents that are well-written and easy to understand.")
+        #     st.caption("• Avoid documents that are too long or too complex.")
+        #     st.caption(
+        #         "• If you are not sure if a document is suitable for GPT-Doc Analyzer, try uploading a small portion of it first.")
 
         with st.expander(":violet[Privacy Policy]"):
             st.caption(

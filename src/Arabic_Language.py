@@ -17,7 +17,7 @@ def write_Arabic_About():
     col1, col2, col3 = st.columns(3)
 
     with col3:
-        change_text_style_arabic("استفد من قوة الذكاء الاصطناعي لتحليل وثائقك.", 'text_red', red)
+        change_text_style_arabic("استفد من قوة الذكاء الاصطناعي.", 'text_red', red)
         st.markdown("")
         change_text_style_arabic("أهلآً بك في محلل المستندات. التطبيق الثوري الذي يستغل قدرات النماذج اللغوية الكبيرة.",
                           'head', violet)
@@ -26,11 +26,11 @@ def write_Arabic_About():
         change_text_style_arabic("ما الذي يمكن لهذا النموذج أن يفعله لك؟", 'text_red', red)
         st.markdown("")
         change_text_style_arabic(
-            "مع هذه الأداة المتقدمة، يمكنك بسهولة تحميل عدة مستندات PDF، Word، أو نص والتفاعل معها كما لم تفعل من قبل",
+            "مع هذه الأداة المتقدمة، يمكنك بسهولة التفاعل مع المستندات أو المواقع الإلكترونية أو موقع يوتيوب كما لم تفعل من قبل.",
             'subhead', violet)
         st.markdown("")
         change_text_style_arabic(
-            "توجه بأسئلة، استخرج معلومات قيمة، قم بتحليل المحتوى، وانتج ملخصات موجزة مباشرة من المستندات التي تم تحميلها!",
+            "إطرح الأسئلة، استخرج معلومات قيمة، أو قم بتحليل المحتوى، وانتج ملخصات موجزة.!",
             'text_violet', violet)
         st.markdown("")
         change_text_style_arabic("شاهد الفيديو لترى كيف يعمل هذا النموذج ⬅︎", 'text_violet', violet)
@@ -44,35 +44,35 @@ def write_Arabic_About():
     change_text_style_arabic("اشترك للوصول إلى الإمكانات الكاملة لنموذج الذكاء الاصطناعي لدينا.", 'text_violet', violet)
 
     def Terms_ara():
-        # section 4
-        change_text_style_arabic("الأسئلة والأجوبة / نصائح",'text_violet',violet)
-        st.caption("")
-        with st.expander(""):
-            change_text_style_arabic("ما هو محلل الوثائق هذا؟",'text_violet',violet)
-            change_text_style_arabic("محلل الوثائق هو أداة تستخدم نماذج لغوية كبيرة لتحليل وتلخيص الوثائق. يمكن استخدامها لاستخلاص الأفكار الرئيسية من الوثائق، وتحديد المواضيع المهمة، وإنشاء ملخصات دقيقة وموجزة",'text_white',white)
-
-            change_text_style_arabic("كيف يعمل محلل الوثائق؟",'text_violet',violet)
-            change_text_style_arabic("محلل المستندات يستخدم نموذج لغوي ضخم لمعالجة نص المستند. يتم تدريب النموذج اللغوي على مجموعة بيانات ضخمة تتضمن نصوصًا وشفرات، ويمكن للنموذج أن يتعلم التعرف على الأنماط والعلاقات في اللغة. يتيح هذا للنموذج اللغوي استخلاص الأفكار الرئيسية من المستندات، وتحديد المواضيع المهمة، وإنشاء ملخصات دقيقة وموجزة في نفس الوقت",'text_white',white)
-
-            change_text_style_arabic("ما هي فوائد استخدام محلل الوثائق؟",'text_violet',violet)
-            change_text_style_arabic("هناك العديد من الفوائد في استخدام محلل المستندات، بما في ذلك",'text_white',white)
-            change_text_style_arabic("زيادة الإنتاجية: يمكن لمحلل المستندات مساعدتك في توفير الوقت من خلال أتمتة عملية تحليل وتلخيص المستندات",'text_white',white)
-            change_text_style_arabic("تحسين الدقة: يمكن لمحلل المستندات مساعدتك في إنتاج ملخصات أكثر دقة من خلال تحديد المعلومات الأكثر أهمية في المستند",'text_white',white)
-            change_text_style_arabic("رؤى أفضل: يمكن لمحلل المستندات مساعدتك في الحصول على رؤى جديدة في المستندات من خلال تحديد الأنماط والعلاقات في النص",'text_white',white)
-
-            change_text_style_arabic("كيف يمكنني استخدام محلل المستندات؟",'text_violet',violet)
-            change_text_style_arabic("محلل المستندات سهل الاستخدام. قم ببساطة بتحميل المستند إلى الموقع الإلكتروني، ثم اطرح سؤالاً متعلقاً بالمستند المحمل، وسيقوم محلل المستندات بتحليل المستند",'text_white',white)
-
-            change_text_style_arabic("ما هي قيود محلل المستندات؟",'text_violet',violet)
-            change_text_style_arabic("محلل المستندات هو أداة قوية، ولكن لديه بعض القيود. فهو غير قادر على التعامل مع جميع أنواع المستندات. فيما يلي بعض القيود المحددة للأخذ في الاعتبار",'text_white',white)
-            change_text_style_arabic("بشكل عام، يجب أن يحتوي المستندات المحملة على صور لا تزيد نسبتها عن 40٪ من المحتوى الإجمالي",'text_white',white)
-            change_text_style_arabic("إذا توقف المستند عن التحميل وتعلق، فيجب حذفه والمحاولة مرة أخرى",'text_white',white)
-            change_text_style_arabic("هذا النموذج مناسب لأوراق البحث والمستندات المستندة إلى النص، وليس الكتب الموضوعية والقصص",'text_white',white)
-
-            change_text_style_arabic("وإليك بعض النصائح لاستخدام محلل المستندات",'text_violet',violet)
-            change_text_style_arabic("اختر مستندات مكتوبة بشكل جيد وسهلة الفهم",'text_white',white)
-            change_text_style_arabic("تجنب المستندات التي تكون طويلة جدًا أو معقدة للغاية",'text_white',white)
-            change_text_style_arabic("إذا لم تكن متأكدًا مما إذا كان المستند مناسبًا لمحلل المستندات، جرب تحميل جزء صغير منه أولاً",'text_white',white)
+        # # section 4
+        # change_text_style_arabic("الأسئلة والأجوبة / نصائح",'text_violet',violet)
+        # st.caption("")
+        # with st.expander(""):
+        #     change_text_style_arabic("ما هو محلل الوثائق هذا؟",'text_violet',violet)
+        #     change_text_style_arabic("محلل الوثائق هو أداة تستخدم نماذج لغوية كبيرة لتحليل وتلخيص الوثائق. يمكن استخدامها لاستخلاص الأفكار الرئيسية من الوثائق، وتحديد المواضيع المهمة، وإنشاء ملخصات دقيقة وموجزة",'text_white',white)
+        #
+        #     change_text_style_arabic("كيف يعمل محلل الوثائق؟",'text_violet',violet)
+        #     change_text_style_arabic("محلل المستندات يستخدم نموذج لغوي ضخم لمعالجة نص المستند. يتم تدريب النموذج اللغوي على مجموعة بيانات ضخمة تتضمن نصوصًا وشفرات، ويمكن للنموذج أن يتعلم التعرف على الأنماط والعلاقات في اللغة. يتيح هذا للنموذج اللغوي استخلاص الأفكار الرئيسية من المستندات، وتحديد المواضيع المهمة، وإنشاء ملخصات دقيقة وموجزة في نفس الوقت",'text_white',white)
+        #
+        #     change_text_style_arabic("ما هي فوائد استخدام محلل الوثائق؟",'text_violet',violet)
+        #     change_text_style_arabic("هناك العديد من الفوائد في استخدام محلل المستندات، بما في ذلك",'text_white',white)
+        #     change_text_style_arabic("زيادة الإنتاجية: يمكن لمحلل المستندات مساعدتك في توفير الوقت من خلال أتمتة عملية تحليل وتلخيص المستندات",'text_white',white)
+        #     change_text_style_arabic("تحسين الدقة: يمكن لمحلل المستندات مساعدتك في إنتاج ملخصات أكثر دقة من خلال تحديد المعلومات الأكثر أهمية في المستند",'text_white',white)
+        #     change_text_style_arabic("رؤى أفضل: يمكن لمحلل المستندات مساعدتك في الحصول على رؤى جديدة في المستندات من خلال تحديد الأنماط والعلاقات في النص",'text_white',white)
+        #
+        #     change_text_style_arabic("كيف يمكنني استخدام محلل المستندات؟",'text_violet',violet)
+        #     change_text_style_arabic("محلل المستندات سهل الاستخدام. قم ببساطة بتحميل المستند إلى الموقع الإلكتروني، ثم اطرح سؤالاً متعلقاً بالمستند المحمل، وسيقوم محلل المستندات بتحليل المستند",'text_white',white)
+        #
+        #     change_text_style_arabic("ما هي قيود محلل المستندات؟",'text_violet',violet)
+        #     change_text_style_arabic("محلل المستندات هو أداة قوية، ولكن لديه بعض القيود. فهو غير قادر على التعامل مع جميع أنواع المستندات. فيما يلي بعض القيود المحددة للأخذ في الاعتبار",'text_white',white)
+        #     change_text_style_arabic("بشكل عام، يجب أن يحتوي المستندات المحملة على صور لا تزيد نسبتها عن 40٪ من المحتوى الإجمالي",'text_white',white)
+        #     change_text_style_arabic("إذا توقف المستند عن التحميل وتعلق، فيجب حذفه والمحاولة مرة أخرى",'text_white',white)
+        #     change_text_style_arabic("هذا النموذج مناسب لأوراق البحث والمستندات المستندة إلى النص، وليس الكتب الموضوعية والقصص",'text_white',white)
+        #
+        #     change_text_style_arabic("وإليك بعض النصائح لاستخدام محلل المستندات",'text_violet',violet)
+        #     change_text_style_arabic("اختر مستندات مكتوبة بشكل جيد وسهلة الفهم",'text_white',white)
+        #     change_text_style_arabic("تجنب المستندات التي تكون طويلة جدًا أو معقدة للغاية",'text_white',white)
+        #     change_text_style_arabic("إذا لم تكن متأكدًا مما إذا كان المستند مناسبًا لمحلل المستندات، جرب تحميل جزء صغير منه أولاً",'text_white',white)
 
         change_text_style_arabic("سياسة الخصوصية", 'text_violet', violet)
         st.caption("")
