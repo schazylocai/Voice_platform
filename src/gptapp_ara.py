@@ -240,7 +240,7 @@ def launch_app_ara():
     ####################################### Write chat history #######################################
     for message in st.session_state.messages_files_ara:
         with st.chat_message(message['role']):
-            change_text_style_arabic(message['content'], 'main_text_white', 'white')
+            change_text_style_arabic(message['content'], 'subhead', 'white')
 
     ######################################### Run LLM sequence #########################################
     if text_list:

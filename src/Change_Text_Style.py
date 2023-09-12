@@ -365,7 +365,7 @@ def change_text_style_english(text_body, font_type, color):
                         font-size: 22px;
                         color: {color};
                         text-align: left;
-                        line-height: 2.2;
+                        line-height: 1.8;
                         font-weight: 400;
                     }}
                 </style>

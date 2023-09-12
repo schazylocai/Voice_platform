@@ -239,7 +239,7 @@ def launch_app_eng():
     for message in st.session_state.messages_files_eng:
         with st.chat_message(message['role']):
             st.subheader(message['content'])
-            change_text_style_english(message['content'], '', 'white')
+            change_text_style_english(message['content'], 'main_text_white', 'white')
 
     ######################################### Run LLM sequence #########################################
     if text_list:

@@ -4,7 +4,6 @@ import streamlit as st
 import os
 from dotenv import load_dotenv
 import stripe
-from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import RetrievalQA
@@ -145,8 +144,8 @@ def launch_web_app_ara():
                                  'text_violet', violet)
 
         change_text_style_arabic_side(
-            "يرجى نسخ الرابط *** http *** أو *** https *** من متصفح الإنترنت الخاص بك ولصقه هنا",
-            'text_violet_side_tight', violet)
+            "يرجى نسخ الرابط *** http *** أو *** https *** من متصفح الإنترنت الخاص بك وكتابته هنا",
+            'subhead_side', violet)
         st.sidebar.write("")
         web_1 = st.sidebar.text_input(label=':violet[weblink]', key='web_1_ara',
                                       label_visibility='hidden')

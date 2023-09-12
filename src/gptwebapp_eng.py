@@ -4,7 +4,6 @@ import streamlit as st
 import os
 from dotenv import load_dotenv
 import stripe
-from tenacity import retry, stop_after_attempt, wait_random_exponential
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import RetrievalQA
@@ -139,7 +138,7 @@ def launch_web_app_eng():
         st.write("")
         st.write(":violet[Be mindful that not all websites permit access to their content!]")
 
-        st.sidebar.write(
+        st.sidebar.subheader(
             ':violet[Please copy the :red[http] or :red[https] link from your browser and paste it here]')
         web_1 = st.sidebar.text_input(label=':violet[weblink]', key='web_1_eng')
         weblink_button_1 = st.sidebar.button(label=':violet[Upload weblink]',
@@ -171,7 +170,7 @@ def launch_web_app_eng():
     ####################################### Write chat history #######################################
     for message in st.session_state.messages_weblinks_eng:
         with st.chat_message(message['role']):
-            change_text_style_english(message['content'], '', 'white')
+            change_text_style_english(message['content'], 'main_text_white', 'white')
 
     ######################################### Run LLM sequence #########################################
     if st.session_state.weblink_1_eng:
@@ -201,7 +200,7 @@ def launch_web_app_eng():
         ################################### weblinks ##################################
         if st.session_state.continue_analysis_weblink_eng:
 
-            # RetrievalQA from chain type ##########
+            ##################################### RetrievalQA from chain type #####################################
 
             response_template = f"""
                 • You will act as an English professional and a researcher.
@@ -270,7 +269,7 @@ def launch_web_app_eng():
                                             font-size: 22px;
                                             color: 'white;
                                             text-align: left;
-                                            line-height: 2.2;
+                                            line-height: 1.8;
                                             font-weight: 400;
                                         }}
                                     </style>
