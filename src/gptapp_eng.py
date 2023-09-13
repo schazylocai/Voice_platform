@@ -31,7 +31,6 @@ final_result = {"query": "", "answer": ""}
 violet = "rgb(169, 131, 247)"
 red = "rgb(232,89,83)"
 
-llm_model = 'gpt-3.5-turbo'  # gpt-4 or gpt-3.5-turbo
 
 
 def launch_app_eng():
@@ -42,9 +41,6 @@ def launch_app_eng():
 
     if 'file_text_list_eng' not in st.session_state:
         st.session_state.file_text_list_eng = []
-
-    if 'ChatOpenAI' not in st.session_state:
-        st.session_state.ChatOpenAI = llm_model
 
     if 'messages_files_eng' not in st.session_state:
         st.session_state.messages_files_eng = []
@@ -156,7 +152,7 @@ def launch_app_eng():
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.title(":violet[GPT Document Analyzer]")
+        st.title(":red[GPT Document Analyzer]")
 
     with col2:
         ################################# load documents #################################

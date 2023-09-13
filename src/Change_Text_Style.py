@@ -11,11 +11,11 @@ def change_text_style_arabic(text_body, font_type, color):
                         <style>
                             .title-text {{
                                 font-family: {font_family};
-                                font-size: 42px;
+                                font-size: 52px;
                                 color: {color};
                                 text-align: right;
-                                line-height: 1.5;
-                                font-weight: 600;
+                                line-height: 1.2;
+                                font-weight: 800;
                             }}
                         </style>
                         <div class="title-text"><bdi>{text_body}</bdi></div>
@@ -28,7 +28,7 @@ def change_text_style_arabic(text_body, font_type, color):
                         <style>
                             .heading-text {{
                                 font-family: {font_family};
-                                font-size: 38px;
+                                font-size: 34px;
                                 color: {color};
                                 text-align: right;
                                 line-height: 1.6;
@@ -45,10 +45,10 @@ def change_text_style_arabic(text_body, font_type, color):
                         <style>
                             .sub-text {{
                                 font-family: {font_family};
-                                font-size: 24px;
+                                font-size: 22px;
                                 color: {color};
                                 text-align: right;
-                                line-height: 2;
+                                line-height: 1.6;
                                 font-weight: 600;
                             }}
                         </style>
@@ -152,7 +152,7 @@ def change_text_style_arabic_side(text_body, font_type, color):
                         <style>
                             .sub-text_side_red {{
                                 font-family: {font_family};
-                                font-size: 22px;
+                                font-size: 20px;
                                 color: {color};
                                 text-align: right;
                                 line-height: 2;
@@ -169,7 +169,7 @@ def change_text_style_arabic_side(text_body, font_type, color):
                         <style>
                             .sub-text_side {{
                                 font-family: {font_family};
-                                font-size: 22px;
+                                font-size: 20px;
                                 color: {color};
                                 text-align: right;
                                 line-height: 2;
@@ -186,7 +186,7 @@ def change_text_style_arabic_side(text_body, font_type, color):
                         <style>
                             .normal-text_side {{
                                 font-family: {font_family};
-                                font-size: 14px;
+                                font-size: 12px;
                                 color: {color};
                                 text-align: right;
                                 line-height: 3;

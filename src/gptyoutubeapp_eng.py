@@ -20,6 +20,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain.vectorstores import SKLearnVectorStore
 from langchain.document_loaders import YoutubeLoader
 from src.Change_Text_Style import change_text_style_english
+from youtube_transcript_api import YouTubeTranscriptApi
 
 load_dotenv()  # read local .env file
 secret_key = os.environ['OPENAI_API_KEY']
@@ -34,17 +35,12 @@ final_result = {"query": "", "answer": ""}
 violet = "rgb(169, 131, 247)"
 red = "rgb(232,89,83)"
 
-llm_model = 'gpt-3.5-turbo'  # gpt-4 or gpt-3.5-turbo
-
 
 def launch_youtube_app_eng():
     ######################################### Set session states #########################################
 
     if 'user_status' not in st.session_state:
         st.session_state.user_status = 'False'
-
-    if 'ChatOpenAI' not in st.session_state:
-        st.session_state.ChatOpenAI = llm_model
 
     if 'messages_youtube_eng' not in st.session_state:
         st.session_state.messages_youtube_eng = []
@@ -129,7 +125,7 @@ def launch_youtube_app_eng():
     col1, col2 = st.columns(2)
 
     with col1:
-        st.title(":violet[GPT Youtube Document Analyzer]")
+        st.title(":red[GPT Youtube Analyzer]")
 
         st.sidebar.subheader(
             ':violet[Please copy the :red[https] youtube link from your browser and paste it here]')
@@ -173,9 +169,7 @@ def launch_youtube_app_eng():
             change_text_style_english(message['content'], 'main_text_white', 'white')
 
     ######################################## Run LLM sequence #########################################
-    st.write(st.session_state.youtube_content_eng)
-    if len(st.session_state.youtube_content_eng) > 0:
-        st.write('A')
+    if st.session_state.youtube_content_eng:
 
         try:
             with st.spinner(text=":red[Please wait while we read the document...]"):
@@ -185,7 +179,7 @@ def launch_youtube_app_eng():
                                                                length_function=len)
                 youtube_chunks = text_splitter.split_text(st.session_state.youtube_content_eng)
 
-                youtube_llm = ChatOpenAI(temperature=0.4, model=llm_model)  # gpt-4 or gpt-3.5-turbo
+                youtube_llm = ChatOpenAI(temperature=0.4, model=st.session_state.ChatOpenAI)  # gpt-4 or gpt-3.5-turbo
                 embedding = OpenAIEmbeddings()
 
                 vector_store = SKLearnVectorStore.from_texts(youtube_chunks, embedding=embedding)

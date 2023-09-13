@@ -16,15 +16,21 @@ load_dotenv()  # read local .env file
 st.set_page_config(layout="wide", initial_sidebar_state='expanded', page_icon="🔬", page_title='GPT Document Analyzer')
 connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
 
+################### Define LLM Model ###################
+llm_model = 'gpt-3.5-turbo'  # gpt-4 or gpt-3.5-turbo
+
+################### Set session states ###################
 st.session_state.setdefault("mylanguage", 'العربية')
+st.session_state.setdefault("user_status", 'False')
 
 if 'mylanguage' not in st.session_state:
     st.session_state.mylanguage = 'العربية'
 
-st.session_state.setdefault("user_status", 'False')
-
 if 'user_status' not in st.session_state:
     st.session_state.user_status = 'False'
+
+if 'ChatOpenAI' not in st.session_state:
+    st.session_state.ChatOpenAI = llm_model
 
 # status = False
 valid_email = False
@@ -34,7 +40,8 @@ red = "rgb(232,89,83)"
 
 def change_language_to_Arabic():
     st.divider()
-    change_text_style_arabic('☘️︎ بإستطاعتك الآن التفاعل مباشرة مع أي ملف أو أي موقع على الإنترنت أو أي شريط ڤيديو من موقع يوتيوب.', 'subhead_new_item', violet)
+    change_text_style_arabic('☘️︎ بإستطاعتك الآن التفاعل مع أي ملف أو أي موقع على الإنترنت أو أي شريط ڤيديو من موقع يوتيوب.', 'subhead_new_item', violet)
+    st.write('')
     col1, col2, col3 = st.columns(3)
     with col3:
         st.image('gpt_logos/GPTdoc.png')
@@ -86,7 +93,7 @@ def first_page():
 
     if my_language == 'English':
         with col1:
-            change_text_style_english("GPT Document Analyzer", 'title', violet)
+            change_text_style_english("GPT Analyzer", 'title', violet)
             st.write("")
 
         with col3:
@@ -97,8 +104,7 @@ def first_page():
 
     if my_language == 'العربية':
         with col1:
-            change_text_style_arabic("محلل المستندات", 'title', violet)
-            change_text_style_arabic("جي بي تي", 'title', violet)
+            change_text_style_arabic("محلل جي بي تي", 'title', violet)
 
         with col3:
             change_text_style_english("🌏  Choose your language", 'head', violet)

@@ -19,6 +19,7 @@ from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
 from langchain.vectorstores import SKLearnVectorStore
 from langchain.document_loaders import YoutubeLoader
+from youtube_transcript_api import YouTubeTranscriptApi
 from src.Change_Text_Style import change_text_style_arabic, change_text_style_arabic_side
 
 load_dotenv()  # read local .env file
@@ -34,17 +35,12 @@ final_result = {"query": "", "answer": ""}
 violet = "rgb(169, 131, 247)"
 red = "rgb(232,89,83)"
 
-llm_model = 'gpt-3.5-turbo'  # gpt-4 or gpt-3.5-turbo
-
 
 def launch_youtube_app_ara():
     ######################################### Set session states #########################################
 
     if 'user_status' not in st.session_state:
         st.session_state.user_status = 'False'
-
-    if 'ChatOpenAI' not in st.session_state:
-        st.session_state.ChatOpenAI = llm_model
 
     if 'messages_youtube_ara' not in st.session_state:
         st.session_state.messages_youtube_ara = []
@@ -99,7 +95,6 @@ def launch_youtube_app_ara():
                     try:
                         loader = YoutubeLoader.from_youtube_url(url_check, add_video_info=True)
                         result = loader.load()
-                        #result_id = f":violet[Found a video from: {result[0].metadata['author']}, that is: {result[0].metadata['length']} seconds long]"
                         result_id = f"وجدنا ڤيديو من: {result[0].metadata['author']}, وطوله: {result[0].metadata['length']} ثواني."
                         change_text_style_arabic(result_id, 'text_violet', violet)
                         result = result[0].page_content
@@ -134,7 +129,7 @@ def launch_youtube_app_ara():
     col1, col2 = st.columns(2)
 
     with col2:
-        change_text_style_arabic(("GPT" + " " + "محلل المستندات"), 'title', red)
+        change_text_style_arabic(("محلل المستندات"), 'title', red)
         change_text_style_arabic("من موقع يوتيوب", 'title', red)
 
         change_text_style_arabic_side(
@@ -190,7 +185,7 @@ def launch_youtube_app_ara():
                                                                length_function=len)
                 youtube_chunks = text_splitter.split_text(st.session_state.youtube_content_ara)
 
-                youtube_llm = ChatOpenAI(temperature=0.4, model=llm_model)  # gpt-4 or gpt-3.5-turbo
+                youtube_llm = ChatOpenAI(temperature=0.4, model=st.session_state.ChatOpenAI)  # gpt-4 or gpt-3.5-turbo
                 embedding = OpenAIEmbeddings()
 
                 vector_store = SKLearnVectorStore.from_texts(youtube_chunks, embedding=embedding)
