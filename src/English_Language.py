@@ -23,7 +23,7 @@ def write_english_About():
     with col2:
         st.write(":red[What can this model do for you?]")
         st.subheader(
-            ":violet[With this cutting-edge tool, you can effortlessly upload documents, web links, or Youtube videos to interact with them like never before.]")
+            ":violet[With this cutting-edge tool, you can effortlessly upload documents, web links, or YouTube videos to interact with them like never before.]")
         st.write(
             ":violet[Pose questions, extract valuable information, analyze content, and generate concise summaries.]")
         st.write(":violet[➜ Watch the video to see how this model works!]")

@@ -128,7 +128,7 @@ def launch_youtube_app_ara():
     col1, col2 = st.columns(2)
 
     with col2:
-        change_text_style_arabic(("محلل المستندات"), 'title', red)
+        change_text_style_arabic(("محلل المحتوى"), 'title', red)
         change_text_style_arabic("من موقع يوتيوب", 'title', red)
 
         change_text_style_arabic_side(

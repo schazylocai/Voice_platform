@@ -128,7 +128,7 @@ def launch_web_app_ara():
     col1, col2, col3 = st.columns(3)
 
     with col3:
-        change_text_style_arabic(("محلل المستندات"), 'title', red)
+        change_text_style_arabic(("محلل المحتوى"), 'title', red)
         change_text_style_arabic(("من مواقع الإنترنت"), 'title', red)
 
     with col2:
