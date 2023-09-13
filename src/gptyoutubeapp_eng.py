@@ -20,7 +20,6 @@ from langchain.memory import ConversationBufferMemory
 from langchain.vectorstores import SKLearnVectorStore
 from langchain.document_loaders import YoutubeLoader
 from src.Change_Text_Style import change_text_style_english
-from youtube_transcript_api import YouTubeTranscriptApi
 
 load_dotenv()  # read local .env file
 secret_key = os.environ['OPENAI_API_KEY']

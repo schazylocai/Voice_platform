@@ -19,7 +19,6 @@ from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
 from langchain.vectorstores import SKLearnVectorStore
 from langchain.document_loaders import YoutubeLoader
-from youtube_transcript_api import YouTubeTranscriptApi
 from src.Change_Text_Style import change_text_style_arabic, change_text_style_arabic_side
 
 load_dotenv()  # read local .env file
