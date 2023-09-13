@@ -155,7 +155,7 @@ def launch_app_ara():
     ######################################### Compose layout #########################################
     col1, col2, col3 = st.columns(3)
 
-    with col1:
+    with col3:
         change_text_style_arabic(("GPT" + " " + "محلل المستندات"), 'title', red)
 
     with col2:
@@ -202,7 +202,7 @@ def launch_app_ara():
             st.session_state.file_to_upload_list_3_ara = ''
             st.session_state.file_to_upload_3_ara = None
 
-    with col3:
+    with col1:
         # set the clear button
         st.write("")
         st.write("")

@@ -18,8 +18,7 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
 from langchain.vectorstores import SKLearnVectorStore
-from langchain.document_loaders import AsyncHtmlLoader, YoutubeLoader
-from langchain.document_transformers import BeautifulSoupTransformer
+from langchain.document_loaders import YoutubeLoader
 from src.Change_Text_Style import change_text_style_arabic, change_text_style_arabic_side
 
 load_dotenv()  # read local .env file
@@ -136,12 +135,13 @@ def launch_youtube_app_ara():
 
     with col2:
         change_text_style_arabic(("GPT" + " " + "محلل المستندات"), 'title', red)
-        change_text_style_arabic("من مواقع الإنترنت", 'title', red)
+        change_text_style_arabic("من موقع يوتيوب", 'title', red)
 
         change_text_style_arabic_side(
             "يرجى نسخ الرابط *** https *** من موقع يوتيوب وكتابته هنا",
-            'subhead_side', violet)
-        youtube_link = st.sidebar.text_input(label=':violet[youtube link]', key='youtube_1_ara')
+            'text_violet_side_tight_medium', violet)
+        youtube_link = st.sidebar.text_input(label=':violet[رابط يوتيوب]', key='youtube_1_ara',
+                                             help='نموزج: https://www.youtube.com/watch?v=fw2W1lUIdgQ')
         youtube_button = st.sidebar.button(label=':violet[قم بتحميل الرابط الإلكتروني]',
                                            use_container_width=True,
                                            key='web_s_1_ara')

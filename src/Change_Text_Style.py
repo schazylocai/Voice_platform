@@ -213,6 +213,23 @@ def change_text_style_arabic_side(text_body, font_type, color):
                         <div class="normal-text_side_tight"><bdi>{text_body}</bdi></div>
                         """, unsafe_allow_html=True)
 
+    elif font_type == 'text_violet_side_tight_medium':
+        st.sidebar.markdown(
+            f"""
+                        {font_link}
+                        <style>
+                            .normal-text_side_tight_medium {{
+                                font-family: {font_family};
+                                font-size: 17px;
+                                color: {color};
+                                text-align: right;
+                                line-height: 1.8;
+                                font-weight: 800;
+                            }}
+                        </style>
+                        <div class="normal-text_side_tight_medium"><bdi>{text_body}</bdi></div>
+                        """, unsafe_allow_html=True)
+
     elif font_type == 'text_red_side':
         st.sidebar.markdown(
             f"""

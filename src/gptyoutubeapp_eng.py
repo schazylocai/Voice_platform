@@ -109,6 +109,7 @@ def launch_youtube_app_eng():
                         return []
 
                     except Exception as e:
+                        st.markdown(e)
                         return []
 
                 else:
@@ -132,7 +133,8 @@ def launch_youtube_app_eng():
 
         st.sidebar.subheader(
             ':violet[Please copy the :red[https] youtube link from your browser and paste it here]')
-        youtube_link = st.sidebar.text_input(label=':violet[youtube link]', key='youtube_1_eng')
+        youtube_link = st.sidebar.text_input(label=':violet[youtube link]', key='youtube_1_eng',
+                                             help='Example: https://www.youtube.com/watch?v=fw2W1lUIdgQ')
         youtube_button = st.sidebar.button(label=':violet[Upload youtube link]',
                                            use_container_width=True,
                                            key='youtube_s_1_eng')
@@ -171,7 +173,9 @@ def launch_youtube_app_eng():
             change_text_style_english(message['content'], 'main_text_white', 'white')
 
     ######################################## Run LLM sequence #########################################
-    if st.session_state.youtube_content_eng:
+    st.write(st.session_state.youtube_content_eng)
+    if len(st.session_state.youtube_content_eng) > 0:
+        st.write('A')
 
         try:
             with st.spinner(text=":red[Please wait while we read the document...]"):

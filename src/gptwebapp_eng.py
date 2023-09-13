@@ -140,7 +140,8 @@ def launch_web_app_eng():
 
         st.sidebar.subheader(
             ':violet[Please copy the :red[http] or :red[https] link from your browser and paste it here]')
-        web_1 = st.sidebar.text_input(label=':violet[weblink]', key='web_1_eng')
+        web_1 = st.sidebar.text_input(label=':violet[weblink]', key='web_1_eng',
+                                      help='Example: https://www.worldwildlife.org/')
         weblink_button_1 = st.sidebar.button(label=':violet[Upload weblink]',
                                              use_container_width=True,
                                              key='web_s_1_eng')

@@ -60,7 +60,7 @@ def launch_web_app_ara():
 
     ######################################### Catch exceptions #########################################
     def catch_exception(file_name):
-        with col3:
+        with col1:
             change_text_style_arabic(
                 ("لم يمكن تحميل الملف. يحتوي الملف" + " " + file_name + " " + ".على بعض الشوائب!" + " " + "يرجى حذفه."),
                 'subhead', red)
@@ -132,7 +132,7 @@ def launch_web_app_ara():
     ######################################### Compose layout #########################################
     col1, col2, col3 = st.columns(3)
 
-    with col1:
+    with col3:
         change_text_style_arabic(("GPT" + " " + "محلل المستندات"), 'title', red)
         change_text_style_arabic(("من مواقع الإنترنت"), 'title', red)
 
@@ -145,10 +145,10 @@ def launch_web_app_ara():
 
         change_text_style_arabic_side(
             "يرجى نسخ الرابط *** http *** أو *** https *** من متصفح الإنترنت الخاص بك وكتابته هنا",
-            'subhead_side', violet)
+            'text_violet_side_tight_medium', violet)
         st.sidebar.write("")
-        web_1 = st.sidebar.text_input(label=':violet[weblink]', key='web_1_ara',
-                                      label_visibility='hidden')
+        web_1 = st.sidebar.text_input(label=':violet[رابط الإنترنت]', key='web_1_ara',
+                                      help="نموزج: https://www.worldwildlife.org/")
         weblink_button_1 = st.sidebar.button(label=':violet[قم بتحميل الرابط الإلكتروني]',
                                              use_container_width=True,
                                              key='web_s_1_ara')
@@ -158,7 +158,7 @@ def launch_web_app_ara():
                 f"{web_1} :الرابط", 'text_violet', violet)
             st.session_state.weblink_1_ara = is_web_link(web_1)
 
-    with col3:
+    with col1:
         # set the clear button
         st.write("")
         st.write("")
