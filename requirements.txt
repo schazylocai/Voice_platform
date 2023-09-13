@@ -18,5 +18,4 @@ requests==2.31.0
 youtube-transcript-api==0.6.1
 yt-dlp==2023.7.6
 pydub==0.25.1
-librosa==0.10.1
 pytube==15.0.0
