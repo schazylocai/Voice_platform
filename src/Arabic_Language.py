@@ -4,7 +4,7 @@ import re
 import os
 from src.Change_Text_Style import change_text_style_arabic
 
-video_url_ara = "https://youtu.be/mHIycWBDJ6w"
+video_url_ara = "https://youtu.be/xBUGO2e-3EI"
 
 
 def write_Arabic_About():
