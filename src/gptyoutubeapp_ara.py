@@ -187,9 +187,10 @@ def launch_youtube_app_ara():
                 youtube_llm = ChatOpenAI(temperature=0.4, model=st.session_state.ChatOpenAI)  # gpt-4 or gpt-3.5-turbo
                 embedding = OpenAIEmbeddings()
 
-                vector_store = SKLearnVectorStore.from_texts(youtube_chunks, embedding=embedding)
-                retriever = vector_store.as_retriever(search_kwargs={"k": 1})
-                memory_weblinks = ConversationBufferMemory(memory_key="chat_history_youtube_ara", return_messages=True)
+                vector_store = SKLearnVectorStore.from_texts(youtube_chunks, embedding=embedding,
+                                                             persist_path=None)
+                # vector_store.persist()
+                retriever = vector_store.as_retriever(search_kwargs={"k": 4})
                 st.session_state.continue_analysis_youtube_ara = True
 
         except Exception as e:
@@ -200,39 +201,58 @@ def launch_youtube_app_ara():
         ################################### Youtube ##################################
         if st.session_state.continue_analysis_youtube_ara:
 
-            # RetrievalQA from chain type ##########
+            ##################################### RetrievalQA from chain type #####################################
 
-            response_template = f"""
+            response_template = """
                 • You will act as an Arabic professional and a researcher.
                 • Your task is to reply only in Arabic even if the question is in another language.
                 • Your task is to read through the Youtube video and its content.
-                • If a user asks you about a specific video url, then look inside the given documents for "Video" url to reply to the user.
+                • If a user asks you about a specific video url, then look inside the given documents for "Video" url
+                  to reply to the user.
                 • You should be analytical, thoughtful, and reply in depth and details to any question.
-                • If you suspect bias in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is biased". Explain why do yuo think it is biased.
-                • If you suspect incorrect or misleading information in the answer, then highlight the concerned sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or paragrph is incorrect or misleading". Explain why do yuo think it is incorrect or misleading.
+                • Before giving your answer, you should look through all the documents in the provided text.
+                • Always keep the History of the chat in your memory from the text stored in the variable chat_history
+                • If the user asks about a previous question, then you can look into the history using the text
+                  stored in the variable chat_history.
+                • If you suspect bias in the answer, then highlight the concerned sentence or paragraph in quotation
+                  marks and write: "It is highly likly that this sentence or paragrph is biased". Explain why do you
+                  think it is biased.
+                • If you suspect incorrect or misleading information in the answer, then highlight the concerned
+                  sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or
+                  paragrph is incorrect or misleading". Explain why do yuo think it is incorrect or misleading.
                 • Always reply in a polite and professional manner.
-                • If you don't know the answer to the question, then reply: "أنا لست واثقًا من الإجابة على هذا السؤال بسبب غياب بعض المعلومات. حاول تحديد السؤال بطريقة اخرى."
+                • If you don't know the answer to the question, then reply:
+                  "أنا لست واثقًا من الإجابة على هذا السؤال بسبب غياب بعض المعلومات. حاول تحديد السؤال بطريقة اخرى."
     
                 Divide your answer when possible into paragraphs:
                 • What is your answer to the question?
                 • Add citations when possible from the document that supports the answer.
 
-                {{context}}
-
-                Question: {{question}}
-
+                <ctx>
+                {context}
+                </ctx>
+                --------
+                <hs>
+                {history}
+                </hs>
+                --------
+                {question}
                 Answer:
                 """
 
-            prompt_weblinks = PromptTemplate(template=response_template, input_variables=["context", "question"])
-            chain_type_kwargs = {'prompt': prompt_weblinks}
+            prompt_youtube = PromptTemplate(template=response_template,
+                                            input_variables=["history", "context", "question"])
+
             query_model = RetrievalQA.from_chain_type(
                 llm=youtube_llm,
                 chain_type="stuff",
-                memory=memory_weblinks,
                 return_source_documents=False,
                 retriever=retriever,
-                chain_type_kwargs=chain_type_kwargs)
+                chain_type_kwargs={"verbose": False,
+                                   "prompt": prompt_youtube,
+                                   "memory": ConversationBufferMemory(memory_key="history",
+                                                                      input_key="question",
+                                                                      return_messages=True)})
 
             def create_text_question():
 
@@ -250,9 +270,9 @@ def launch_youtube_app_ara():
                             message_placeholder = st.empty()
                             all_results = ''
                             chat_history = st.session_state.chat_history_youtube_ara
-                            result = query_model({"query": user_input, "chat_history_youtube_ara": chat_history})
+                            result = query_model({"query": user_input})
                             user_query = result['query']
-                            result = result['chat_history_youtube_ara'][1].content
+                            result = result['result']
                             st.session_state.chat_history_youtube_ara.append((user_query, result))
                             all_results += result
                             font_link = '<link href="https://fonts.googleapis.com/css2?family=Cairo+Play:wght@600;800' \
