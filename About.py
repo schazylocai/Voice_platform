@@ -61,7 +61,7 @@ def change_language_to_Arabic():
 def change_language_to_English():
     st.divider()
     st.subheader(
-        ':violet[☘️ You can now interact with any document, website, or YouTube video.]')
+        ':violet[☘️ You can now interact with any document, website, or YouTube video]')
     col1, col2, col3 = st.columns(3)
     with col1:
         st.image('gpt_logos/GPTdoc.png')
