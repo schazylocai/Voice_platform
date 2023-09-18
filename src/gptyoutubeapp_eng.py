@@ -178,7 +178,7 @@ def launch_youtube_app_eng():
                                                                length_function=len)
                 youtube_chunks = text_splitter.split_text(st.session_state.youtube_content_eng)
 
-                youtube_llm = ChatOpenAI(temperature=0.4, model=st.session_state.ChatOpenAI)  # gpt-4 or gpt-3.5-turbo
+                youtube_llm = ChatOpenAI(temperature=0.6, model=st.session_state.ChatOpenAI)  # gpt-4 or gpt-3.5-turbo
                 embedding = OpenAIEmbeddings()
 
                 vector_store = SKLearnVectorStore.from_texts(youtube_chunks, embedding=embedding,

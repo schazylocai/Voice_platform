@@ -180,7 +180,7 @@ def launch_web_app_eng():
                 chunks = text_splitter.split_text(text=str(st.session_state.weblink_1_eng))
                 chunks = list(chunks)
 
-                llm = ChatOpenAI(temperature=0.4, model=st.session_state.ChatOpenAI)  # gpt-4 or gpt-3.5-turbo
+                llm = ChatOpenAI(temperature=0.6, model=st.session_state.ChatOpenAI)  # gpt-4 or gpt-3.5-turbo
                 embedding = OpenAIEmbeddings()
 
                 vector_store = SKLearnVectorStore.from_texts(texts=chunks, embedding=embedding,
