@@ -190,7 +190,7 @@ def launch_youtube_app_ara():
                 vector_store = SKLearnVectorStore.from_texts(youtube_chunks, embedding=embedding,
                                                              persist_path=None)
                 # vector_store.persist()
-                retriever = vector_store.as_retriever(search_kwargs={"k": 4})
+                retriever = vector_store.as_retriever(search_kwargs={"k": 2})
                 st.session_state.continue_analysis_youtube_ara = True
 
         except Exception as e:

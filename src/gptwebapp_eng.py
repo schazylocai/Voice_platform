@@ -186,7 +186,7 @@ def launch_web_app_eng():
                 vector_store = SKLearnVectorStore.from_texts(texts=chunks, embedding=embedding,
                                                              persist_path=None)
                 # vector_store.persist()
-                retriever = vector_store.as_retriever(search_kwargs={"k": 4})
+                retriever = vector_store.as_retriever(search_kwargs={"k": 2})
                 st.session_state.continue_analysis_weblink_eng = True
 
         except Exception as e:
