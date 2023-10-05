@@ -16,7 +16,7 @@ load_dotenv()  # read local .env file
 st.set_page_config(layout="wide", initial_sidebar_state='expanded', page_icon="🔬", page_title='GPT Document Analyzer')
 connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
 
-################### Define LLM Model ###################
+##################### Define LLM Model ####################
 llm_model = 'gpt-4'  # gpt-4 or gpt-3.5-turbo
 
 ################### Set session states ###################

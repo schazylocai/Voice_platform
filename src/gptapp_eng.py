@@ -6,6 +6,7 @@ import PyPDF2
 import docx2txt
 import textract
 import tempfile
+import uuid
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import RetrievalQA
@@ -19,6 +20,7 @@ from src.Change_Text_Style import change_text_style_english
 
 load_dotenv()  # read local .env file
 secret_key = os.environ['OPENAI_API_KEY']
+session_id = str(uuid.uuid4())
 
 stripe_publishable_key = os.environ['STRIPE_PUBLISHABLE_KEY']
 strip_secret_key = os.environ['STRIPE_SECRET_KEY']
@@ -154,44 +156,84 @@ def launch_app_eng():
 
     with col2:
         ################################# load documents #################################
+        max_retries = 3
+
+        # upload file 1
         file_1 = st.sidebar.file_uploader(
             label=':violet[Select PDF, word, or text'
                   'files to upload]',
             type=['pdf', 'docx', 'txt'],
             accept_multiple_files=False, key='file_1_eng',
             label_visibility='hidden')
+
+        retry_count_1 = 0
         if file_1:
-            st.session_state.file_to_upload_list_1_eng = file_1
-            st.session_state.file_to_upload_1_eng = convert_file_to_text(file_1)
-            st.session_state.file_text_list_eng.append(file_1)
+            while retry_count_1 < max_retries:
+                try:
+                    st.session_state.file_to_upload_list_1_eng = file_1
+                    st.session_state.file_to_upload_1_eng = convert_file_to_text(file_1)
+                    st.session_state.file_text_list_eng.append(file_1)
+                    break
+
+                except Exception as e:
+                    retry_count_1 += 1
+                    if retry_count_1 < max_retries:
+                        continue
+                    st.sidebar.write("Maximum retry attempts reached. Upload failed.")
+                    break
+
         else:
-            st.session_state.file_to_upload_list_1_eng = ''
             st.session_state.file_to_upload_1_eng = None
 
+        # upload file 2
         file_2 = st.sidebar.file_uploader(
             label=':violet[Select PDF, word, or text files to upload]',
             type=['pdf', 'docx', 'txt'],
             accept_multiple_files=False, key='file_2_eng',
             label_visibility='hidden')
+
+        retry_count_2 = 0
         if file_2:
-            st.session_state.file_to_upload_list_2_eng = file_2
-            st.session_state.file_to_upload_2_eng = convert_file_to_text(file_2)
-            st.session_state.file_text_list_eng.append(file_2)
+            while retry_count_2 < max_retries:
+                try:
+                    st.session_state.file_to_upload_list_2_eng = file_2
+                    st.session_state.file_to_upload_2_eng = convert_file_to_text(file_2)
+                    st.session_state.file_text_list_eng.append(file_2)
+                    break
+
+                except Exception as e:
+                    retry_count_2 += 1
+                    if retry_count_2 < max_retries:
+                        continue
+                    st.sidebar.write("Maximum retry attempts reached. Upload failed.")
+                    break
+
         else:
-            st.session_state.file_to_upload_list_2_eng = ''
             st.session_state.file_to_upload_2_eng = None
 
+        # upload file 3
         file_3 = st.sidebar.file_uploader(
             label=':violet[Select PDF, word, or text files to upload]',
             type=['pdf', 'docx', 'txt'],
             accept_multiple_files=False, key='file_3_eng',
             label_visibility='hidden')
+
+        retry_count_3 = 0
         if file_3:
-            st.session_state.file_to_upload_list_3_eng = file_3
-            st.session_state.file_to_upload_3_eng = convert_file_to_text(file_3)
-            st.session_state.file_text_list_eng.append(file_3)
+            while retry_count_3 < max_retries:
+                try:
+                    st.session_state.file_to_upload_list_3_eng = file_3
+                    st.session_state.file_to_upload_3_eng = convert_file_to_text(file_3)
+                    st.session_state.file_text_list_eng.append(file_3)
+                    break
+
+                except Exception as e:
+                    retry_count_3 += 1
+                    if retry_count_3 < max_retries:
+                        continue
+                    st.sidebar.write("Maximum retry attempts reached. Upload failed.")
+                    break
         else:
-            st.session_state.file_to_upload_list_3_eng = ''
             st.session_state.file_to_upload_3_eng = None
 
     with col3:
@@ -215,7 +257,6 @@ def launch_app_eng():
 
     ################################## Create final text file to pass to LLM ##################################
     def create_final_text():
-
         if st.session_state.file_to_upload_1_eng or st.session_state.file_to_upload_2_eng or st.session_state.file_to_upload_3_eng:
             loop_through_files = [st.session_state.file_to_upload_1_eng,
                                   st.session_state.file_to_upload_2_eng,

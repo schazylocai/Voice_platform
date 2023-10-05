@@ -219,6 +219,7 @@ def subscribe_to_service_ara():
         # Create a clickable link to the payment URL
         pay_link = f'<a href="{session.url}" target="_blank">انقر هنا للمتابعة إلى عملية الدفع!</a>'
         st.sidebar.write(pay_link, unsafe_allow_html=True)
+        # st.link_button(label='انقر هنا للمتابعة إلى عملية الدفع!', url=session.url, use_container_width=True)
 
     st.sidebar.divider()
     change_text_style_arabic_side("هل ترغب في الاشتراك؟", 'subhead_side', violet)

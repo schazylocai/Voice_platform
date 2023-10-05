@@ -154,46 +154,87 @@ def launch_app_ara():
 
     with col2:
         ################################# load documents #################################
+        max_retries = 3
+
+        # upload file 1
         change_text_style_arabic_side(" حمل PDF, word, أو أي نص", 'text_violet_side_tight', violet)
         file_1 = st.sidebar.file_uploader(
             label=':violet[Select PDF, word, or text files to upload]',
             type=['pdf', 'docx', 'txt'],
             label_visibility='hidden',
             accept_multiple_files=False, key='file_1_ara')
+
+        retry_count_1 = 0
         if file_1:
-            st.session_state.file_to_upload_list_1_ara = file_1
-            st.session_state.file_to_upload_1_ara = convert_file_to_text(file_1)
-            st.session_state.file_text_list_ara.append(file_1)
+            while retry_count_1 < max_retries:
+                try:
+                    st.session_state.file_to_upload_list_1_ara = file_1
+                    st.session_state.file_to_upload_1_ara = convert_file_to_text(file_1)
+                    st.session_state.file_text_list_ara.append(file_1)
+                    break
+
+                except Exception as e:
+                    retry_count_1 += 1
+                    if retry_count_1 < max_retries:
+                        continue
+                    st.sidebar.write("تم الوصول إلى الحد الأقصى لمحاولات إعادة المحاولة. فشل التحميل")
+                    break
+
         else:
-            st.session_state.file_to_upload_list_1_ara = ''
             st.session_state.file_to_upload_1_ara = None
 
+        # upload file 2
         change_text_style_arabic_side(" حمل PDF, word, أو أي نص", 'text_violet_side_tight', violet)
         file_2 = st.sidebar.file_uploader(
             label=':violet[Select PDF, word, or text files to upload]',
             type=['pdf', 'docx', 'txt'],
             label_visibility='hidden',
             accept_multiple_files=False, key='file_2_ara')
+
+        retry_count_2 = 0
         if file_2:
-            st.session_state.file_to_upload_list_2_ara = file_2
-            st.session_state.file_to_upload_2_ara = convert_file_to_text(file_2)
-            st.session_state.file_text_list_ara.append(file_2)
+            while retry_count_2 < max_retries:
+                try:
+                    st.session_state.file_to_upload_list_2_ara = file_2
+                    st.session_state.file_to_upload_2_ara = convert_file_to_text(file_2)
+                    st.session_state.file_text_list_ara.append(file_2)
+                    break
+
+                except Exception as e:
+                    retry_count_2 += 1
+                    if retry_count_2 < max_retries:
+                        continue
+                    st.sidebar.write("تم الوصول إلى الحد الأقصى لمحاولات إعادة المحاولة. فشل التحميل")
+                    break
+
         else:
-            st.session_state.file_to_upload_list_2_ara = ''
             st.session_state.file_to_upload_2_ara = None
 
+        # upload file 3
         change_text_style_arabic_side(" حمل PDF, word, أو أي نص", 'text_violet_side_tight', violet)
         file_3 = st.sidebar.file_uploader(
             label=':violet[Select PDF, word, or text files to upload]',
             type=['pdf', 'docx', 'txt'],
             label_visibility='hidden',
             accept_multiple_files=False, key='file_3_ara')
+
+        retry_count_3 = 0
         if file_3:
-            st.session_state.file_to_upload_list_3_ara = file_3
-            st.session_state.file_to_upload_3_ara = convert_file_to_text(file_3)
-            st.session_state.file_text_list_ara.append(file_3)
+            while retry_count_3 < max_retries:
+                try:
+                    st.session_state.file_to_upload_list_3_ara = file_3
+                    st.session_state.file_to_upload_3_ara = convert_file_to_text(file_3)
+                    st.session_state.file_text_list_ara.append(file_3)
+                    break
+
+                except Exception as e:
+                    retry_count_3 += 1
+                    if retry_count_3 < max_retries:
+                        continue
+                    st.sidebar.write("تم الوصول إلى الحد الأقصى لمحاولات إعادة المحاولة. فشل التحميل")
+                    break
+
         else:
-            st.session_state.file_to_upload_list_3_ara = ''
             st.session_state.file_to_upload_3_ara = None
 
     with col1:

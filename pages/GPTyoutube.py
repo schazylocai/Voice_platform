@@ -19,6 +19,7 @@ red = "rgb(232,89,83)"
 
 # Check if a user is subscribed to launch the GPTapp
 # if "subscribed_status" in st.session_state:
+subscribed_user = False
 subscribed_user = st.session_state.user_status
 
 if st.session_state.mylanguage == 'English':

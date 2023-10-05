@@ -210,6 +210,7 @@ def subscribe_to_service_eng():
         # Create a clickable link to the payment URL
         pay_link = f'<a href="{session.url}" target="_blank">Click here to proceed to payment!</a>'
         st.sidebar.write(pay_link, unsafe_allow_html=True)
+        # st.link_button(label='Click here to proceed to payment!', url=session.url, use_container_width=True)
 
     st.sidebar.divider()
     st.sidebar.title(":violet[Want to subscribe?]")
