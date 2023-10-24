@@ -14,11 +14,14 @@ import stripe
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import RetrievalQA
 from langchain.chat_models import ChatOpenAI
+from langchain.document_loaders import YoutubeLoader
+from langchain.document_loaders.blob_loaders.youtube_audio import YoutubeAudioLoader
+from langchain.document_loaders.generic import GenericLoader
+from langchain.document_loaders.parsers import OpenAIWhisperParser
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
 from langchain.vectorstores import SKLearnVectorStore
-from langchain.document_loaders import YoutubeLoader
 from src.Change_Text_Style import change_text_style_arabic, change_text_style_arabic_side
 
 load_dotenv()  # read local .env file
@@ -102,11 +105,29 @@ def launch_youtube_app_ara():
 
                         if result:
                             return result
-                        change_text_style_arabic("لم يمكن استخراج أي معلومات من هذا الموقع", 'text_red', red)
-                        return []
 
                     except Exception as e:
-                        return []
+                        # st.markdown(e)
+                        try:
+                            with st.spinner('"لا توجد نسخة نصية متاحة للفيديو على YouTube. جاري نسخ الفيديو. قد يستغرق ذلك بضع دقائق اعتمادًا على حجم ومدة الفيديو..."'):
+                                loader = GenericLoader(YoutubeAudioLoader([url_check],
+                                                                          save_dir='cache'),
+                                                       OpenAIWhisperParser())
+                                docs = loader.load()
+                                combined_docs = [doc.page_content for doc in docs]
+                                result = " ".join(combined_docs)
+                                result = result.lower()
+                                result = f'Youtube video: {url} ======> {result}'
+
+                                if result:
+                                    return result
+                                else:
+                                    st.write('لا نتيجة')
+
+                        except Exception as e:
+                            # st.write(e)
+                            return []
+
 
                 else:
                     change_text_style_arabic(

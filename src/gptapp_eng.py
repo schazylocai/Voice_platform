@@ -6,7 +6,6 @@ import PyPDF2
 import docx2txt
 import textract
 import tempfile
-import uuid
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import RetrievalQA
@@ -15,12 +14,11 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
 from langchain.vectorstores import SKLearnVectorStore
-
 from src.Change_Text_Style import change_text_style_english
+from langchain.storage import InMemoryStore
 
 load_dotenv()  # read local .env file
 secret_key = os.environ['OPENAI_API_KEY']
-session_id = str(uuid.uuid4())
 
 stripe_publishable_key = os.environ['STRIPE_PUBLISHABLE_KEY']
 strip_secret_key = os.environ['STRIPE_SECRET_KEY']
@@ -156,7 +154,7 @@ def launch_app_eng():
 
     with col2:
         ################################# load documents #################################
-        max_retries = 3
+        max_retries = 15
 
         # upload file 1
         file_1 = st.sidebar.file_uploader(
@@ -281,8 +279,8 @@ def launch_app_eng():
         try:
             with st.spinner(text=":red[Please wait while we read the documents...]"):
 
-                chunk_size = 1500
-                text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=200,
+                chunk_size = 1000
+                text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=50,
                                                                length_function=len)
                 chunks = text_splitter.split_text(text=str(text_list))
                 chunks = list(chunks)
@@ -292,8 +290,9 @@ def launch_app_eng():
 
                 vector_store = SKLearnVectorStore.from_texts(texts=chunks, embedding=embedding,
                                                              persist_path=None)
+                store = InMemoryStore()
                 # vector_store.persist()
-                retriever = vector_store.as_retriever(search_kwargs={"k": 4})
+                retriever = vector_store.as_retriever(search_kwargs={"k": 5}, docstore=store)
                 st.session_state.continue_analysis_files_eng = True
 
         except Exception as e:
@@ -372,34 +371,38 @@ def launch_app_eng():
                     with st.spinner(
                             text=":red[Query submitted. This may take a minute while we query the documents...]"):
                         with st.chat_message('assistant'):
-                            message_placeholder = st.empty()
-                            all_results = ''
-                            chat_history = st.session_state.chat_history_files_eng
-                            result = query_model({"query": user_input})
-                            user_query = result['query']
-                            result = result['result']
-                            st.session_state.chat_history_files_eng.append((user_query, result))
-                            all_results += result
-                            font_link_eng = '<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">'
-                            font_family_eng = "'Roboto', sans-serif"
-                            message_placeholder.markdown(
-                                f"""
-                                    {font_link_eng}
-                                    <style>
-                                        .bold-text {{
-                                            font-family: {font_family_eng};
-                                            font-size: 22px;
-                                            color: 'white;
-                                            text-align: left;
-                                            line-height: 2.2;
-                                            font-weight: 400;
-                                        }}
-                                    </style>
-                                    <div class="bold-text"><bdi>{all_results}</bdi></div>
-                                    """, unsafe_allow_html=True)
+                            try:
+                                message_placeholder = st.empty()
+                                all_results = ''
+                                chat_history = st.session_state.chat_history_files_eng
+                                result = query_model({"query": user_input})
+                                user_query = result['query']
+                                result = result['result']
+                                st.session_state.chat_history_files_eng.append((user_query, result))
+                                all_results += result
+                                font_link_eng = '<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">'
+                                font_family_eng = "'Roboto', sans-serif"
+                                message_placeholder.markdown(
+                                    f"""
+                                        {font_link_eng}
+                                        <style>
+                                            .bold-text {{
+                                                font-family: {font_family_eng};
+                                                font-size: 22px;
+                                                color: 'white;
+                                                text-align: left;
+                                                line-height: 2.2;
+                                                font-weight: 400;
+                                            }}
+                                        </style>
+                                        <div class="bold-text"><bdi>{all_results}</bdi></div>
+                                        """, unsafe_allow_html=True)
 
-                            st.session_state.messages_files_eng.append({'role': 'assistant', 'content': all_results})
-                            return user_input, result, user_query
+                                st.session_state.messages_files_eng.append({'role': 'assistant', 'content': all_results})
+                                return user_input, result, user_query
+
+                            except Exception as e:
+                                st.write(":red[Couldn't process the request. Please try again!]")
 
             create_text_question()
 

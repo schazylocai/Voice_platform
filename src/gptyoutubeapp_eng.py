@@ -4,21 +4,25 @@
 # !pip install youtube-transcript-api
 # pip install pytube
 
-import requests
-import re
-import streamlit as st
 import os
-from dotenv import load_dotenv
-import stripe
+import re
 
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+import requests
+import streamlit as st
+import stripe
+from dotenv import load_dotenv
 from langchain.chains import RetrievalQA
 from langchain.chat_models import ChatOpenAI
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.prompts import PromptTemplate
-from langchain.memory import ConversationBufferMemory
-from langchain.vectorstores import SKLearnVectorStore
 from langchain.document_loaders import YoutubeLoader
+from langchain.document_loaders.blob_loaders.youtube_audio import YoutubeAudioLoader
+from langchain.document_loaders.generic import GenericLoader
+from langchain.document_loaders.parsers import OpenAIWhisperParser
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.memory import ConversationBufferMemory
+from langchain.prompts import PromptTemplate
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.vectorstores import SKLearnVectorStore
+
 from src.Change_Text_Style import change_text_style_english
 
 load_dotenv()  # read local .env file
@@ -100,12 +104,28 @@ def launch_youtube_app_eng():
 
                         if result:
                             return result
-                        st.subheader(":red[Couldn't extract any information from this website]")
-                        return []
 
                     except Exception as e:
-                        st.markdown(e)
-                        return []
+                        # st.markdown(e)
+                        try:
+                            with st.spinner('No transcribtion found for the video on Youtube. Transcribing video. This might take a few minutes depending on the size and the length of the video...'):
+                                loader = GenericLoader(YoutubeAudioLoader([url_check],
+                                                                          save_dir='cache'),
+                                                       OpenAIWhisperParser())
+                                docs = loader.load()
+                                combined_docs = [doc.page_content for doc in docs]
+                                result = " ".join(combined_docs)
+                                result = result.lower()
+                                result = f'Youtube video: {url} ======> {result}'
+
+                                if result:
+                                    return result
+                                else:
+                                    st.write('no result')
+
+                        except Exception as e:
+                            # st.write(e)
+                            return []
 
                 else:
                     st.subheader(

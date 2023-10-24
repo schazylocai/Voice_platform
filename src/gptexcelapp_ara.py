@@ -15,7 +15,6 @@ from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
 from langchain.vectorstores import SKLearnVectorStore
 from src.Change_Text_Style import change_text_style_arabic, change_text_style_arabic_side
-from langchain.storage import InMemoryStore
 
 load_dotenv()  # read local .env file
 secret_key = os.environ['OPENAI_API_KEY']
@@ -31,7 +30,7 @@ violet = "rgb(169, 131, 247)"
 red = "rgb(232,89,83)"
 
 
-def launch_app_ara():
+def launch_excel_app_ara():
     ######################################### Set session states #########################################
 
     if 'user_status' not in st.session_state:
@@ -155,87 +154,46 @@ def launch_app_ara():
 
     with col2:
         ################################# load documents #################################
-        max_retries = 15
-
-        # upload file 1
         change_text_style_arabic_side(" حمل PDF, word, أو أي نص", 'text_violet_side_tight', violet)
         file_1 = st.sidebar.file_uploader(
             label=':violet[Select PDF, word, or text files to upload]',
             type=['pdf', 'docx', 'txt'],
             label_visibility='hidden',
             accept_multiple_files=False, key='file_1_ara')
-
-        retry_count_1 = 0
         if file_1:
-            while retry_count_1 < max_retries:
-                try:
-                    st.session_state.file_to_upload_list_1_ara = file_1
-                    st.session_state.file_to_upload_1_ara = convert_file_to_text(file_1)
-                    st.session_state.file_text_list_ara.append(file_1)
-                    break
-
-                except Exception as e:
-                    retry_count_1 += 1
-                    if retry_count_1 < max_retries:
-                        continue
-                    st.sidebar.write("تم الوصول إلى الحد الأقصى لمحاولات إعادة المحاولة. فشل التحميل")
-                    break
-
+            st.session_state.file_to_upload_list_1_ara = file_1
+            st.session_state.file_to_upload_1_ara = convert_file_to_text(file_1)
+            st.session_state.file_text_list_ara.append(file_1)
         else:
+            st.session_state.file_to_upload_list_1_ara = ''
             st.session_state.file_to_upload_1_ara = None
 
-        # upload file 2
         change_text_style_arabic_side(" حمل PDF, word, أو أي نص", 'text_violet_side_tight', violet)
         file_2 = st.sidebar.file_uploader(
             label=':violet[Select PDF, word, or text files to upload]',
             type=['pdf', 'docx', 'txt'],
             label_visibility='hidden',
             accept_multiple_files=False, key='file_2_ara')
-
-        retry_count_2 = 0
         if file_2:
-            while retry_count_2 < max_retries:
-                try:
-                    st.session_state.file_to_upload_list_2_ara = file_2
-                    st.session_state.file_to_upload_2_ara = convert_file_to_text(file_2)
-                    st.session_state.file_text_list_ara.append(file_2)
-                    break
-
-                except Exception as e:
-                    retry_count_2 += 1
-                    if retry_count_2 < max_retries:
-                        continue
-                    st.sidebar.write("تم الوصول إلى الحد الأقصى لمحاولات إعادة المحاولة. فشل التحميل")
-                    break
-
+            st.session_state.file_to_upload_list_2_ara = file_2
+            st.session_state.file_to_upload_2_ara = convert_file_to_text(file_2)
+            st.session_state.file_text_list_ara.append(file_2)
         else:
+            st.session_state.file_to_upload_list_2_ara = ''
             st.session_state.file_to_upload_2_ara = None
 
-        # upload file 3
         change_text_style_arabic_side(" حمل PDF, word, أو أي نص", 'text_violet_side_tight', violet)
         file_3 = st.sidebar.file_uploader(
             label=':violet[Select PDF, word, or text files to upload]',
             type=['pdf', 'docx', 'txt'],
             label_visibility='hidden',
             accept_multiple_files=False, key='file_3_ara')
-
-        retry_count_3 = 0
         if file_3:
-            while retry_count_3 < max_retries:
-                try:
-                    st.session_state.file_to_upload_list_3_ara = file_3
-                    st.session_state.file_to_upload_3_ara = convert_file_to_text(file_3)
-                    st.session_state.file_text_list_ara.append(file_3)
-                    break
-
-                except Exception as e:
-                    retry_count_3 += 1
-                    if retry_count_3 < max_retries:
-                        continue
-                    st.sidebar.write("تم الوصول إلى الحد الأقصى لمحاولات إعادة المحاولة. فشل التحميل")
-                    break
-
+            st.session_state.file_to_upload_list_3_ara = file_3
+            st.session_state.file_to_upload_3_ara = convert_file_to_text(file_3)
+            st.session_state.file_text_list_ara.append(file_3)
         else:
+            st.session_state.file_to_upload_list_3_ara = ''
             st.session_state.file_to_upload_3_ara = None
 
     with col1:
@@ -284,8 +242,8 @@ def launch_app_ara():
         try:
             with st.spinner(text=":red[يرجى الانتظار بينما نقرء المستندات...]"):
 
-                chunk_size = 1000
-                text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=50,
+                chunk_size = 1500
+                text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=200,
                                                                length_function=len)
                 chunks = text_splitter.split_text(text=str(text_list))
                 chunks = list(chunks)
@@ -295,9 +253,8 @@ def launch_app_ara():
 
                 vector_store = SKLearnVectorStore.from_texts(texts=chunks, embedding=embedding,
                                                              persist_path=None)
-                store = InMemoryStore()
                 # vector_store.persist()
-                retriever = vector_store.as_retriever(search_kwargs={"k": 5}, docstore=store)
+                retriever = vector_store.as_retriever(search_kwargs={"k": 4})
                 st.session_state.continue_analysis_files_ara = True
 
         except Exception as e:
@@ -375,39 +332,35 @@ def launch_app_ara():
                     with st.spinner(
                             text=":red[...تم إرسال المحادثة. قد يستغرق ذلك حوالي دقيقة لتحليل المستندات]"):
                         with st.chat_message('assistant'):
-                            try:
-                                message_placeholder = st.empty()
-                                all_results = ''
-                                chat_history = st.session_state.chat_history_files_ara
-                                result = query_model({"query": user_input})
-                                user_query = result['query']
-                                result = result['result']
-                                st.session_state.chat_history_files_ara.append((user_query, result))
-                                all_results += result
-                                font_link = '<link href="https://fonts.googleapis.com/css2?family=Cairo+Play:wght@600;800' \
-                                            '&display=swap" rel="stylesheet">'
-                                font_family = "'Cairo Play', sans-serif"
-                                message_placeholder.markdown(
-                                    f"""
-                                        {font_link}
-                                        <style>
-                                            .bot_reply_text {{
-                                                font-family: {font_family};
-                                                font-size: 22px;
-                                                color: 'white;
-                                                text-align: right;
-                                                line-height: 2;
-                                                font-weight: 800;
-                                            }}
-                                        </style>
-                                        <div class="bot_reply_text"><bdi>{all_results}</bdi></div>
-                                        """, unsafe_allow_html=True)
+                            message_placeholder = st.empty()
+                            all_results = ''
+                            chat_history = st.session_state.chat_history_files_ara
+                            result = query_model({"query": user_input})
+                            user_query = result['query']
+                            result = result['result']
+                            st.session_state.chat_history_files_ara.append((user_query, result))
+                            all_results += result
+                            font_link = '<link href="https://fonts.googleapis.com/css2?family=Cairo+Play:wght@600;800' \
+                                        '&display=swap" rel="stylesheet">'
+                            font_family = "'Cairo Play', sans-serif"
+                            message_placeholder.markdown(
+                                f"""
+                                    {font_link}
+                                    <style>
+                                        .bot_reply_text {{
+                                            font-family: {font_family};
+                                            font-size: 22px;
+                                            color: 'white;
+                                            text-align: right;
+                                            line-height: 2;
+                                            font-weight: 800;
+                                        }}
+                                    </style>
+                                    <div class="bot_reply_text"><bdi>{all_results}</bdi></div>
+                                    """, unsafe_allow_html=True)
 
-                                st.session_state.messages_files_ara.append({'role': 'assistant', 'content': all_results})
-                                return user_input, result, user_query
-
-                            except Exception as e:
-                                st.write(":red[تعذر معالجة الطلب. يرجى المحاولة مرة أخرى]")
+                            st.session_state.messages_files_ara.append({'role': 'assistant', 'content': all_results})
+                            return user_input, result, user_query
 
             create_text_question()
 

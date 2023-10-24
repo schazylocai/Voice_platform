@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import datetime
 
 from src.English_Language import write_english_About
 from src.Arabic_Language import write_Arabic_About
@@ -17,7 +18,7 @@ st.set_page_config(layout="wide", initial_sidebar_state='expanded', page_icon="�
 connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
 
 ##################### Define LLM Model ####################
-llm_model = 'gpt-4'  # gpt-4 or gpt-3.5-turbo
+llm_model = 'gpt-3.5-turbo-16k'  # gpt-4 or gpt-3.5-turbo or gpt-3.5-turbo-16k
 
 ################### Set session states ###################
 st.session_state.setdefault("mylanguage", 'العربية')
@@ -111,6 +112,34 @@ def first_page():
 
         st.session_state.mylanguage = 'العربية'
         change_language_to_Arabic()
+
+    # clear files from the cache folder
+    # Define the path to the "cache" folder
+    cache_folder = "cache"
+
+    # Check if the "cache" folder exists
+    if os.path.exists(cache_folder) and os.path.isdir(cache_folder):
+        # Get the current time
+        current_time = datetime.datetime.now()
+
+        # Define a time delta of 4 hours
+        time_threshold = datetime.timedelta(hours=4)
+
+        # Iterate through files in the "cache" folder
+        for filename in os.listdir(cache_folder):
+            file_path = os.path.join(cache_folder, filename)
+
+            # Check if the path is a file (not a subdirectory)
+            if os.path.isfile(file_path):
+                # Get the modification time of the file
+                modification_time = datetime.datetime.fromtimestamp(os.path.getmtime(file_path))
+
+                # Calculate the time difference
+                time_difference = current_time - modification_time
+
+                # If the file was modified more 4 hours ago then delete it
+                if time_difference > time_threshold:
+                    os.remove(file_path)
 
 
 first_page()
