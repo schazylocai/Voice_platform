@@ -16,7 +16,7 @@ def write_english_About():
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.write(":red[Unlock the Power of AI & ] :blue[GPT4].")
+        st.write(":red[Unlock the Power of ] :blue[OpenAI GPT].")
         st.header(
             ":violet[Welcome to GPT Document Analyzer, a revolutionary application that leverages the capabilities of Large Language Models.]")
 

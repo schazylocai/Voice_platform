@@ -26,11 +26,11 @@ connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
 llm_model = 'gpt-3.5-turbo-16k'  # gpt-4 or gpt-3.5-turbo or gpt-3.5-turbo-16k
 
 ################### Set session states ###################
-st.session_state.setdefault("mylanguage", 'العربية')
+st.session_state.setdefault("mylanguage", 'English')
 st.session_state.setdefault("user_status", 'False')
 
 if 'mylanguage' not in st.session_state:
-    st.session_state.mylanguage = 'العربية'
+    st.session_state.mylanguage = 'English'
 
 if 'user_status' not in st.session_state:
     st.session_state.user_status = 'False'
