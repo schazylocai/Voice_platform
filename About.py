@@ -14,6 +14,11 @@ from src.stripe_functions_arabic import check_customers_ara, subscribe_to_servic
 
 load_dotenv()  # read local .env file
 
+LANGCHAIN_TRACING_V2 = os.environ['LANGCHAIN_TRACING_V2']
+LANGCHAIN_ENDPOINT = os.environ['LANGCHAIN_ENDPOINT']
+LANGCHAIN_API_KEY = os.environ['LANGCHAIN_API_KEY']
+LANGCHAIN_PROJECT = os.environ['LANGCHAIN_PROJECT']
+
 st.set_page_config(layout="wide", initial_sidebar_state='expanded', page_icon="🔬", page_title='GPT Document Analyzer')
 connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
 
