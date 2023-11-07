@@ -23,7 +23,7 @@ st.set_page_config(layout="wide", initial_sidebar_state='expanded', page_icon="ð
 connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
 
 ##################### Define LLM Model ####################
-llm_model = 'gpt-4'  # gpt-4 or gpt-3.5-turbo or gpt-3.5-turbo-16k
+llm_model = 'gpt-4-1106-preview'  # gpt-4 or gpt-3.5-turbo or gpt-3.5-turbo-16k or gpt-4-1106-preview
 
 ################### Set session states ###################
 st.session_state.setdefault("mylanguage", 'English')
