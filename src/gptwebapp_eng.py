@@ -223,9 +223,6 @@ def launch_web_app_eng():
 
                 Divide your answer when possible into paragraphs:
                 • What is your answer to the question?
-                • Add citations when possible from the document that supports the answer.
-                • Add references when possible related to questions from the given documents only, in bullet points,
-                  each one separately, at the end of your answer.
 
                 <ctx>
                 {context}
