@@ -182,8 +182,8 @@ def launch_web_app_ara():
         try:
             with st.spinner(text=":red[Please wait while we read the documents...]"):
 
-                chunk_size = 1500
-                text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=200,
+                chunk_size = 1000
+                text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=50,
                                                                length_function=len)
                 chunks = text_splitter.split_text(text=str(st.session_state.weblink_1_ara))
                 chunks = list(chunks)
@@ -194,7 +194,7 @@ def launch_web_app_ara():
                 vector_store = SKLearnVectorStore.from_texts(texts=chunks, embedding=embedding,
                                                              persist_path=None)
                 # vector_store.persist()
-                retriever = vector_store.as_retriever(search_kwargs={"k": 4})
+                retriever = vector_store.as_retriever(search_kwargs={"k": 1})
                 st.session_state.continue_analysis_weblink_ara = True
 
         except Exception as e:
