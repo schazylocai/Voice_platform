@@ -124,7 +124,7 @@ def launch_youtube_app_eng():
                                     st.write('no result')
 
                         except Exception as e:
-                            # st.write(e)
+                            st.write(e)
                             return []
 
                 else:
@@ -210,7 +210,7 @@ def launch_youtube_app_eng():
         except Exception as e:
             st.subheader(":red[An error occurred. Please upload the youtube link again]")
             st.session_state.continue_analysis_youtube_eng = False
-            # st.markdown(e)
+            st.markdown(e)
 
         ################################## Youtube ##################################
         if st.session_state.continue_analysis_youtube_eng:
