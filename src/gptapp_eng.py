@@ -298,7 +298,7 @@ def launch_app_eng():
         except Exception as e:
             st.subheader(":red[An error occurred. Please delete the uploaded file, and then uploaded it again]")
             st.session_state.continue_analysis_files_eng = False
-            # st.markdown(e)
+            st.markdown(e)
 
         #################################### documents ####################################
         if st.session_state.continue_analysis_files_eng:
