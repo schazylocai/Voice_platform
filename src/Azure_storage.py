@@ -9,8 +9,7 @@ from dotenv import load_dotenv
 
 load_dotenv()  # read local .env file
 
-# tenant_id = os.environ["AZURE_TENANT_ID"]
-tenant_id = "c6f27586-aa5d-4bcd-b0b2-cdd40adc30a6"
+tenant_id = os.environ["AZURE_TENANT_ID"]
 client_id = os.environ["AZURE_CLIENT_ID"]
 client_secret = os.environ["AZURE_CLIENT_SECRET"]
 keyvault_name = os.environ["AZURE_KEYVAULT_NAME"]
