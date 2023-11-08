@@ -200,7 +200,7 @@ def launch_youtube_app_ara():
         try:
             with st.spinner(text=":red[Please wait while we read the documents...]"):
 
-                chunk_size = 1500
+                chunk_size = 1000
                 text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=200,
                                                                length_function=len)
                 youtube_chunks = text_splitter.split_text(st.session_state.youtube_content_ara)
@@ -211,7 +211,7 @@ def launch_youtube_app_ara():
                 vector_store = SKLearnVectorStore.from_texts(youtube_chunks, embedding=embedding,
                                                              persist_path=None)
                 # vector_store.persist()
-                retriever = vector_store.as_retriever(search_kwargs={"k": 2})
+                retriever = vector_store.as_retriever(search_kwargs={"k": 1})
                 st.session_state.continue_analysis_youtube_ara = True
 
         except Exception as e:
@@ -247,7 +247,6 @@ def launch_youtube_app_ara():
     
                 Divide your answer when possible into paragraphs:
                 • What is your answer to the question?
-                • Add citations when possible from the document that supports the answer.
 
                 <ctx>
                 {context}
