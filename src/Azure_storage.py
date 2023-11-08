@@ -6,6 +6,7 @@ import azure.keyvault.secrets
 import re
 
 from dotenv import load_dotenv
+
 load_dotenv()  # read local .env file
 
 tenant_id = os.environ["AZURE_TENANT_ID"]
