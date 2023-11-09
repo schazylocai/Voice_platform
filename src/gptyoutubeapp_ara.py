@@ -108,25 +108,27 @@ def launch_youtube_app_ara():
 
                     except Exception as e:
                         # st.markdown(e)
-                        try:
-                            with st.spinner('"لا توجد نسخة نصية متاحة للفيديو على YouTube. جاري نسخ الفيديو. قد يستغرق ذلك بضع دقائق اعتمادًا على حجم ومدة الفيديو..."'):
-                                loader = GenericLoader(YoutubeAudioLoader([url_check],
-                                                                          save_dir='cache'),
-                                                       OpenAIWhisperParser())
-                                docs = loader.load()
-                                combined_docs = [doc.page_content for doc in docs]
-                                result = " ".join(combined_docs)
-                                result = result.lower()
-                                result = f'Youtube video: {url} ======> {result}'
-
-                                if result:
-                                    return result
-                                else:
-                                    st.write('لا نتيجة')
-
-                        except Exception as e:
-                            # st.write(e)
-                            return []
+                        st.write("لا توجد نسخة نصية متاحة للفيديو على YouTube. جاري نسخ الفيديو. قد يستغرق ذلك بضع دقائق اعتمادًا على حجم ومدة الفيديو...")
+                        return []
+                        # try:
+                        #     with st.spinner("لا توجد نسخة نصية متاحة للفيديو على YouTube. جاري نسخ الفيديو. قد يستغرق ذلك بضع دقائق اعتمادًا على حجم ومدة الفيديو..."):
+                        #         loader = GenericLoader(YoutubeAudioLoader([url_check],
+                        #                                                   save_dir='cache'),
+                        #                                OpenAIWhisperParser())
+                        #         docs = loader.load()
+                        #         combined_docs = [doc.page_content for doc in docs]
+                        #         result = " ".join(combined_docs)
+                        #         result = result.lower()
+                        #         result = f'Youtube video: {url} ======> {result}'
+                        #
+                        #         if result:
+                        #             return result
+                        #         else:
+                        #             st.write('لا نتيجة')
+                        #
+                        # except Exception as e:
+                        #     # st.write(e)
+                        #     return []
 
 
                 else:

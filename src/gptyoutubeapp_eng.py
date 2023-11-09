@@ -106,27 +106,29 @@ def launch_youtube_app_eng():
                             return result
 
                     except Exception as e:
+                        st.write('No transcribtion found for the video on Youtube. Transcribing video. This might take a few minutes depending on the size and the length of the video...')
                         # st.markdown(e)
-                        try:
-                            with st.spinner('No transcribtion found for the video on Youtube. Transcribing video. This might take a few minutes depending on the size and the length of the video...'):
-                                loader = GenericLoader(YoutubeAudioLoader([url_check],
-                                                                          save_dir='cache'),
-                                                       OpenAIWhisperParser())
-                                docs = loader.load()
-                                combined_docs = [doc.page_content for doc in docs]
-                                result = " ".join(combined_docs)
-
-                                result = result.lower()
-                                result = f'Youtube video: {url} ======> {result}'
-
-                                if result:
-                                    return result
-                                else:
-                                    st.write('no result')
-
-                        except Exception as e:
-                            # st.write(e)
-                            return []
+                        return []
+                        # try:
+                        #     with st.spinner('No transcribtion found for the video on Youtube. Transcribing video. This might take a few minutes depending on the size and the length of the video...'):
+                        #         loader = GenericLoader(YoutubeAudioLoader([url_check],
+                        #                                                   save_dir='cache'),
+                        #                                OpenAIWhisperParser())
+                        #         docs = loader.load()
+                        #         combined_docs = [doc.page_content for doc in docs]
+                        #         result = " ".join(combined_docs)
+                        #
+                        #         result = result.lower()
+                        #         result = f'Youtube video: {url} ======> {result}'
+                        #
+                        #         if result:
+                        #             return result
+                        #         else:
+                        #             st.write('no result')
+                        #
+                        # except Exception as e:
+                        #     # st.write(e)
+                        #     return []
 
                 else:
                     st.subheader(
