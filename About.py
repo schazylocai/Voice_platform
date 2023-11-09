@@ -7,10 +7,10 @@ from src.Arabic_Language import write_Arabic_About
 from src.Change_Text_Style import change_text_style_arabic, change_text_style_english
 
 from dotenv import load_dotenv
-from src.stripe_functions_english import check_customers_eng, subscribe_to_service_eng, cancel_service_eng, \
-    forgot_password_eng
-from src.stripe_functions_arabic import check_customers_ara, subscribe_to_service_ara, cancel_service_ara, \
-    forgot_password_ara
+# from src.stripe_functions_english import check_customers_eng, subscribe_to_service_eng, cancel_service_eng, \
+#     forgot_password_eng
+# from src.stripe_functions_arabic import check_customers_ara, subscribe_to_service_ara, cancel_service_ara, \
+#     forgot_password_ara
 
 load_dotenv()  # read local .env file
 

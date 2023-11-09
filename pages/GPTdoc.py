@@ -30,6 +30,8 @@ if st.session_state.mylanguage == 'English':
     else:
         st.header(':red[Subscription is not valid!]')
         st.subheader(':violet[Please Login or Subscribe in the About page.]')
+        launch_app_eng()
+        client_started = True
 
 elif st.session_state.mylanguage == 'العربية':
 
