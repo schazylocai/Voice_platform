@@ -64,4 +64,4 @@ jobs:
         with:
           app-name: 'gptdocanalyzer'
           slot-name: 'gptdocanalayzer-development-phase'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_FF65F94D81A44F069A4A4075A4426064 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_788593539FB94979AD45D2D1926F9045 }}
