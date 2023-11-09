@@ -58,10 +58,10 @@ def change_language_to_Arabic():
     st.divider()
     write_Arabic_About()
 
-    st.session_state.subscribed_status = check_customers_ara()
-    subscribe_to_service_ara()
-    cancel_service_ara()
-    forgot_password_ara()
+    # st.session_state.subscribed_status = check_customers_ara()
+    # subscribe_to_service_ara()
+    # cancel_service_ara()
+    # forgot_password_ara()
 
 
 def change_language_to_English():
@@ -78,10 +78,10 @@ def change_language_to_English():
     st.divider()
     write_english_About()
 
-    st.session_state.subscribed_status = check_customers_eng()
-    subscribe_to_service_eng()
-    cancel_service_eng()
-    forgot_password_eng()
+    # st.session_state.subscribed_status = check_customers_eng()
+    # subscribe_to_service_eng()
+    # cancel_service_eng()
+    # forgot_password_eng()
 
 
 def first_page():
