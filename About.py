@@ -118,7 +118,7 @@ def first_page():
         st.session_state.mylanguage = 'العربية'
         change_language_to_Arabic()
 
-    # clear files from the cache folder
+    # clear files from the cache folder.
     # Define the path to the "cache" folder
     cache_folder = "cache"
 
