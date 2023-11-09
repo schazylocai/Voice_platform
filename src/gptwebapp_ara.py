@@ -163,11 +163,11 @@ def launch_web_app_ara():
             clear_all_files()
 
     #################################### Create final text file to pass to LLM ####################################
-    st.divider()
-
-    if st.session_state.weblink_1_ara:
-        with st.expander('النص المُستخرَج من الموقع الإلكتروني'):
-            st.write(st.session_state.weblink_1_ara)
+    # st.divider()
+    #
+    # if st.session_state.weblink_1_ara:
+    #     with st.expander('النص المُستخرَج من الموقع الإلكتروني'):
+    #         st.write(st.session_state.weblink_1_ara)
 
     st.divider()
 

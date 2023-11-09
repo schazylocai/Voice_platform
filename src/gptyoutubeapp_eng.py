@@ -115,6 +115,7 @@ def launch_youtube_app_eng():
                                 docs = loader.load()
                                 combined_docs = [doc.page_content for doc in docs]
                                 result = " ".join(combined_docs)
+
                                 result = result.lower()
                                 result = f'Youtube video: {url} ======> {result}'
 

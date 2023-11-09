@@ -1,8 +1,6 @@
 import streamlit as st
 import os
 import datetime
-import azure.identity
-import azure.keyvault.secrets
 
 from src.English_Language import write_english_About
 from src.Arabic_Language import write_Arabic_About
@@ -15,16 +13,6 @@ from src.stripe_functions_arabic import check_customers_ara, subscribe_to_servic
     forgot_password_ara
 
 load_dotenv()  # read local .env file
-
-tenant_id = os.environ["AZURE_TENANT_ID"]
-client_id = os.environ["AZURE_CLIENT_ID"]
-client_secret = os.environ["AZURE_CLIENT_SECRET"]
-keyvault_name = os.environ["AZURE_KEYVAULT_NAME"]
-keyvault_uri = os.environ["AZURE_KEYVAULT_URI"]
-
-_credential = azure.identity.ClientSecretCredential(tenant_id=tenant_id, client_id=client_id,
-                                                    client_secret=client_secret)
-client = azure.keyvault.secrets.SecretClient(vault_url=keyvault_uri, credential=_credential)
 
 LANGCHAIN_TRACING_V2 = os.environ['LANGCHAIN_TRACING_V2']
 LANGCHAIN_ENDPOINT = os.environ['LANGCHAIN_ENDPOINT']

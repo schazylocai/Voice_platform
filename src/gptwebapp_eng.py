@@ -155,11 +155,11 @@ def launch_web_app_eng():
             clear_all_files()
 
     ################################## Create final text file to pass to LLM ##################################
-    st.divider()
-
-    if st.session_state.weblink_1_eng:
-        with st.expander('Retrieved text from website'):
-            st.write(st.session_state.weblink_1_eng)
+    # st.divider()
+    #
+    # if st.session_state.weblink_1_eng:
+    #     with st.expander('Retrieved text from website'):
+    #         st.write(st.session_state.weblink_1_eng)
 
     st.divider()
 
