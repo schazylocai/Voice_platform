@@ -106,7 +106,7 @@ def launch_youtube_app_eng():
                             return result
 
                     except Exception as e:
-                        st.write('No transcribtion found for the video on Youtube. Transcribing video. This might take a few minutes depending on the size and the length of the video...')
+                        st.write('No transcribtion found for the video on Youtube.')
                         # st.markdown(e)
                         return []
                         # try:

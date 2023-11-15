@@ -292,7 +292,7 @@ def launch_app_eng():
                                                              persist_path=None)
                 store = InMemoryStore()
                 # vector_store.persist()
-                retriever = vector_store.as_retriever(search_kwargs={"k": 5}, docstore=store)
+                retriever = vector_store.as_retriever(search_kwargs={"k": 3}, docstore=store)
                 st.session_state.continue_analysis_files_eng = True
 
         except Exception as e:

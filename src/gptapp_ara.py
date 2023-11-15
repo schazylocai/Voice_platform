@@ -297,7 +297,7 @@ def launch_app_ara():
                                                              persist_path=None)
                 store = InMemoryStore()
                 # vector_store.persist()
-                retriever = vector_store.as_retriever(search_kwargs={"k": 5}, docstore=store)
+                retriever = vector_store.as_retriever(search_kwargs={"k": 3}, docstore=store)
                 st.session_state.continue_analysis_files_ara = True
 
         except Exception as e:
