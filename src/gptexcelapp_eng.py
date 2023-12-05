@@ -12,7 +12,6 @@ import pandas as pd
 import altair as alt
 import warnings
 import io
-from io import BytesIO
 import altair_saver
 from datetime import datetime
 from langchain.callbacks.base import BaseCallbackManager
