@@ -208,40 +208,34 @@ def launch_web_app_ara():
             ##################################### RetrievalQA from chain type #####################################
 
             response_template = """
-                • You will act as an Arabic professional and a researcher.
-                • Your task is to reply only in Arabic even if the question is in another language.
-                • Your task is to read through the websites.
-                • If a user asks you about a specific website url, then look inside the given documents for "Website"
-                  url to reply to the user.
-                • You should be analytical, thoughtful, and reply in depth and details to any question.
-                • Before giving your answer, you should look through all the documents in the provided text.
-                • Always keep the History of the chat in your memory from the text stored in the variable chat_history
-                • If the user asks about a previous question, then you can look into the history using the text
-                  stored in the variable chat_history.
-                • If you suspect bias in the answer, then highlight the concerned sentence or paragraph in quotation
-                  marks and write: "It is highly likly that this sentence or paragrph is biased".
-                  Explain why do yuo think it is biased.
-                • If you suspect incorrect or misleading information in the answer, then highlight the concerned
-                  sentence or paragraph in quotation marks and write: "It is highly likly that this sentence
-                  or paragrph is incorrect or misleading". Explain why do yuo think it is incorrect or misleading.
-                • Always reply in a polite and professional manner.
-                • If you don't know the answer to the question, then reply:
-                  "أنا لست واثقًا من الإجابة على هذا السؤال بسبب غياب بعض المعلومات. حاول تحديد السؤال بطريقة اخرى."
-    
-                Divide your answer when possible into paragraphs:
-                • What is your answer to the question?
+                        - you are provided with a dataframe {{sheets}}
+                        - Take a deep breath and work on this problem step-by-step.
 
-                <ctx>
-                {context}
-                </ctx>
-                --------
-                <hs>
-                {history}
-                </hs>
-                --------
-                {question}
-                Answer:
-                """
+                        - You are only allowed to use the dataframe {{sheets}} given to you.
+                        - Don't use any information outside the given dataframe {{sheets}}.
+                        - If you do not know the answer, reply as follows: "I do not know the answer..."
+
+                        - Give your final solution in an excel like format.
+                        - List all the in_lines of the solution.
+                        - In your solution, sort the in_lines in descending order
+
+                        - Example:
+                            "Column 1": "Column 2"
+                            "Data scientist": {{percentage}} of Data scientist in the column
+                            "Data analyst": {{percentage}} of Data analyst in the column
+                            "Web developer": {{percentage}} of Web developer in the column
+
+                        <ctx>
+                        {context}
+                        </ctx>
+                        --------
+                        <hs>
+                        {history}
+                        </hs>
+                        --------
+                        {question}
+                        Answer:
+                        """
 
             prompt_weblinks = PromptTemplate(template=response_template,
                                              input_variables=["history", "context", "question"])

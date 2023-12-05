@@ -419,7 +419,7 @@ def launch_excel_app_eng():
                 col_A = st.sidebar.selectbox(
                     label='Choose first column (distribution)',
                     options=['None'] + [sheet for sheet in sheets_frame.select_dtypes(exclude=[np.datetime64,
-                                                                                    datetime, 'number'])],
+                                                                                               datetime, 'number'])],
                     key='choose_categorical_A_column',
                     label_visibility='visible',
                 )
@@ -469,13 +469,13 @@ def launch_excel_app_eng():
                     chunks = text_splitter.split_text(text=str(sheets_text))
                     chunks = list(chunks)
 
-                    in_llm = ChatOpenAI(temperature=0.0, model=st.session_state.ChatOpenAI)  # gpt-4 or gpt-3.5-turbo
+                    in_llm = ChatOpenAI(temperature=0.0, model=st.session_state.ChatOpenAI)
                     in_embedding = OpenAIEmbeddings()
 
                     in_vector_store = SKLearnVectorStore.from_texts(texts=chunks, embedding=in_embedding,
                                                                     persist_path=None)
                     # in_vector_store.persist()
-                    in_retriever = in_vector_store.as_retriever(search_kwargs={"k": 1})
+                    in_retriever = in_vector_store.as_retriever(search_kwargs={"k": 3})
                     st.session_state.continue_analysis_excel_eng = True
 
                     return in_llm, in_retriever
@@ -493,7 +493,7 @@ def launch_excel_app_eng():
         embedding = OpenAIEmbeddings()
         vector_store = SKLearnVectorStore.from_texts(texts='No text provided...', embedding=embedding,
                                                      persist_path=None)
-        retriever = vector_store.as_retriever(search_kwargs={"k": 4})
+        retriever = vector_store.as_retriever(search_kwargs={"k": 1})
         st.session_state.continue_analysis_excel_eng = True
 
     ######################################## documents ########################################
@@ -502,34 +502,34 @@ def launch_excel_app_eng():
         #################################### Templates ####################################
 
         response_template = """
-            - you are provided with a dataframe {{sheets}}
-            - Take a deep breath and work on this problem step-by-step.
+                        - you are provided with a dataframe {{sheets}}
+                        - Take a deep breath and work on this problem step-by-step.
 
-            - You are only allowed to use the dataframe {{sheets}} given to you.
-            - Don't use any information outside the given dataframe {{sheets}}.
-            - If you do not know the answer, reply as follows: "I do not know the answer..."
+                        - You are only allowed to use the dataframe {{sheets}} given to you.
+                        - Don't use any information outside the given dataframe {{sheets}}.
+                        - If you do not know the answer, reply as follows: "I do not know the answer..."
 
-            - Give your final solution in an excel like format.
-            - List all the in_lines of the solution.
-            - In your solution, sort the in_lines in descending order
+                        - Give your final solution in an excel like format.
+                        - List all the in_lines of the solution.
+                        - In your solution, sort the in_lines in descending order
 
-            - Example:
-                "Column 1": "Column 2"
-                "Data scientist": {{percentage}} of Data scientist in the column
-                "Data analyst": {{percentage}} of Data analyst in the column
-                "Web developer": {{percentage}} of Web developer in the column
+                        - Example:
+                            "Column 1": "Column 2"
+                            "Data scientist": {{percentage}} of Data scientist in the column
+                            "Data analyst": {{percentage}} of Data analyst in the column
+                            "Web developer": {{percentage}} of Web developer in the column
 
-            <ctx>
-            {context}
-            </ctx>
-            --------
-            <hs>
-            {history}
-            </hs>
-            --------
-            {question}
-            Answer:
-            """
+                        <ctx>
+                        {context}
+                        </ctx>
+                        --------
+                        <hs>
+                        {history}
+                        </hs>
+                        --------
+                        {question}
+                        Answer:
+                        """
 
         prompt_files = PromptTemplate(template=response_template,
                                       input_variables=["history", "context", "question"])
