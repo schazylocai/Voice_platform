@@ -91,13 +91,35 @@ def launch_excel_app_eng():
                         engine='openpyxl',
                         sheet_name=sheet_name,
                         parse_dates=True,
-                        na_values=0,
-                        keep_default_na=True,
+                        keep_default_na=False,
                         dtype_backend='numpy_nullable',
-                        nrows=2500,
+                        nrows=5000,
                     )
                     date_written = []
-                    adjusted_frame = current_sheet_data.dropna(thresh=1)
+                    adjusted_frame = current_sheet_data.replace(to_replace=r'^\s*$', value=np.nan, regex=True)
+                    adjusted_frame = adjusted_frame.dropna(thresh=1)
+
+                    # check if columns are missing some values
+                    def is_integer(val):
+                        try:
+                            float_val = float(val)
+                            return float_val.is_integer()
+                        except ValueError:
+                            return False
+
+                    for col in adjusted_frame.columns:
+                        # Calculate the percentage of integer values in the column
+                        perc_integers = adjusted_frame[col].apply(
+                            lambda x: pd.to_numeric(x, errors='coerce') and pd.to_numeric(x, errors='coerce') % 1 == 0).mean()
+
+                        # If more than 90% are integers, replace non-integers with 0
+                        if perc_integers > 0.9:
+                            # Convert the column to numeric, coercing errors to NaN, then fill NaNs with 0
+                            adjusted_frame[col] = pd.to_numeric(adjusted_frame[col], errors='coerce').fillna(0)
+
+                            # If you need the column as integers
+                            adjusted_frame[col] = adjusted_frame[col].astype(float)
+
                     # Write all column names in small caps
                     try:
                         adjusted_frame.columns = [frame.strip().lower() for frame in adjusted_frame.columns]
@@ -109,7 +131,11 @@ def launch_excel_app_eng():
                                                                                           datetime]), axis=1)
                     if len(adjusted_frame.columns) > 1:
                         try:
-                            date_written = [col for col in adjusted_frame if 'date' in col]
+                            date_terms = ['date', 'year', 'month', 'day', 'hour', 'minutes', 'seconds', 'time',
+                                          'min','sec']
+                            date_written = [col for col in adjusted_frame.columns if
+                                            any(date_term in col for date_term in date_terms)]
+
                             if date_cols.empty:
                                 final_columns = date_written
                             else:
@@ -163,8 +189,9 @@ def launch_excel_app_eng():
     with col1:
         st.title(":red[GPT Excel Analyzer]")
 
-    st.subheader(":violet[• Ensure the :red[1st row] of the table contains the :red[column names] & "
-                 "the :red[1st column] of the table is :red[not empty].]")
+    st.subheader(":violet[Ensure the :red[1st row] of the table contains the :red[column names], "
+                 "the :red[1st column] of the table is :red[not empty], and there are :red[no extra null rows]"
+                 " at the end of the table.]")
     # st.subheader(':violet[• Refer to columns by their :red[exact column names] in each query:]')
     # st.write(':violet[Example 1: What are the names of participant in the column :red["participants"]? Example 2: '
     #          'what is the total percentage time per office from the columns :red["time spent"] and :red["offices"]?]')
@@ -258,7 +285,7 @@ def launch_excel_app_eng():
                     col_A = st.sidebar.selectbox(
                         label='Choose first column (x-axis / distribution)',
                         options=['None'] + [sheet for sheet in
-                                            sheets_frame.select_dtypes(exclude=['number', np.datetime64, datetime])],
+                                            sheets_frame.select_dtypes(exclude=[np.datetime64, datetime])],
                         key='choose_categorical_A_column',
                         label_visibility='visible',
                     )
@@ -511,9 +538,9 @@ def launch_excel_app_eng():
             sheets_csv,
             agent_type=AgentType.OPENAI_FUNCTIONS,
             agent_executor_kwargs={
-                               "prompt": prompt_files,
-                               "memory": ConversationBufferMemory(memory_key="history",
-                                                                  return_messages=True)}
+                "prompt": prompt_files,
+                "memory": ConversationBufferMemory(memory_key="history",
+                                                   return_messages=True)}
         )
 
         #################################### Run the model ####################################
