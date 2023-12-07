@@ -14,9 +14,6 @@ from dotenv import load_dotenv
 from langchain.chains import RetrievalQA
 from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import YoutubeLoader
-from langchain.document_loaders.blob_loaders.youtube_audio import YoutubeAudioLoader
-from langchain.document_loaders.generic import GenericLoader
-from langchain.document_loaders.parsers import OpenAIWhisperParser
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
@@ -161,8 +158,9 @@ def launch_youtube_app_eng():
             st.write('')
             st.write(f':violet[youtube link: {youtube_link}]')
             youtube_content = is_youtube_link_eng(youtube_link)
-            st.session_state.youtube_content_eng = youtube_content
-            st.session_state.youtube_video_link_eng = youtube_link
+            if len(youtube_content) > 0:
+                st.session_state.youtube_content_eng = youtube_content
+                st.session_state.youtube_video_link_eng = youtube_link
 
     with col2:
 
@@ -176,8 +174,9 @@ def launch_youtube_app_eng():
             clear_all_files()
 
         ################################# load youtube link #################################
-        if st.session_state.youtube_video_link_eng:
-            st.video(st.session_state.youtube_video_link_eng)
+        if youtube_button:
+            if st.session_state.youtube_video_link_eng and len(youtube_content) > 0:
+                st.video(st.session_state.youtube_video_link_eng)
 
         ################################## Create final text file to pass to LLM ##################################
         # with st.expander('Retrieved text from the YouTube link'):

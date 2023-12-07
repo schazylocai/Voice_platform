@@ -3,14 +3,11 @@ import os
 import datetime
 
 from src.English_Language import write_english_About
-from src.Arabic_Language import write_Arabic_About
-from src.Change_Text_Style import change_text_style_arabic, change_text_style_english
+from src.Change_Text_Style import change_text_style_english
 
 from dotenv import load_dotenv
 from src.stripe_functions_english import check_customers_eng, subscribe_to_service_eng, cancel_service_eng, \
     forgot_password_eng
-from src.stripe_functions_arabic import check_customers_ara, subscribe_to_service_ara, cancel_service_ara, \
-    forgot_password_ara
 
 load_dotenv()  # read local .env file
 
@@ -44,37 +41,16 @@ violet = "rgb(169, 131, 247)"
 red = "rgb(232,89,83)"
 
 
-def change_language_to_Arabic():
-    st.divider()
-    change_text_style_arabic('☘️︎ بإستطاعتك الآن التفاعل مع أي ملف أو أي موقع على الإنترنت أو أي شريط ڤيديو من موقع يوتيوب.', 'subhead_new_item', violet)
-    st.write('')
-    col1, col2, col3 = st.columns(3)
-    with col3:
-        st.image('gpt_logos/GPTdoc.png')
-    with col2:
-        st.image('gpt_logos/GPTweb.png')
-    with col1:
-        st.image('gpt_logos/GPTyoutube.png')
-    st.divider()
-    write_Arabic_About()
-
-    st.session_state.subscribed_status = check_customers_ara()
-    subscribe_to_service_ara()
-    cancel_service_ara()
-    forgot_password_ara()
-
-
 def change_language_to_English():
-    st.divider()
-    st.subheader(
-        ':violet[☘️ You can now interact with any document, website, or YouTube video]')
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
+
     with col1:
-        st.image('gpt_logos/GPTdoc.png')
-    with col2:
-        st.image('gpt_logos/GPTweb.png')
-    with col3:
-        st.image('gpt_logos/GPTyoutube.png')
+        change_text_style_english("GPT Analyzer", 'title', red)
+        st.write('')
+    # with col2:
+    #     st.subheader(
+    #         ':violet[☘️ You can now interact with any document, website, YouTube video, or Excel file...]')
+
     st.divider()
     write_english_About()
 
@@ -85,41 +61,7 @@ def change_language_to_English():
 
 
 def first_page():
-    col1, col2, col3 = st.columns(3)
-
-    with col3:
-
-        if st.session_state.mylanguage == 'English':
-            language_options = ('English', 'العربية')
-        else:
-            language_options = ('العربية', 'English')
-
-        my_language = st.selectbox("/", options=language_options,
-                                   label_visibility='hidden')
-
-    if my_language == 'English':
-        with col1:
-            change_text_style_english("GPT Analyzer", 'title', violet)
-            st.write("")
-
-        with col3:
-            change_text_style_arabic("🌏  اختر لغتك", 'head', violet)
-
-        st.session_state.mylanguage = 'English'
-        change_language_to_English()
-
-    if my_language == 'العربية':
-        with col1:
-            change_text_style_arabic("محلل جي بي تي", 'title', violet)
-
-        with col3:
-            change_text_style_english("🌏  Choose your language", 'head', violet)
-
-        st.session_state.mylanguage = 'العربية'
-        change_language_to_Arabic()
-
-    # clear files from the cache folder
-    # Define the path to the "cache" folder
+    change_language_to_English()
     cache_folder = "cache"
 
     # Check if the "cache" folder exists

@@ -90,7 +90,7 @@ def check_customers_eng():
 
                                 st.sidebar.write(f":violet[{days_left} days left for this month.]")
                                 st.sidebar.title(
-                                    ':blue[Click at the top of this page on ] :red[GPTapp]:blue[ tab to start...]')
+                                  ':blue[Choose an app from the Menu/list at the top left side of this page to start... ]')
                                 found = True
                                 pass_found = True
                                 user = True
@@ -113,7 +113,7 @@ def check_customers_eng():
                                 elif subscription['data'][0]['cancel_at_period_end']:
                                     st.sidebar.write(f":red[Subscription will be canceled in {days_left} days.]")
                                     st.sidebar.title(
-                                        ':blue[Click at the top of this page on ] :red[GPTapp]:blue[ tab to start...]')
+                                     ':blue[Choose an app from the Menu/list at the top left side of this page to start... ]')
 
                                     found = True
                                     pass_found = True
@@ -133,7 +133,7 @@ def check_customers_eng():
                             elif status in ['trialing']:
                                 st.sidebar.write(':red[Subscription is on trial mode!]')
                                 st.sidebar.title(
-                                    ':blue[Click at the top of this page ] :red[GPTapp]:blue[ tab to start...]')
+                                    ':blue[Choose an app from the Menu/list at the top left side of this page to start... ]')
                                 found = True
                                 pass_found = True
                                 user = True
@@ -161,16 +161,6 @@ def check_customers_eng():
                         pass_found = True
                         user = True
                         st.session_state.user_status = 'True'
-                        return user
-
-                    elif email == os.environ['AWARD_EMAIL'] and password == os.environ['AWARD_PASSWORD']:
-                        found = True
-                        pass_found = True
-                        user = True
-                        st.session_state.user_status = 'True'
-                        send_email_eng("Award's email", os.environ["MY_EMAIL_ADDRESS"],
-                                       "Login from award's credentials",
-                                       "There was a login from the award's credentials", os.environ['AWARD_EMAIL'])
                         return user
 
                 if not found and not pass_found:

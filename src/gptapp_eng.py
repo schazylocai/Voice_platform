@@ -402,6 +402,7 @@ def launch_app_eng():
 
                             except Exception as e:
                                 st.write(":red[Couldn't process the request. Please try again!]")
+                                st.write(e)
 
             create_text_question()
 

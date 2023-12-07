@@ -6,7 +6,7 @@ tenacity==8.2.3
 docx2txt==0.8
 textract==1.6.5
 numpy==1.26.2
-langchain==0.0.345
+langchain==0.0.347
 azure.identity==1.15.0
 azure.keyvault.secrets==4.7.0
 validate_email==1.3

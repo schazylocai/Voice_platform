@@ -142,7 +142,7 @@ def launch_web_app_eng():
                                              key='web_s_1_eng')
         if weblink_button_1 and web_1:
             st.session_state.web_text_list_1_eng = web_1
-            st.write(f':violet[weblink: {web_1}]')
+            # st.write(f':violet[weblink: {web_1}]')
             st.session_state.weblink_1_eng = is_web_link(web_1)
 
     with col3:
@@ -155,11 +155,11 @@ def launch_web_app_eng():
             clear_all_files()
 
     ################################## Create final text file to pass to LLM ##################################
-    # st.divider()
-    #
-    # if st.session_state.weblink_1_eng:
-    #     with st.expander('Retrieved text from website'):
-    #         st.write(st.session_state.weblink_1_eng)
+    st.divider()
+
+    if st.session_state.weblink_1_eng:
+        with st.expander('Retrieved text from website'):
+            st.write(st.session_state.weblink_1_eng)
 
     st.divider()
 
@@ -170,6 +170,10 @@ def launch_web_app_eng():
 
     ######################################### Run LLM sequence #########################################
     if st.session_state.weblink_1_eng:
+
+        st.subheader(f":violet[Ask me anything about the webpage:]")
+        st.write(web_1)
+        st.divider()
 
         try:
             with st.spinner(text=":red[Please wait while we read the documents...]"):

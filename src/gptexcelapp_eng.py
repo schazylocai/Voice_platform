@@ -4,42 +4,19 @@ import streamlit as st
 import os
 from dotenv import load_dotenv
 import stripe
-import PyPDF2
-import docx2txt
-import textract
-import tempfile
 import pandas as pd
 import altair as alt
 import warnings
-import io
-import altair_saver
 from datetime import datetime
-from langchain.callbacks.base import BaseCallbackManager
-from langchain.schema.language_model import BaseLanguageModel
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.chains import RetrievalQA, LLMChain
 from langchain.chat_models import ChatOpenAI
 from langchain.embeddings import OpenAIEmbeddings
-from langchain.memory import ConversationBufferMemory, StreamlitChatMessageHistory
-from langchain.tools import BaseTool
+from langchain.memory import ConversationBufferMemory
 from langchain.vectorstores import SKLearnVectorStore
-from langchain.document_loaders import UnstructuredExcelLoader, DataFrameLoader
-from langchain.agents import initialize_agent, load_tools, LLMSingleActionAgent, AgentOutputParser, \
-    BaseSingleActionAgent, ZeroShotAgent, OpenAIFunctionsAgent
-from langchain.agents.output_parsers import JSONAgentOutputParser
-from langchain.agents.format_scratchpad import format_log_to_messages
+from langchain.prompts import PromptTemplate
+from langchain_experimental.agents.agent_toolkits import create_pandas_dataframe_agent
 from langchain.agents.agent_types import AgentType
-from langchain.prompts import StringPromptTemplate, PromptTemplate
-from langchain.schema import AgentAction, AgentFinish
-from langchain.tools.render import render_text_description
-from langchain.callbacks import StreamlitCallbackHandler
-
-from langchain import hub
-
-from typing import Callable, Optional, Dict, Any, Sequence
-from typing import List, Union
-import re
 
 from src.Change_Text_Style import change_text_style_english
 
@@ -72,8 +49,8 @@ def launch_excel_app_eng():
     if 'excel_sheets_dataframe_eng' not in st.session_state:
         st.session_state.excel_sheets_dataframe_eng = pd.DataFrame()
 
-    if 'excel_sheets_pdf_eng' not in st.session_state:
-        st.session_state.excel_sheets_pdf_eng = pd.DataFrame()
+    if 'excel_sheets_csv_eng' not in st.session_state:
+        st.session_state.excel_sheets_csv_eng = pd.DataFrame()
 
     if 'continue_analysis_excel_eng' not in st.session_state:
         st.session_state.continue_analysis_excel_eng = False
@@ -114,13 +91,13 @@ def launch_excel_app_eng():
                         engine='openpyxl',
                         sheet_name=sheet_name,
                         parse_dates=True,
-                        na_values=np.nan,
+                        na_values=0,
                         keep_default_na=True,
                         dtype_backend='numpy_nullable',
                         nrows=2500,
                     )
                     date_written = []
-                    adjusted_frame = current_sheet_data.iloc[:-1, :]
+                    adjusted_frame = current_sheet_data.dropna(thresh=1)
                     # Write all column names in small caps
                     try:
                         adjusted_frame.columns = [frame.strip().lower() for frame in adjusted_frame.columns]
@@ -168,8 +145,8 @@ def launch_excel_app_eng():
 
                     adjusted_frame = adjusted_frame.reset_index(drop=True)
                     # convert an Excel sheet to pdf
-                    adjusted_frame_pdf = adjusted_frame.to_csv()
-                    return adjusted_frame, adjusted_frame_pdf
+
+                    return adjusted_frame, adjusted_frame
 
             else:
                 catch_exception(my_file.name)
@@ -188,9 +165,9 @@ def launch_excel_app_eng():
 
     st.subheader(":violet[• Ensure the :red[1st row] of the table contains the :red[column names] & "
                  "the :red[1st column] of the table is :red[not empty].]")
-    st.subheader(':violet[• Refer to columns by their :red[exact column names] in each query:]')
-    st.write(':violet[Example 1: What are the names of participant in the column :red["participants"]? Example 2: '
-             'what is the total percentage time per office from the columns :red["time spent"] and :red["offices"]?]')
+    # st.subheader(':violet[• Refer to columns by their :red[exact column names] in each query:]')
+    # st.write(':violet[Example 1: What are the names of participant in the column :red["participants"]? Example 2: '
+    #          'what is the total percentage time per office from the columns :red["time spent"] and :red["offices"]?]')
 
     with col2:
         ################################# load documents #################################
@@ -226,7 +203,7 @@ def launch_excel_app_eng():
                         selected_index, selected_sheet_name = choose_sheet_index
                         st.session_state.continue_analysis_excel_eng = True
 
-                        st.session_state.excel_sheets_dataframe_eng, st.session_state.excel_sheets_pdf_eng = convert_excel_to_dataframe(
+                        st.session_state.excel_sheets_dataframe_eng, st.session_state.excel_sheets_csv_eng = convert_excel_to_dataframe(
                             excel_file_1, selected_index)
                         break
 
@@ -252,7 +229,7 @@ def launch_excel_app_eng():
     ######################################### render tables #########################################
     st.divider()
     sheets_frame = st.session_state.excel_sheets_dataframe_eng
-    sheets = st.session_state.excel_sheets_pdf_eng
+    sheets_csv = st.session_state.excel_sheets_csv_eng
 
     if excel_file_1:
         graph_type = 'None'
@@ -456,7 +433,7 @@ def launch_excel_app_eng():
 
     ##################################### chunk the document #########################################
 
-    if len(sheets) > 0:
+    if len(sheets_csv) > 0:
         @st.cache_resource
         def embed_text(sheets_text):
             try:
@@ -485,7 +462,7 @@ def launch_excel_app_eng():
                 # st.markdown(e)
                 return in_llm, in_retriever
 
-        llm, retriever = embed_text(sheets)
+        llm, retriever = embed_text(sheets_csv)
 
     else:
         llm = ChatOpenAI(temperature=0.0, model=st.session_state.ChatOpenAI)  # gpt-4 or gpt-3.5-turbo
@@ -501,22 +478,19 @@ def launch_excel_app_eng():
         #################################### Templates ####################################
 
         response_template = """
-                        - you are provided with a dataframe {{sheets}}
+                        - you are provided with a dataframe {{sheets_csv}}
+                        - This dataframe has to be read in a horizontal and vertical sense to understand the context.
+                        - The horizontal lines are the rows of the dataframe.
+                        - The vertical lines are the columns of the dataframe.
                         - Take a deep breath and work on this problem step-by-step.
 
-                        - You are only allowed to use the dataframe {{sheets}} given to you.
-                        - Don't use any information outside the given dataframe {{sheets}}.
+                        - You are only allowed to use the dataframe {{sheets_csv}} given to you.
+                        - Don't use any information outside the given dataframe {{sheets_csv}}.
                         - If you do not know the answer, reply as follows: "I do not know the answer..."
 
-                        - Give your final solution in an excel like format.
-                        - List all the in_lines of the solution.
-                        - In your solution, sort the in_lines in descending order
+                        - Give your final solution in bullet points.
+                        - In your solution, sort the in_lines in descending order.
 
-                        - Example:
-                            "Column 1": "Column 2"
-                            "Data scientist": {{percentage}} of Data scientist in the column
-                            "Data analyst": {{percentage}} of Data analyst in the column
-                            "Web developer": {{percentage}} of Web developer in the column
 
                         <ctx>
                         {context}
@@ -526,23 +500,21 @@ def launch_excel_app_eng():
                         {history}
                         </hs>
                         --------
-                        {question}
                         Answer:
                         """
 
         prompt_files = PromptTemplate(template=response_template,
-                                      input_variables=["history", "context", "question"])
+                                      input_variables=["history", "context"])
 
-        query_model = RetrievalQA.from_chain_type(
-            llm=llm,
-            chain_type="stuff",
-            return_source_documents=False,
-            retriever=retriever,
-            chain_type_kwargs={"verbose": False,
+        query_model = create_pandas_dataframe_agent(
+            llm,
+            sheets_csv,
+            agent_type=AgentType.OPENAI_FUNCTIONS,
+            agent_executor_kwargs={
                                "prompt": prompt_files,
                                "memory": ConversationBufferMemory(memory_key="history",
-                                                                  input_key="question",
-                                                                  return_messages=True)})
+                                                                  return_messages=True)}
+        )
 
         #################################### Run the model ####################################
         def create_text_question():
@@ -555,134 +527,44 @@ def launch_excel_app_eng():
 
                 st.session_state.messages_excel_eng.append({'role': 'user', 'content': user_input})
 
-                with st.spinner(text=":red[Query submitted. This may take a minute while we query the tables...]"):
+                with st.spinner(text=":red[Query submitted. This may take a minute while we query the table...]"):
                     with st.chat_message('assistant'):
-                        all_results = ''
-                        chat_files_eng = st.session_state.chat_history_excel_eng
-                        # st_callback = StreamlitCallbackHandler(st.container())  # callbacks = [st_callback]
-                        output = query_model({"query": user_input})
-                        user_query = user_input
-                        result = output['result']
-                        st.session_state.chat_history_excel_eng.append((user_query, result))
-                        all_results += result
+                        try:
+                            message_placeholder = st.empty()
+                            all_results = ''
+                            chat_files_eng = st.session_state.chat_history_excel_eng
+                            # st_callback = StreamlitCallbackHandler(st.container())  # callbacks = [st_callback]
+                            output = query_model(user_input)
+                            user_query = user_input
+                            result = output['output']
+                            st.session_state.chat_history_excel_eng.append((user_query, result))
+                            all_results += result
+                            font_link_eng = '<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">'
+                            font_family_eng = "'Roboto', sans-serif"
+                            message_placeholder.markdown(
+                                f"""
+                                                                    {font_link_eng}
+                                                                    <style>
+                                                                        .bold-text {{
+                                                                            font-family: {font_family_eng};
+                                                                            font-size: 22px;
+                                                                            color: 'white;
+                                                                            text-align: left;
+                                                                            line-height: 2.2;
+                                                                            font-weight: 400;
+                                                                        }}
+                                                                    </style>
+                                                                    <div class="bold-text"><bdi>{all_results}</bdi></div>
+                                                                    """, unsafe_allow_html=True)
 
-                        st.session_state.messages_excel_eng.append({'role': 'assistant', 'content': all_results})
-                        return result
+                            st.session_state.messages_excel_eng.append({'role': 'assistant', 'content': all_results})
+                            # return result
 
-        final_LLM_output = create_text_question()
+                        except Exception as e:
+                            st.write(":red[Couldn't process the request. Please try again!]")
+                            st.write(e)
 
-        def render_data_frame(df_output):
-            try:
-                in_frame = df_output.strip().replace('-', '')
-                in_frame = in_frame.split('\n')
-                bullet_output_columns = []
-                for fr in in_frame:
-                    in_line = fr.split(': ')
-                    bullet_output_columns.append(in_line)
-
-                if len(bullet_output_columns) > 1:
-                    pandas_df = pd.DataFrame(data=bullet_output_columns)
-                    # Display the dataframe in Streamlit
-                    st.dataframe(pandas_df, use_container_width=True)
-
-                    # Create an in-memory Excel file
-                    excel_buffer = io.BytesIO()
-                    excel_writer = pd.ExcelWriter(excel_buffer, engine='openpyxl')
-                    pandas_df.to_excel(excel_writer, index=False)
-
-                    # Provide a download button to download the in-memory Excel file
-                    st.download_button(
-                        label='Save table',
-                        data=excel_buffer.getvalue(),
-                        key='download_button',
-                        file_name='table.xlsx',
-                        use_container_width=True,
-                    )
-                    return pandas_df
-                else:
-                    message_placeholder = st.empty()
-                    font_link_eng = '<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">'
-                    font_family_eng = "'Roboto', sans-serif"
-                    message_placeholder.markdown('According to the Excel file:')
-                    message_placeholder.markdown(
-                        f"""
-                                                    {font_link_eng}
-                                                    <style>
-                                                        .bold-text {{
-                                                            font-family: {font_family_eng};
-                                                            font-size: 22px;
-                                                            color: 'white;
-                                                            text-align: left;
-                                                            line-height: 2.2;
-                                                            font-weight: 400;
-                                                        }}
-                                                    </style>
-                                                    <div class="bold-text"><bdi>{df_output}</bdi></div>
-                                                    """, unsafe_allow_html=True)
-                    # st.write(bullet_output)
-
-            except Exception as e:
-                st.write(df_output)
-                return df_output
-
-        def render_graph(data_graph):
-            try:
-                data_plot = data_graph.strip().replace('-', '').replace('%', '')
-                data_plot = data_plot.split('\n')
-                lines_graph = []
-                for dg in data_plot:
-                    line_graph = dg.split(': ')
-                    lines_graph.append(line_graph)
-                pandas_df_graph = pd.DataFrame(data=lines_graph)
-                pandas_df_graph['value'] = pd.to_numeric(pandas_df_graph['value']).astype(float)
-
-                # Create a Streamlit bar chart using Altair
-                st.header('Bar Chart...')
-                # Create a bar chart using Altair
-                chart = alt.Chart(pandas_df_graph, height=600).mark_bar(cornerRadius=10, color='cyan').encode(
-                    alt.Y('variable:N', axis=alt.Axis(labelFontSize=14)),
-                    alt.X('value:Q', axis=alt.Axis(labelFontSize=12)), )
-                # Display the chart in Streamlit
-                st.altair_chart(chart, use_container_width=True)
-
-                # Convert the Altair chart to a PNG image in memory
-                chart_image = chart.to_html()
-                # chart_saved = chart.save(fp='chart.png', ppi=300, format='png', engine="vl-convert")
-
-                # Provide a download link for the in-memory image
-                st.download_button(
-                    label='Download bar chart',
-                    data=chart_image,
-                    key='download_chart_button',
-                    file_name='chart.html',
-                    use_container_width=True,
-                )
-
-                return chart
-            except Exception as e:
-                return ''
-
-        if final_LLM_output is not None:
-            try:
-                data = ''
-                for idx, d in enumerate(final_LLM_output):
-                    if d == ': ':
-                        data = final_LLM_output[idx + 1:]
-                        break
-                data_frame = data.strip().replace('-', '')
-                data_frame = data_frame.split('\n')
-                lines = []
-                for d in data_frame:
-                    line = d.split(': ')
-                    lines.append(line)
-
-                render_data_frame(final_LLM_output)
-                render_graph(final_LLM_output)
-
-            except Exception as e:
-                st.write(':red[An error has occurred]')
-        else:
-            st.write('')
+        create_text_question()
 
     else:
         st.empty()

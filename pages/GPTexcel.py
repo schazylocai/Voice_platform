@@ -1,5 +1,5 @@
 import streamlit as st
-from src.gptyoutubeapp_eng import launch_youtube_app_eng
+from src.gptexcelapp_eng import launch_excel_app_eng
 from src.Change_Text_Style import change_text_style_arabic
 
 if 'mylanguage' not in st.session_state:
@@ -11,7 +11,7 @@ if 'user_status' not in st.session_state:
 client_started = False
 subscribed = False
 
-st.set_page_config(layout="wide", initial_sidebar_state='expanded', page_icon="🔬", page_title='GPT Youtube Engine')
+st.set_page_config(layout="wide", initial_sidebar_state='expanded', page_icon="🔬", page_title='GPT Excel Engine ')
 
 violet = "rgb(169, 131, 247)"
 red = "rgb(232,89,83)"
@@ -24,7 +24,7 @@ subscribed_user = st.session_state.user_status
 if st.session_state.mylanguage == 'English':
 
     if subscribed_user == 'True':
-        launch_youtube_app_eng()
+        launch_excel_app_eng()
         client_started = True
     else:
         st.header(':red[Subscription is not valid!]')

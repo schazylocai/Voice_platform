@@ -2,8 +2,12 @@ import streamlit as st
 import smtplib
 import re
 import os
+from src.Change_Text_Style import change_text_style_english
 
-video_url_eng = "https://youtu.be/S48h79XK_QU"
+video_url_doc = "https://youtu.be/zx5rGXgYCLw"
+video_url_web = "https://youtu.be/aVZyQoH1PT8"
+video_url_youtube = "https://youtu.be/fTfgycMftFk"
+video_url_excel = "https://youtu.be/ZAwEfTTg3I0"
 
 
 def write_english_About():
@@ -13,7 +17,7 @@ def write_english_About():
     white = "rgb(255,255,255)"
 
     # section 2
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
 
     with col1:
         st.write(":red[Unlock the Power of ] :blue[OpenAI GPT].")
@@ -28,8 +32,34 @@ def write_english_About():
             ":violet[Pose questions, extract valuable information, analyze content, and generate concise summaries.]")
         st.write(":violet[➜ Watch the video to see how this model works!]")
 
+    st.divider()
+
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        st.image('gpt_logos/GPTdoc.png')
+        # change_text_style_english("GPTdoc", 'title', red)
+    with col2:
+        st.image('gpt_logos/GPTweb.png')
+        # change_text_style_english("GPTweb", 'title', red)
     with col3:
-        st.video(video_url_eng)
+        st.image('gpt_logos/GPTyoutube.png')
+        # change_text_style_english("GPTyoutube", 'title', red)
+    with col4:
+        st.image('gpt_logos/GPTexcel.png')
+        # change_text_style_english("GPTexcel", 'title', red)
+
+    st.divider()
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        st.video(video_url_doc)
+    with col2:
+        st.video(video_url_web)
+    with col3:
+        st.video(video_url_youtube)
+    with col4:
+        st.video(video_url_excel)
 
     # section 3
     st.divider()
