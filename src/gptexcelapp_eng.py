@@ -9,11 +9,8 @@ import altair as alt
 import warnings
 from datetime import datetime
 
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chat_models import ChatOpenAI
-from langchain.embeddings import OpenAIEmbeddings
 from langchain.memory import ConversationBufferMemory
-from langchain.vectorstores import SKLearnVectorStore
 from langchain.prompts import PromptTemplate
 from langchain_experimental.agents.agent_toolkits import create_pandas_dataframe_agent
 from langchain.agents.agent_types import AgentType
@@ -49,8 +46,8 @@ def launch_excel_app_eng():
     if 'excel_sheets_dataframe_eng' not in st.session_state:
         st.session_state.excel_sheets_dataframe_eng = pd.DataFrame()
 
-    if 'excel_sheets_csv_eng' not in st.session_state:
-        st.session_state.excel_sheets_csv_eng = pd.DataFrame()
+    if 'excel_sheets_frame_eng' not in st.session_state:
+        st.session_state.excel_sheets_frame_eng = pd.DataFrame()
 
     if 'continue_analysis_excel_eng' not in st.session_state:
         st.session_state.continue_analysis_excel_eng = False
@@ -98,6 +95,9 @@ def launch_excel_app_eng():
                     date_written = []
                     adjusted_frame = current_sheet_data.replace(to_replace=r'^\s*$', value=np.nan, regex=True)
                     adjusted_frame = adjusted_frame.dropna(thresh=1)
+                    for col in adjusted_frame.columns:
+                        new_col_name = col.replace("'", " ")
+                        adjusted_frame = adjusted_frame.rename(columns={col: new_col_name})
 
                     # check if columns are missing some values
                     def is_integer(val):
@@ -110,7 +110,8 @@ def launch_excel_app_eng():
                     for col in adjusted_frame.columns:
                         # Calculate the percentage of integer values in the column
                         perc_integers = adjusted_frame[col].apply(
-                            lambda x: pd.to_numeric(x, errors='coerce') and pd.to_numeric(x, errors='coerce') % 1 == 0).mean()
+                            lambda x: pd.to_numeric(x, errors='coerce') and pd.to_numeric(x,
+                                                                                          errors='coerce') % 1 == 0).mean()
 
                         # If more than 90% are integers, replace non-integers with 0
                         if perc_integers > 0.9:
@@ -132,7 +133,7 @@ def launch_excel_app_eng():
                     if len(adjusted_frame.columns) > 1:
                         try:
                             date_terms = ['date', 'year', 'month', 'day', 'hour', 'minutes', 'seconds', 'time',
-                                          'min','sec']
+                                          'min', 'sec']
                             date_written = [col for col in adjusted_frame.columns if
                                             any(date_term in col for date_term in date_terms)]
 
@@ -189,12 +190,8 @@ def launch_excel_app_eng():
     with col1:
         st.title(":red[GPT Excel Analyzer]")
 
-    st.subheader(":violet[Ensure the :red[1st row] of the table contains the :red[column names], "
-                 "the :red[1st column] of the table is :red[not empty], and there are :red[no extra null rows]"
-                 " at the end of the table.]")
-    # st.subheader(':violet[• Refer to columns by their :red[exact column names] in each query:]')
-    # st.write(':violet[Example 1: What are the names of participant in the column :red["participants"]? Example 2: '
-    #          'what is the total percentage time per office from the columns :red["time spent"] and :red["offices"]?]')
+    st.subheader(":violet[Ensure that the :red[first row] of the table has the :red[column names], "
+                 "and that there are :red[no empty rows] at the end of the table.]")
 
     with col2:
         ################################# load documents #################################
@@ -202,7 +199,7 @@ def launch_excel_app_eng():
 
         # upload file 1
         excel_file_1 = st.sidebar.file_uploader(
-            label=':violet[Maximum allowed rows = 2,500]',
+            label=':violet[Maximum allowed rows = 5,000]',
             type=['xlsx'],
             accept_multiple_files=False, key='excel_file_1_eng',
             label_visibility='visible')
@@ -230,7 +227,7 @@ def launch_excel_app_eng():
                         selected_index, selected_sheet_name = choose_sheet_index
                         st.session_state.continue_analysis_excel_eng = True
 
-                        st.session_state.excel_sheets_dataframe_eng, st.session_state.excel_sheets_csv_eng = convert_excel_to_dataframe(
+                        st.session_state.excel_sheets_dataframe_eng, st.session_state.excel_sheets_frame_eng = convert_excel_to_dataframe(
                             excel_file_1, selected_index)
                         break
 
@@ -254,19 +251,32 @@ def launch_excel_app_eng():
             clear_all_files()
 
     ######################################### render tables #########################################
-    st.divider()
     sheets_frame = st.session_state.excel_sheets_dataframe_eng
-    sheets_csv = st.session_state.excel_sheets_csv_eng
 
     if excel_file_1:
         graph_type = 'None'
         col_A = 'None'
         col_B = 'None'
-        # print dataframe
-        # st.dataframe(data=sheets_frame, use_container_width=True)
-        st.dataframe(data=sheets_frame, use_container_width=True)
 
-        # select a graph type
+        st.write(':violet[You can :red["edit any value"] in the table. You can :red["add rows"] to the table by '
+                 'clicking on the :red["＋"] icon at the bottom of the table. You can :red["delete rows"] in the table '
+                 'by ticking :red["✓"] on the far left box of each desired row, and then clicking on the :red["trash '
+                 'bin"] icon :red["🗑️"] on the far top right icons above the table. You can :red["save the table"] '
+                 'by clicking on the Download icon :red["↓"], :red["search for values"] in the table by clicking on '
+                 'the :red["Loupe"] icon :red["🔍"], and :red["view the table in full screen"] by clicking on the '
+                 'square icon :red["⌑"]: with the icons located at the far top right icons above the table.]')
+        st.divider()
+
+        # Validate the dataframe
+        sheets_frame = st.data_editor(data=sheets_frame, use_container_width=True, height=500,
+                                      num_rows='dynamic', hide_index=False,
+                                      key='edited_dataframe_key')
+
+    if excel_file_1:
+        # Convert sheets_frame to a DataFrame if it's not already
+        sheets_frame = pd.DataFrame(sheets_frame)
+        # st.dataframe(data=sheets_frame, use_container_width=True, height=500, hide_index=False)
+    # select a graph type
         st.sidebar.subheader(':violet[Choose a graph type:]')
         graph_type = st.sidebar.selectbox(
             label='Choose a graph type',
@@ -320,7 +330,8 @@ def launch_excel_app_eng():
                         # Display the chart in Streamlit
                         st.altair_chart(chart, use_container_width=True)
                     else:
-                        graph_dataframe = pd.DataFrame(data=sheets_frame.loc[:, [col_A, col_B]], columns=[col_A, col_B])
+                        graph_dataframe = pd.DataFrame(data=sheets_frame.loc[:, [col_A, col_B]],
+                                                       columns=[col_A, col_B])
                         chart = alt.Chart(graph_dataframe, height=800).mark_bar(cornerRadius=10).encode(
                             alt.X(f'{col_A}:N', axis=alt.Axis(
                                 labelFontSize=16,
@@ -422,7 +433,8 @@ def launch_excel_app_eng():
                 col_A = st.sidebar.selectbox(
                     label='Choose first column (distribution)',
                     options=['None'] + [sheet for sheet in sheets_frame.select_dtypes(exclude=[np.datetime64,
-                                                                                               datetime, 'number'])],
+                                                                                               datetime,
+                                                                                               'number'])],
                     key='choose_categorical_A_column',
                     label_visibility='visible',
                 )
@@ -451,53 +463,12 @@ def launch_excel_app_eng():
             graph_type = 'None'
             st.sidebar.write(':red[Choose graph type.]')
 
-    st.divider()
+    # st.divider()
 
     ####################################### Write chat history #######################################
     for message in st.session_state.messages_excel_eng:
         with st.chat_message(message['role']):
             change_text_style_english(message['content'], 'main_text_white', 'white')
-
-    ##################################### chunk the document #########################################
-
-    if len(sheets_csv) > 0:
-        @st.cache_resource
-        def embed_text(sheets_text):
-            try:
-                with st.spinner(text=":red[Please wait while we process the excel file...]"):
-
-                    chunk_size = 1500
-                    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=200,
-                                                                   length_function=len)
-                    chunks = text_splitter.split_text(text=str(sheets_text))
-                    chunks = list(chunks)
-
-                    in_llm = ChatOpenAI(temperature=0.0, model=st.session_state.ChatOpenAI)
-                    in_embedding = OpenAIEmbeddings()
-
-                    in_vector_store = SKLearnVectorStore.from_texts(texts=chunks, embedding=in_embedding,
-                                                                    persist_path=None)
-                    # in_vector_store.persist()
-                    in_retriever = in_vector_store.as_retriever(search_kwargs={"k": 3})
-                    st.session_state.continue_analysis_excel_eng = True
-
-                    return in_llm, in_retriever
-
-            except Exception as e:
-                st.subheader(":red[An error occurred. Please delete the uploaded file, and then uploaded it again]")
-                st.session_state.continue_analysis_excel_eng = True
-                # st.markdown(e)
-                return in_llm, in_retriever
-
-        llm, retriever = embed_text(sheets_csv)
-
-    else:
-        llm = ChatOpenAI(temperature=0.0, model=st.session_state.ChatOpenAI)  # gpt-4 or gpt-3.5-turbo
-        embedding = OpenAIEmbeddings()
-        vector_store = SKLearnVectorStore.from_texts(texts='No text provided...', embedding=embedding,
-                                                     persist_path=None)
-        retriever = vector_store.as_retriever(search_kwargs={"k": 1})
-        st.session_state.continue_analysis_excel_eng = True
 
     ######################################## documents ########################################
     if st.session_state.continue_analysis_excel_eng:
@@ -505,14 +476,14 @@ def launch_excel_app_eng():
         #################################### Templates ####################################
 
         response_template = """
-                        - you are provided with a dataframe {{sheets_csv}}
+                        - you are provided with a dataframe {{sheets_frame}}
                         - This dataframe has to be read in a horizontal and vertical sense to understand the context.
                         - The horizontal lines are the rows of the dataframe.
                         - The vertical lines are the columns of the dataframe.
                         - Take a deep breath and work on this problem step-by-step.
 
-                        - You are only allowed to use the dataframe {{sheets_csv}} given to you.
-                        - Don't use any information outside the given dataframe {{sheets_csv}}.
+                        - You are only allowed to use the dataframe {{sheets_frame}} given to you.
+                        - Don't use any information outside the given dataframe {{sheets_frame}}.
                         - If you do not know the answer, reply as follows: "I do not know the answer..."
 
                         - Give your final solution in bullet points.
@@ -533,9 +504,10 @@ def launch_excel_app_eng():
         prompt_files = PromptTemplate(template=response_template,
                                       input_variables=["history", "context"])
 
+        llm = ChatOpenAI(temperature=0.0, model=st.session_state.ChatOpenAI)
         query_model = create_pandas_dataframe_agent(
             llm,
-            sheets_csv,
+            sheets_frame,
             agent_type=AgentType.OPENAI_FUNCTIONS,
             agent_executor_kwargs={
                 "prompt": prompt_files,
@@ -559,8 +531,6 @@ def launch_excel_app_eng():
                         try:
                             message_placeholder = st.empty()
                             all_results = ''
-                            chat_files_eng = st.session_state.chat_history_excel_eng
-                            # st_callback = StreamlitCallbackHandler(st.container())  # callbacks = [st_callback]
                             output = query_model(user_input)
                             user_query = user_input
                             result = output['output']
