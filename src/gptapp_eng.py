@@ -322,9 +322,6 @@ def launch_app_eng():
                   "It is highly likely that this sentence or paragraph is incorrect or misleading".
                   Explain why you think it is incorrect or misleading.
                 • Always reply in a polite and professional manner.
-                • If you don't know the answer to the question, then reply: "I can't be confident about my answer
-                  because I am missing the context or some information! Please try to be more precise and accurate
-                  in your query."
 
                 Divide your answer when possible into paragraphs:
                 • What is your answer to the question?

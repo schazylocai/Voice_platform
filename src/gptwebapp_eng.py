@@ -221,9 +221,6 @@ def launch_web_app_eng():
                   sentence or paragraph in quotation marks and write: "It is highly likly that this sentence or
                   paragrph is incorrect or misleading". Explain why do yuo think it is incorrect or misleading.
                 • Always reply in a polite and professional manner.
-                • If you don't know the answer to the question, then reply: "I can't be confident about my answer
-                  because I am missing the context or some information! Please try to be more precise and accurate
-                  in your query."
 
                 Divide your answer when possible into paragraphs:
                 • What is your answer to the question?

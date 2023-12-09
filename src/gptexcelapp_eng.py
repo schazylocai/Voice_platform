@@ -498,7 +498,6 @@ def launch_excel_app_eng():
 
                         - You are only allowed to use the dataframe {{sheets_frame}} given to you.
                         - Don't use any information outside the given dataframe {{sheets_frame}}.
-                        - If you do not know the answer, reply as follows: "I do not know the answer..."
 
                         - Give your final solution in bullet points.
                         - In your solution, sort the in_lines in descending order.
