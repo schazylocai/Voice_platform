@@ -64,7 +64,7 @@ def first_page():
     change_language_to_English()
     cache_folder = "cache"
 
-    # Check if the "cache" folder exists
+    # Check if the cache folder exists
     if os.path.exists(cache_folder) and os.path.isdir(cache_folder):
         # Get the current time
         current_time = datetime.datetime.now()
