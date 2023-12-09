@@ -8,6 +8,7 @@ import pandas as pd
 import altair as alt
 import warnings
 from datetime import datetime
+from collections import Counter
 
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
@@ -43,14 +44,20 @@ def launch_excel_app_eng():
     if 'chat_history_excel_eng' not in st.session_state:
         st.session_state.chat_history_excel_eng = []
 
-    if 'excel_sheets_dataframe_eng' not in st.session_state:
-        st.session_state.excel_sheets_dataframe_eng = pd.DataFrame()
-
     if 'excel_sheets_frame_eng' not in st.session_state:
         st.session_state.excel_sheets_frame_eng = pd.DataFrame()
 
+    if 'excel_sheets_frame_eng_adjusted' not in st.session_state:
+        st.session_state.excel_sheets_frame_eng_adjusted = pd.DataFrame()
+
     if 'continue_analysis_excel_eng' not in st.session_state:
         st.session_state.continue_analysis_excel_eng = False
+
+    if 'header_row_index' not in st.session_state:
+        st.session_state.header_row_index = 0
+
+    if 'file_in_memory' not in st.session_state:
+        st.session_state.file_in_memory = 0
 
     if 'excel_output_dataframe' not in st.session_state:
         st.session_state.excel_output_dataframe = None
@@ -69,7 +76,13 @@ def launch_excel_app_eng():
         st.empty()
         st.session_state.messages_excel_eng = []
         st.session_state.chat_history_excel_eng = []
-        st.session_state.excel_sheets_dataframe_eng = pd.DataFrame()
+        st.session_state.excel_sheets_frame_eng = pd.DataFrame()
+        st.session_state.excel_sheets_frame_eng_adjusted = pd.DataFrame()
+        st.session_state.continue_analysis_excel_eng = False
+        st.session_state.header_row_index = 0
+        st.session_state.file_in_memory = 0
+        st.session_state.excel_output_dataframe = None
+        st.session_state.excel_output_chart = None
 
     #################################### Convert uploaded files to text ####################################
     def convert_excel_to_dataframe(my_file, sheet_idx):
@@ -173,16 +186,16 @@ def launch_excel_app_eng():
                     adjusted_frame = adjusted_frame.reset_index(drop=True)
                     # convert an Excel sheet to pdf
 
-                    return adjusted_frame, adjusted_frame
+                    return adjusted_frame
 
             else:
                 catch_exception(my_file.name)
-                return [], []
+                return []
 
         except Exception as e:
             catch_exception(my_file.name)
             st.write(e)
-            return [], []
+            return []
 
     ######################################### Compose layout #########################################
     col1, col2, col3 = st.columns(3)
@@ -206,6 +219,7 @@ def launch_excel_app_eng():
 
         retry_count_1 = 0
         if excel_file_1:
+            st.session_state.file_in_memory = 1
             while retry_count_1 < max_retries:
                 try:
                     if str(excel_file_1.name).endswith('.xlsx'):
@@ -227,7 +241,7 @@ def launch_excel_app_eng():
                         selected_index, selected_sheet_name = choose_sheet_index
                         st.session_state.continue_analysis_excel_eng = True
 
-                        st.session_state.excel_sheets_dataframe_eng, st.session_state.excel_sheets_frame_eng = convert_excel_to_dataframe(
+                        st.session_state.excel_sheets_frame_eng = convert_excel_to_dataframe(
                             excel_file_1, selected_index)
                         break
 
@@ -239,7 +253,7 @@ def launch_excel_app_eng():
                     break
 
         else:
-            st.session_state.excel_sheets_dataframe_eng = pd.DataFrame()
+            st.session_state.excel_sheets_frame_eng = pd.DataFrame()
 
     with col3:
         # set the clear button
@@ -251,9 +265,9 @@ def launch_excel_app_eng():
             clear_all_files()
 
     ######################################### render tables #########################################
-    sheets_frame = st.session_state.excel_sheets_dataframe_eng
+    sheets_frame = st.session_state.excel_sheets_frame_eng
 
-    if excel_file_1:
+    if excel_file_1 and st.session_state['file_in_memory'] == 1:
         graph_type = 'None'
         col_A = 'None'
         col_B = 'None'
@@ -268,15 +282,15 @@ def launch_excel_app_eng():
         st.divider()
 
         # Validate the dataframe
-        sheets_frame = st.data_editor(data=sheets_frame, use_container_width=True, height=500,
-                                      num_rows='dynamic', hide_index=False,
-                                      key='edited_dataframe_key')
+        st.session_state['excel_sheets_frame_eng'] = st.data_editor(
+            data=st.session_state['excel_sheets_frame_eng'],
+            use_container_width=True, height=500,
+            num_rows='dynamic', hide_index=False, ).reset_index(drop=True)
 
-    if excel_file_1:
-        # Convert sheets_frame to a DataFrame if it's not already
-        sheets_frame = pd.DataFrame(sheets_frame)
-        # st.dataframe(data=sheets_frame, use_container_width=True, height=500, hide_index=False)
-    # select a graph type
+        sheets_frame = st.session_state['excel_sheets_frame_eng']
+
+    if excel_file_1 and st.session_state['file_in_memory'] == 1:
+        # select a graph type
         st.sidebar.subheader(':violet[Choose a graph type:]')
         graph_type = st.sidebar.selectbox(
             label='Choose a graph type',
