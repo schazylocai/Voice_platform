@@ -282,11 +282,13 @@ def launch_excel_app_eng():
         st.divider()
 
         # Validate the dataframe
-        st.session_state['excel_sheets_frame_eng'] = st.data_editor(
-            data=st.session_state['excel_sheets_frame_eng'],
-            use_container_width=True, height=500,
-            num_rows='dynamic', hide_index=False, ).reset_index(drop=True)
+        def show_dataframe():
+            st.session_state['excel_sheets_frame_eng'] = st.data_editor(
+                data=st.session_state['excel_sheets_frame_eng'],
+                use_container_width=True, height=500,
+                num_rows='dynamic', hide_index=False, ).reset_index(drop=True)
 
+        show_dataframe()
         sheets_frame = st.session_state['excel_sheets_frame_eng']
 
     if excel_file_1 and st.session_state['file_in_memory'] == 1:
