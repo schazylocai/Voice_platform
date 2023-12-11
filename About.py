@@ -5,8 +5,6 @@ import datetime
 from src.English_Language import write_english_About
 from src.Change_Text_Style import change_text_style_english
 
-from flask import Flask, make_response
-
 from dotenv import load_dotenv
 from src.stripe_functions_english import check_customers_eng, subscribe_to_service_eng, cancel_service_eng, \
     forgot_password_eng
@@ -41,15 +39,6 @@ if 'ChatOpenAI' not in st.session_state:
 valid_email = False
 violet = "rgb(169, 131, 247)"
 red = "rgb(232,89,83)"
-
-app = Flask(__name__)
-
-
-@app.route('/set-cookie')
-def set_cookie():
-    response = make_response("Cookie Set")
-    response.set_cookie('cookieName', 'cookieValue', secure=True, samesite='None')
-    return response
 
 
 def change_language_to_English():

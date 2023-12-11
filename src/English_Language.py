@@ -37,17 +37,17 @@ def write_english_About():
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        st.image('gpt_logos/GPTdoc.png')
-        # change_text_style_english("GPTdoc", 'title', red)
+        # st.image('gpt_logos/GPTdoc.png')
+        change_text_style_english("GPTdoc", 'title', red)
     with col2:
-        st.image('gpt_logos/GPTweb.png')
-        # change_text_style_english("GPTweb", 'title', red)
+        # st.image('gpt_logos/GPTweb.png')
+        change_text_style_english("GPTweb", 'title', red)
     with col3:
-        st.image('gpt_logos/GPTyoutube.png')
-        # change_text_style_english("GPTyoutube", 'title', red)
+        # st.image('gpt_logos/GPTyoutube.png')
+        change_text_style_english("GPTyoutube", 'title', red)
     with col4:
-        st.image('gpt_logos/GPTexcel.png')
-        # change_text_style_english("GPTexcel", 'title', red)
+        # st.image('gpt_logos/GPTexcel.png')
+        change_text_style_english("GPTexcel", 'title', red)
 
     st.divider()
     col1, col2, col3, col4 = st.columns(4)
