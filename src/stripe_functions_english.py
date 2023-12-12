@@ -6,7 +6,7 @@ from datetime import datetime
 import os
 from src.Azure_storage import write_subscription_ids_to_azure_keyvault, read_subscription_from_azure_keyvault, \
     retrieve_password_from_azure_keyvault
-from src.English_Language import send_email_eng
+from src.Intro_page import send_email_eng
 
 from dotenv import load_dotenv
 

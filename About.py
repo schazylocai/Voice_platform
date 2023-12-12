@@ -2,7 +2,7 @@ import streamlit as st
 import os
 import datetime
 
-from src.English_Language import write_english_About
+from src.Intro_page import write_english_About
 from src.Change_Text_Style import change_text_style_english
 
 from dotenv import load_dotenv

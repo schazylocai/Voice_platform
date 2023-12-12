@@ -8,7 +8,6 @@ import pandas as pd
 import altair as alt
 import warnings
 from datetime import datetime
-from collections import Counter
 
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationBufferMemory

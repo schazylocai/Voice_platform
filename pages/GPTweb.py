@@ -1,6 +1,5 @@
 import streamlit as st
 from src.gptwebapp_eng import launch_web_app_eng
-from src.Change_Text_Style import change_text_style_arabic
 
 if 'mylanguage' not in st.session_state:
     st.session_state.mylanguage = 'English'
