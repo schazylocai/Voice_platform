@@ -7,5 +7,9 @@ font="sans serif"
 base="dark"
 [server]
 maxUploadSize = 100
+runOnSave = true
+enableStaticServing = true
 enableXsrfProtection = false
 enableCORS = false
+[browser]
+gatherUsageStats = false
