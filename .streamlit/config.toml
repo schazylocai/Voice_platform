@@ -7,5 +7,4 @@ font="sans serif"
 base="dark"
 [server]
 maxUploadSize = 100
-enableStaticServing = true
 enableXsrfProtection = false

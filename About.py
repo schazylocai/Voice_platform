@@ -1,6 +1,7 @@
 import streamlit as st
 import os
 import datetime
+import uuid
 
 from src.Intro_page import write_english_About
 from src.Change_Text_Style import change_text_style_english
@@ -41,6 +42,15 @@ violet = "rgb(169, 131, 247)"
 red = "rgb(232,89,83)"
 
 
+# Function to initialize the session
+def init_session():
+    if 'session_key' not in st.session_state:
+        # Generate a unique session key
+        st.session_state['session_key'] = str(uuid.uuid4())
+        # Initialize other session-specific data
+        st.session_state['data'] = {}
+
+
 def change_language_to_English():
     col1, col2 = st.columns(2)
 
@@ -61,6 +71,11 @@ def change_language_to_English():
 
 
 def first_page():
+    init_session()
+    st.session_state['data']['clicked'] = True
+    # print('Session Key:', st.session_state['session_key'])
+    # print('Session Data:', st.session_state['data'])
+
     change_language_to_English()
     cache_folder = "cache"
 
