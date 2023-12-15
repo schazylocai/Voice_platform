@@ -22,32 +22,31 @@ def write_english_About():
     with col1:
         st.write(":red[Unlock the Power of ] :blue[OpenAI GPT].")
         st.header(
-            ":violet[Welcome to GPT Document Analyzer, a revolutionary application that leverages the capabilities of Large Language Models.]")
+            ":violet[Welcome to GPT Analyzer, a revolutionary application that leverages the capabilities of Large Language Models.]")
 
     with col2:
         st.write(":red[What can this model do for you?]")
         st.subheader(
-            ":violet[With this cutting-edge tool, you can effortlessly upload documents, web links, or YouTube videos to interact with them like never before.]")
+            ":violet[With this cutting-edge tool, you can effortlessly upload documents, excel files, web links, or YouTube videos to interact with them like never before.]")
         st.write(
             ":violet[Pose questions, extract valuable information, analyze content, and generate concise summaries.]")
-        st.write(":violet[➜ Watch the video to see how this model works!]")
 
-    st.divider()
-
-    col1, col2, col3, col4 = st.columns(4)
-
-    with col1:
-        # st.image('gpt_logos/GPTdoc.png')
-        change_text_style_english("GPTdoc", 'title', red)
-    with col2:
-        # st.image('gpt_logos/GPTweb.png')
-        change_text_style_english("GPTweb", 'title', red)
-    with col3:
-        # st.image('gpt_logos/GPTyoutube.png')
-        change_text_style_english("GPTyoutube", 'title', red)
-    with col4:
-        # st.image('gpt_logos/GPTexcel.png')
-        change_text_style_english("GPTexcel", 'title', red)
+    # st.divider()
+    #
+    # col1, col2, col3, col4 = st.columns(4)
+    #
+    # with col1:
+    #     # st.image('gpt_logos/GPTdoc.png')
+    #     change_text_style_english("GPTdoc", 'title', red)
+    # with col2:
+    #     # st.image('gpt_logos/GPTweb.png')
+    #     change_text_style_english("GPTweb", 'title', red)
+    # with col3:
+    #     # st.image('gpt_logos/GPTyoutube.png')
+    #     change_text_style_english("GPTyoutube", 'title', red)
+    # with col4:
+    #     # st.image('gpt_logos/GPTexcel.png')
+    #     change_text_style_english("GPTexcel", 'title', red)
 
     st.divider()
     col1, col2, col3, col4 = st.columns(4)
@@ -170,8 +169,6 @@ def write_english_About():
     st.write("")
     st.write("")
     st.write("")
-    st.divider()
-    st.markdown(":violet[© 2023 FAB DWC LLC. All rights reserved.]")
 
 
 def send_email_eng(sender, recipient, subject, body, sender_email):

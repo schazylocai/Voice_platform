@@ -58,6 +58,9 @@ def launch_excel_app_eng():
     if 'file_in_memory' not in st.session_state:
         st.session_state.file_in_memory = 0
 
+    if 'excel_file_to_upload' not in st.session_state:
+        st.session_state.excel_file_to_upload = None
+
     if 'excel_output_dataframe' not in st.session_state:
         st.session_state.excel_output_dataframe = None
 
@@ -80,6 +83,7 @@ def launch_excel_app_eng():
         st.session_state.continue_analysis_excel_eng = False
         st.session_state.header_row_index = 0
         st.session_state.file_in_memory = 0
+        st.session_state.excel_file_to_upload = None
         st.session_state.excel_output_dataframe = None
         st.session_state.excel_output_chart = None
 
@@ -218,40 +222,44 @@ def launch_excel_app_eng():
 
         retry_count_1 = 0
         if excel_file_1:
-            st.session_state.file_in_memory = 1
-            while retry_count_1 < max_retries:
-                try:
-                    if str(excel_file_1.name).endswith('.xlsx'):
-                        excel_file = openpyxl.load_workbook(excel_file_1, read_only=True)
+            st.session_state.excel_file_to_upload = excel_file_1
+            with st.session_state.excel_file_to_upload:
+                st.session_state.file_in_memory = 1
+                while retry_count_1 < max_retries:
+                    try:
+                        if str(excel_file_1.name).endswith('.xlsx'):
+                            excel_file = openpyxl.load_workbook(excel_file_1, read_only=True)
 
-                        # Create a list of sheet names and their corresponding indices
-                        sheet_info = [(i, sheet_name) for i, sheet_name in enumerate(excel_file.sheetnames)]
+                            # Create a list of sheet names and their corresponding indices
+                            sheet_info = [(i, sheet_name) for i, sheet_name in enumerate(excel_file.sheetnames)]
 
-                        # Create a radio button to choose a sheet using its index
-                        st.sidebar.subheader(':violet[Choose a sheet:]')
-                        choose_sheet_index = st.sidebar.selectbox(label='Choose a sheet from the uploaded Excel file:',
-                                                                  options=[sheet for sheet in sheet_info],
-                                                                  format_func=lambda x: x[1],  # Display sheet names
-                                                                  key='choose_sheet_index',
-                                                                  label_visibility='hidden',
-                                                                  )
+                            # Create a radio button to choose a sheet using its index
+                            st.sidebar.subheader(':violet[Choose a sheet:]')
+                            choose_sheet_index = st.sidebar.selectbox(label='Choose a sheet from the uploaded Excel file:',
+                                                                      options=[sheet for sheet in sheet_info],
+                                                                      format_func=lambda x: x[1],  # Display sheet names
+                                                                      key='choose_sheet_index',
+                                                                      label_visibility='hidden',
+                                                                      )
 
-                        # Get the selected sheet index
-                        selected_index, selected_sheet_name = choose_sheet_index
-                        st.session_state.continue_analysis_excel_eng = True
+                            # Get the selected sheet index
+                            selected_index, selected_sheet_name = choose_sheet_index
+                            st.session_state.continue_analysis_excel_eng = True
 
-                        st.session_state.excel_sheets_frame_eng = convert_excel_to_dataframe(
-                            excel_file_1, selected_index)
+                            st.session_state.excel_sheets_frame_eng = convert_excel_to_dataframe(
+                                excel_file_1, selected_index)
+                            break
+
+                    except Exception as e:
+                        retry_count_1 += 1
+                        if retry_count_1 < max_retries:
+                            continue
+                        st.sidebar.write("Maximum retry attempts reached. Upload failed.")
                         break
 
-                except Exception as e:
-                    retry_count_1 += 1
-                    if retry_count_1 < max_retries:
-                        continue
-                    st.sidebar.write("Maximum retry attempts reached. Upload failed.")
-                    break
-
         else:
+            # Delete session state if upload exists in the context manager
+            del st.session_state.excel_file_to_upload
             st.session_state.excel_sheets_frame_eng = pd.DataFrame()
 
     with col3:

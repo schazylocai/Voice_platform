@@ -166,21 +166,24 @@ def launch_app_eng():
 
         retry_count_1 = 0
         if file_1:
-            while retry_count_1 < max_retries:
-                try:
-                    st.session_state.file_to_upload_list_1_eng = file_1
-                    st.session_state.file_to_upload_1_eng = convert_file_to_text(file_1)
-                    st.session_state.file_text_list_eng.append(file_1)
-                    break
+            st.session_state.file_to_upload_1_eng = file_1
+            with st.session_state.file_to_upload_1_eng:
+                while retry_count_1 < max_retries:
+                    try:
+                        st.session_state.file_to_upload_1_eng = convert_file_to_text(file_1)
+                        st.session_state.file_text_list_eng.append(file_1)
+                        break
 
-                except Exception as e:
-                    retry_count_1 += 1
-                    if retry_count_1 < max_retries:
-                        continue
-                    st.sidebar.write("Maximum retry attempts reached. Upload failed.")
-                    break
+                    except Exception as e:
+                        retry_count_1 += 1
+                        if retry_count_1 < max_retries:
+                            continue
+                        st.sidebar.write("Maximum retry attempts reached. Upload failed.")
+                        break
 
         else:
+            # Delete session state if upload exists in the context manager
+            del st.session_state.file_to_upload_1_eng
             st.session_state.file_to_upload_1_eng = None
 
         # upload file 2
@@ -192,21 +195,24 @@ def launch_app_eng():
 
         retry_count_2 = 0
         if file_2:
-            while retry_count_2 < max_retries:
-                try:
-                    st.session_state.file_to_upload_list_2_eng = file_2
-                    st.session_state.file_to_upload_2_eng = convert_file_to_text(file_2)
-                    st.session_state.file_text_list_eng.append(file_2)
-                    break
+            st.session_state.file_to_upload_2_eng = file_2
+            with st.session_state.file_to_upload_2_eng:
+                while retry_count_2 < max_retries:
+                    try:
+                        st.session_state.file_to_upload_2_eng = convert_file_to_text(file_2)
+                        st.session_state.file_text_list_eng.append(file_2)
+                        break
 
-                except Exception as e:
-                    retry_count_2 += 1
-                    if retry_count_2 < max_retries:
-                        continue
-                    st.sidebar.write("Maximum retry attempts reached. Upload failed.")
-                    break
+                    except Exception as e:
+                        retry_count_2 += 1
+                        if retry_count_2 < max_retries:
+                            continue
+                        st.sidebar.write("Maximum retry attempts reached. Upload failed.")
+                        break
 
         else:
+            # Delete session state if upload exists in the context manager
+            del st.session_state.file_to_upload_2_eng
             st.session_state.file_to_upload_2_eng = None
 
         # upload file 3
@@ -218,20 +224,23 @@ def launch_app_eng():
 
         retry_count_3 = 0
         if file_3:
-            while retry_count_3 < max_retries:
-                try:
-                    st.session_state.file_to_upload_list_3_eng = file_3
-                    st.session_state.file_to_upload_3_eng = convert_file_to_text(file_3)
-                    st.session_state.file_text_list_eng.append(file_3)
-                    break
+            st.session_state.file_to_upload_3_eng = file_3
+            with st.session_state.file_to_upload_3_eng:
+                while retry_count_3 < max_retries:
+                    try:
+                        st.session_state.file_to_upload_3_eng = convert_file_to_text(file_3)
+                        st.session_state.file_text_list_eng.append(file_3)
+                        break
 
-                except Exception as e:
-                    retry_count_3 += 1
-                    if retry_count_3 < max_retries:
-                        continue
-                    st.sidebar.write("Maximum retry attempts reached. Upload failed.")
-                    break
+                    except Exception as e:
+                        retry_count_3 += 1
+                        if retry_count_3 < max_retries:
+                            continue
+                        st.sidebar.write("Maximum retry attempts reached. Upload failed.")
+                        break
         else:
+            # Delete session state if upload exists in the context manager
+            del st.session_state.file_to_upload_3_eng
             st.session_state.file_to_upload_3_eng = None
 
     with col3:
