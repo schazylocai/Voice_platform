@@ -142,13 +142,8 @@ def launch_app_eng():
 
                     except Exception as e:
                         retry_count_1 += 1
-
-                    if retry_count_1 < max_retries:
-                        continue
-                    else:
-                        st.sidebar.write("Maximum retry attempts reached. Upload failed.")
+                        # st.sidebar.write("Maximum retry attempts reached. Upload failed.")
                         gpt_doc_send_email_error(os.environ["MY_EMAIL_ADDRESS"], "Document upload error", e)
-                        break
 
         else:
             st.session_state.gpt_doc_file_to_upload_1_eng = None
@@ -170,16 +165,10 @@ def launch_app_eng():
                         st.session_state.gpt_doc_file_text_list_eng.append(file_2)
                         break
 
-
                     except Exception as e:
                         retry_count_1 += 1
-
-                    if retry_count_1 < max_retries:
-                        continue
-                    else:
-                        st.sidebar.write("Maximum retry attempts reached. Upload failed.")
+                        # st.sidebar.write("Maximum retry attempts reached. Upload failed.")
                         gpt_doc_send_email_error(os.environ["MY_EMAIL_ADDRESS"], "Document upload error", e)
-                        break
 
         else:
             st.session_state.gpt_doc_file_to_upload_2_eng = None
@@ -201,16 +190,10 @@ def launch_app_eng():
                         st.session_state.gpt_doc_file_text_list_eng.append(file_3)
                         break
 
-
                     except Exception as e:
                         retry_count_1 += 1
-
-                    if retry_count_1 < max_retries:
-                        continue
-                    else:
-                        st.sidebar.write("Maximum retry attempts reached. Upload failed.")
+                        # st.sidebar.write("Maximum retry attempts reached. Upload failed.")
                         gpt_doc_send_email_error(os.environ["MY_EMAIL_ADDRESS"], "Document upload error", e)
-                        break
         else:
             st.session_state.gpt_doc_file_to_upload_3_eng = None
 

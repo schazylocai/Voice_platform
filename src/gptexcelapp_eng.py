@@ -217,16 +217,10 @@ def launch_excel_app_eng():
                                 excel_file_1, selected_index)
                             break
 
-
                     except Exception as e:
                         retry_count_1 += 1
-
-                    if retry_count_1 < max_retries:
-                        continue
-                    else:
-                        st.sidebar.write("Maximum retry attempts reached. Upload failed.")
+                        # st.sidebar.write("Maximum retry attempts reached. Upload failed.")
                         gpt_excel_send_email_error(os.environ["MY_EMAIL_ADDRESS"], "Document upload error", e)
-                        break
 
         else:
             st.session_state.gpt_excel_sheets_frame_eng = pd.DataFrame()
