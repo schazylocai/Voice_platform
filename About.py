@@ -1,7 +1,6 @@
 import streamlit as st
 import os
 import datetime
-import uuid
 
 from src.Intro_page import write_english_About
 from src.Change_Text_Style import change_text_style_english
@@ -9,6 +8,7 @@ from src.Change_Text_Style import change_text_style_english
 from dotenv import load_dotenv
 from src.stripe_functions_english import check_customers_eng, subscribe_to_service_eng, cancel_service_eng, \
     forgot_password_eng
+from src.sessions import initialize_params
 
 load_dotenv()  # read local .env file
 
@@ -20,22 +20,6 @@ LANGCHAIN_PROJECT = os.environ['LANGCHAIN_PROJECT']
 st.set_page_config(layout="wide", initial_sidebar_state='expanded', page_icon="🔬", page_title='GPT Document Analyzer')
 connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
 
-##################### Define LLM Model ####################
-llm_model = 'gpt-4-1106-preview'  # gpt-4 or gpt-3.5-turbo or gpt-3.5-turbo-16k or gpt-4-1106-preview
-
-################### Set session states ###################
-st.session_state.setdefault("mylanguage", 'English')
-st.session_state.setdefault("user_status", 'False')
-
-if 'mylanguage' not in st.session_state:
-    st.session_state.mylanguage = 'English'
-
-if 'user_status' not in st.session_state:
-    st.session_state.user_status = 'False'
-
-if 'ChatOpenAI' not in st.session_state:
-    st.session_state.ChatOpenAI = llm_model
-
 # status = False
 valid_email = False
 violet = "rgb(169, 131, 247)"
@@ -44,11 +28,9 @@ red = "rgb(232,89,83)"
 
 # Function to initialize the session
 def init_session():
-    if 'session_key' not in st.session_state:
-        # Generate a unique session key
-        st.session_state['session_key'] = str(uuid.uuid4())
-        # Initialize other session-specific data
-        st.session_state['data'] = {}
+    initialize_params()
+    # Initialize other session-specific data
+    st.session_state['data'] = {}
 
 
 def change_language_to_English():

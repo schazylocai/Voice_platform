@@ -6,6 +6,7 @@ import PyPDF2
 import docx2txt
 import textract
 import tempfile
+import smtplib
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import RetrievalQA
@@ -32,43 +33,8 @@ red = "rgb(232,89,83)"
 
 
 def launch_app_eng():
-    ######################################### Set session states #########################################
-
-    if 'user_status' not in st.session_state:
-        st.session_state.user_status = 'False'
-
-    if 'file_text_list_eng' not in st.session_state:
-        st.session_state.file_text_list_eng = []
-
-    if 'messages_files_eng' not in st.session_state:
-        st.session_state.messages_files_eng = []
-
-    if 'chat_history_files_eng' not in st.session_state:
-        st.session_state.chat_history_files_eng = []
-
-    if 'file_to_upload_1_eng' not in st.session_state:
-        st.session_state.file_to_upload_1_eng = None
-
-    if 'file_to_upload_2_eng' not in st.session_state:
-        st.session_state.file_to_upload_2_eng = None
-
-    if 'file_to_upload_3_eng' not in st.session_state:
-        st.session_state.file_to_upload_3_eng = None
-
-    if 'file_to_upload_list_1_eng' not in st.session_state:
-        st.session_state.file_to_upload_list_1_eng = []
-
-    if 'file_to_upload_list_2_eng' not in st.session_state:
-        st.session_state.file_to_upload_list_2_eng = []
-
-    if 'file_to_upload_list_3_eng' not in st.session_state:
-        st.session_state.file_to_upload_list_3_eng = []
-
-    if 'continue_analysis_files_eng' not in st.session_state:
-        st.session_state.continue_analysis_files_eng = False
-
     ########################################### Set variables ##########################################
-    st.session_state.file_text_list_eng = []
+    st.session_state.gpt_doc_file_text_list_eng = []
 
     ######################################### Catch exceptions #########################################
     def catch_exception(file_name):
@@ -78,18 +44,18 @@ def launch_app_eng():
         return False
 
     ######################################### Clear all files #########################################
-    def clear_all_files():
-        st.empty()
-        st.session_state.messages_files_eng = []
-        st.session_state.chat_history_files_eng = []
-        st.session_state.file_to_upload_1_eng = None
-        st.session_state.file_to_upload_2_eng = None
-        st.session_state.file_to_upload_3_eng = None
-        st.session_state.file_to_upload_list_1_eng = []
-        st.session_state.file_to_upload_list_2_eng = []
-        st.session_state.file_to_upload_list_3_eng = []
-        st.session_state.file_text_list_eng = []
-        st.session_state.continue_analysis_files_eng = False
+    # def clear_all_files():
+    #     st.empty()
+    #     st.session_state.gpt_doc_messages_files_eng = []
+    #     st.session_state.gpt_doc_chat_history_files_eng = []
+    #     st.session_state.gpt_doc_file_to_upload_1_eng = None
+    #     st.session_state.gpt_doc_file_to_upload_2_eng = None
+    #     st.session_state.gpt_doc_file_to_upload_3_eng = None
+    #     st.session_state.gpt_doc_file_to_upload_list_1_eng = []
+    #     st.session_state.gpt_doc_file_to_upload_list_2_eng = []
+    #     st.session_state.gpt_doc_file_to_upload_list_3_eng = []
+    #     st.session_state.gpt_doc_file_text_list_eng = []
+    #     st.session_state.gpt_doc_continue_analysis_files_eng = False
 
     #################################### Convert uploaded files to text ####################################
     def convert_file_to_text(my_file):
@@ -154,7 +120,7 @@ def launch_app_eng():
 
     with col2:
         ################################# load documents #################################
-        max_retries = 15
+        max_retries = 5
 
         # upload file 1
         file_1 = st.sidebar.file_uploader(
@@ -166,25 +132,26 @@ def launch_app_eng():
 
         retry_count_1 = 0
         if file_1:
-            st.session_state.file_to_upload_1_eng = file_1
-            with st.session_state.file_to_upload_1_eng:
+            st.session_state.gpt_doc_file_to_upload_1_eng = file_1
+            with st.session_state.gpt_doc_file_to_upload_1_eng:
                 while retry_count_1 < max_retries:
                     try:
-                        st.session_state.file_to_upload_1_eng = convert_file_to_text(file_1)
-                        st.session_state.file_text_list_eng.append(file_1)
+                        st.session_state.gpt_doc_file_to_upload_1_eng = convert_file_to_text(file_1)
+                        st.session_state.gpt_doc_file_text_list_eng.append(file_1)
                         break
 
                     except Exception as e:
                         retry_count_1 += 1
-                        if retry_count_1 < max_retries:
-                            continue
+
+                    if retry_count_1 < max_retries:
+                        continue
+                    else:
                         st.sidebar.write("Maximum retry attempts reached. Upload failed.")
+                        gpt_doc_send_email_error(os.environ["MY_EMAIL_ADDRESS"], "Document upload error", e)
                         break
 
         else:
-            # Delete session state if upload exists in the context manager
-            del st.session_state.file_to_upload_1_eng
-            st.session_state.file_to_upload_1_eng = None
+            st.session_state.gpt_doc_file_to_upload_1_eng = None
 
         # upload file 2
         file_2 = st.sidebar.file_uploader(
@@ -195,25 +162,27 @@ def launch_app_eng():
 
         retry_count_2 = 0
         if file_2:
-            st.session_state.file_to_upload_2_eng = file_2
-            with st.session_state.file_to_upload_2_eng:
+            st.session_state.gpt_doc_file_to_upload_2_eng = file_2
+            with st.session_state.gpt_doc_file_to_upload_2_eng:
                 while retry_count_2 < max_retries:
                     try:
-                        st.session_state.file_to_upload_2_eng = convert_file_to_text(file_2)
-                        st.session_state.file_text_list_eng.append(file_2)
+                        st.session_state.gpt_doc_file_to_upload_2_eng = convert_file_to_text(file_2)
+                        st.session_state.gpt_doc_file_text_list_eng.append(file_2)
                         break
 
+
                     except Exception as e:
-                        retry_count_2 += 1
-                        if retry_count_2 < max_retries:
-                            continue
+                        retry_count_1 += 1
+
+                    if retry_count_1 < max_retries:
+                        continue
+                    else:
                         st.sidebar.write("Maximum retry attempts reached. Upload failed.")
+                        gpt_doc_send_email_error(os.environ["MY_EMAIL_ADDRESS"], "Document upload error", e)
                         break
 
         else:
-            # Delete session state if upload exists in the context manager
-            del st.session_state.file_to_upload_2_eng
-            st.session_state.file_to_upload_2_eng = None
+            st.session_state.gpt_doc_file_to_upload_2_eng = None
 
         # upload file 3
         file_3 = st.sidebar.file_uploader(
@@ -224,38 +193,41 @@ def launch_app_eng():
 
         retry_count_3 = 0
         if file_3:
-            st.session_state.file_to_upload_3_eng = file_3
-            with st.session_state.file_to_upload_3_eng:
+            st.session_state.gpt_doc_file_to_upload_3_eng = file_3
+            with st.session_state.gpt_doc_file_to_upload_3_eng:
                 while retry_count_3 < max_retries:
                     try:
-                        st.session_state.file_to_upload_3_eng = convert_file_to_text(file_3)
-                        st.session_state.file_text_list_eng.append(file_3)
+                        st.session_state.gpt_doc_file_to_upload_3_eng = convert_file_to_text(file_3)
+                        st.session_state.gpt_doc_file_text_list_eng.append(file_3)
                         break
+
 
                     except Exception as e:
-                        retry_count_3 += 1
-                        if retry_count_3 < max_retries:
-                            continue
+                        retry_count_1 += 1
+
+                    if retry_count_1 < max_retries:
+                        continue
+                    else:
                         st.sidebar.write("Maximum retry attempts reached. Upload failed.")
+                        gpt_doc_send_email_error(os.environ["MY_EMAIL_ADDRESS"], "Document upload error", e)
                         break
         else:
-            # Delete session state if upload exists in the context manager
-            del st.session_state.file_to_upload_3_eng
-            st.session_state.file_to_upload_3_eng = None
+            st.session_state.gpt_doc_file_to_upload_3_eng = None
 
-    with col3:
-        # set the clear button
-        st.write("")
-        st.write("")
-        clear = st.button(':white[Clear conversation & memory]', key='clear', use_container_width=True)
-
-        if clear:
-            clear_all_files()
+        # with col3:
+        #     # set the clear button
+        #     st.write("")
+        #     st.write("")
+        #     clear = st.button(':white[Clear conversation & memory]', key='clear', use_container_width=True)
+        #
+        #     if clear:
+        #         clear_all_files()
 
         # Loop through uploaded files
         n = 1
-        if (st.session_state.file_to_upload_list_1_eng or st.session_state.file_to_upload_list_2_eng or st.session_state.file_to_upload_list_3_eng) and st.session_state.file_text_list_eng:
-            for file in st.session_state.file_text_list_eng:
+        if (
+                st.session_state.gpt_doc_file_to_upload_list_1_eng or st.session_state.gpt_doc_file_to_upload_list_2_eng or st.session_state.gpt_doc_file_to_upload_list_3_eng) and st.session_state.gpt_doc_file_text_list_eng:
+            for file in st.session_state.gpt_doc_file_text_list_eng:
                 if file:
                     st.write(f':violet[File {n}: {file.name}]')
                 n += 1
@@ -264,10 +236,10 @@ def launch_app_eng():
 
     ################################## Create final text file to pass to LLM ##################################
     def create_final_text():
-        if st.session_state.file_to_upload_1_eng or st.session_state.file_to_upload_2_eng or st.session_state.file_to_upload_3_eng:
-            loop_through_files = [st.session_state.file_to_upload_1_eng,
-                                  st.session_state.file_to_upload_2_eng,
-                                  st.session_state.file_to_upload_3_eng]
+        if st.session_state.gpt_doc_file_to_upload_1_eng or st.session_state.gpt_doc_file_to_upload_2_eng or st.session_state.gpt_doc_file_to_upload_3_eng:
+            loop_through_files = [st.session_state.gpt_doc_file_to_upload_1_eng,
+                                  st.session_state.gpt_doc_file_to_upload_2_eng,
+                                  st.session_state.gpt_doc_file_to_upload_3_eng]
             return loop_through_files
         else:
             loop_through_files = []
@@ -278,7 +250,7 @@ def launch_app_eng():
     # st.write(text_list)
 
     ####################################### Write chat history #######################################
-    for message in st.session_state.messages_files_eng:
+    for message in st.session_state.gpt_doc_messages_files_eng:
         with st.chat_message(message['role']):
             change_text_style_english(message['content'], 'main_text_white', 'white')
 
@@ -302,15 +274,15 @@ def launch_app_eng():
                 store = InMemoryStore()
                 # vector_store.persist()
                 retriever = vector_store.as_retriever(search_kwargs={"k": 3}, docstore=store)
-                st.session_state.continue_analysis_files_eng = True
+                st.session_state.gpt_doc_continue_analysis_files_eng = True
 
         except Exception as e:
             st.subheader(":red[An error occurred. Please delete the uploaded file, and then uploaded it again]")
-            st.session_state.continue_analysis_files_eng = False
+            st.session_state.gpt_doc_continue_analysis_files_eng = False
             st.markdown(e)
 
         #################################### documents ####################################
-        if st.session_state.continue_analysis_files_eng:
+        if st.session_state.gpt_doc_continue_analysis_files_eng:
 
             # RetrievalQA from chain type ##########
 
@@ -371,7 +343,7 @@ def launch_app_eng():
                     with st.chat_message('user'):
                         st.markdown(user_input)
 
-                    st.session_state.messages_files_eng.append({'role': 'user', 'content': user_input})
+                    st.session_state.gpt_doc_messages_files_eng.append({'role': 'user', 'content': user_input})
 
                     with st.spinner(
                             text=":red[Query submitted. This may take a minute while we query the documents...]"):
@@ -379,11 +351,11 @@ def launch_app_eng():
                             try:
                                 message_placeholder = st.empty()
                                 all_results = ''
-                                chat_history = st.session_state.chat_history_files_eng
+                                chat_history = st.session_state.gpt_doc_chat_history_files_eng
                                 result = query_model({"query": user_input})
                                 user_query = result['query']
                                 result = result['result']
-                                st.session_state.chat_history_files_eng.append((user_query, result))
+                                st.session_state.gpt_doc_chat_history_files_eng.append((user_query, result))
                                 all_results += result
                                 font_link_eng = '<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">'
                                 font_family_eng = "'Roboto', sans-serif"
@@ -403,7 +375,8 @@ def launch_app_eng():
                                         <div class="bold-text"><bdi>{all_results}</bdi></div>
                                         """, unsafe_allow_html=True)
 
-                                st.session_state.messages_files_eng.append({'role': 'assistant', 'content': all_results})
+                                st.session_state.gpt_doc_messages_files_eng.append(
+                                    {'role': 'assistant', 'content': all_results})
                                 return user_input, result, user_query
 
                             except Exception as e:
@@ -414,3 +387,11 @@ def launch_app_eng():
 
     else:
         st.empty()
+
+
+def gpt_doc_send_email_error(recipient, subject, error_message):
+    with smtplib.SMTP("smtp.gmail.com", 587) as server:
+        server.ehlo()
+        server.starttls()
+        server.login(recipient, os.environ["EMAIL_PASSWORD"])
+        server.sendmail(recipient, error_message, f"Subject: {subject}\n\n{'GPT Doc Analyzer'} \n\n{error_message}")

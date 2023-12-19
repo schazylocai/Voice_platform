@@ -31,28 +31,6 @@ red = "rgb(232,89,83)"
 
 
 def launch_web_app_eng():
-    ######################################### Set session states #########################################
-
-    if 'user_status' not in st.session_state:
-        st.session_state.user_status = 'False'
-
-    if 'messages_weblinks_eng' not in st.session_state:
-        st.session_state.messages_weblinks_eng = []
-
-    if 'chat_history_weblinks_eng' not in st.session_state:
-        st.session_state.chat_history_weblinks_eng = []
-
-    if 'weblink_1_eng' not in st.session_state:
-        st.session_state.weblink_1_eng = ''
-
-    if 'web_text_list_1_eng' not in st.session_state:
-        st.session_state.web_text_list_1_eng = []
-
-    if 'continue_analysis_weblink_eng' not in st.session_state:
-        st.session_state.continue_analysis_weblink_eng = False
-
-    ########################################### Set variables ##########################################
-
     ######################################### Catch exceptions #########################################
     def catch_exception(file_name):
         with col3:
@@ -61,13 +39,13 @@ def launch_web_app_eng():
         return False
 
     ######################################### Clear all files #########################################
-    def clear_all_files():
-        st.empty()
-        st.session_state.chat_history_weblinks_eng = []
-        st.session_state.messages_weblinks_eng = []
-        st.session_state.weblink_1_eng = ''
-        st.session_state.web_text_list_1_eng = []
-        st.session_state.continue_analysis_weblink_eng = False
+    # def clear_all_files():
+    #     st.empty()
+    #     st.session_state.gpt_web_chat_history_weblinks_eng = []
+    #     st.session_state.gpt_web_messages_weblinks_eng = []
+    #     st.session_state.gpt_web_weblink_1_eng = ''
+    #     st.session_state.gpt_web_text_list_1_eng = []
+    #     st.session_state.gpt_web_continue_analysis_weblink_eng = False
 
     ############################### Check web links and read their content ###############################
     def is_web_link(web_link):
@@ -141,35 +119,35 @@ def launch_web_app_eng():
                                              use_container_width=True,
                                              key='web_s_1_eng')
         if weblink_button_1 and web_1:
-            st.session_state.web_text_list_1_eng = web_1
+            st.session_state.gpt_web_text_list_1_eng = web_1
             # st.write(f':violet[weblink: {web_1}]')
-            st.session_state.weblink_1_eng = is_web_link(web_1)
+            st.session_state.gpt_web_weblink_1_eng = is_web_link(web_1)
 
-    with col3:
-        # set the clear button
-        st.write("")
-        st.write("")
-        clear = st.button(':white[Clear conversation & memory]', key='clear', use_container_width=True)
-
-        if clear:
-            clear_all_files()
+    # with col3:
+    #     # set the clear button
+    #     st.write("")
+    #     st.write("")
+    #     clear = st.button(':white[Clear conversation & memory]', key='clear', use_container_width=True)
+    #
+    #     if clear:
+    #         clear_all_files()
 
     ################################## Create final text file to pass to LLM ##################################
     st.divider()
 
-    if st.session_state.weblink_1_eng:
+    if st.session_state.gpt_web_weblink_1_eng:
         with st.expander('Retrieved text from website'):
-            st.write(st.session_state.weblink_1_eng)
+            st.write(st.session_state.gpt_web_weblink_1_eng)
 
     st.divider()
 
     ####################################### Write chat history #######################################
-    for message in st.session_state.messages_weblinks_eng:
+    for message in st.session_state.gpt_web_messages_weblinks_eng:
         with st.chat_message(message['role']):
             change_text_style_english(message['content'], 'main_text_white', 'white')
 
     ######################################### Run LLM sequence #########################################
-    if st.session_state.weblink_1_eng:
+    if st.session_state.gpt_web_weblink_1_eng:
 
         st.subheader(f":violet[Ask me anything about the webpage:]")
         st.write(web_1)
@@ -181,7 +159,7 @@ def launch_web_app_eng():
                 chunk_size = 1000
                 text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=50,
                                                                length_function=len)
-                chunks = text_splitter.split_text(text=str(st.session_state.weblink_1_eng))
+                chunks = text_splitter.split_text(text=str(st.session_state.gpt_web_weblink_1_eng))
                 chunks = list(chunks)
 
                 llm = ChatOpenAI(temperature=0.6, model=st.session_state.ChatOpenAI)  # gpt-4 or gpt-3.5-turbo
@@ -191,15 +169,15 @@ def launch_web_app_eng():
                                                              persist_path=None)
                 # vector_store.persist()
                 retriever = vector_store.as_retriever(search_kwargs={"k": 1})
-                st.session_state.continue_analysis_weblink_eng = True
+                st.session_state.gpt_web_continue_analysis_weblink_eng = True
 
         except Exception as e:
             st.subheader(":red[An error occurred. Please upload the web link again]")
-            st.session_state.continue_analysis_weblink_eng = False
+            st.session_state.gpt_web_continue_analysis_weblink_eng = False
             # st.markdown(e)
 
         ################################### weblinks ##################################
-        if st.session_state.continue_analysis_weblink_eng:
+        if st.session_state.gpt_web_continue_analysis_weblink_eng:
 
             ##################################### RetrievalQA from chain type #####################################
 
@@ -259,18 +237,18 @@ def launch_web_app_eng():
                     with st.chat_message('user'):
                         st.markdown(user_input)
 
-                    st.session_state.messages_weblinks_eng.append({'role': 'user', 'content': user_input})
+                    st.session_state.gpt_web_messages_weblinks_eng.append({'role': 'user', 'content': user_input})
 
                     with st.spinner(
                             text=":red[Query submitted. This may take a minute while we query the documents...]"):
                         with st.chat_message('assistant'):
                             message_placeholder = st.empty()
                             all_results = ''
-                            chat_history = st.session_state.chat_history_weblinks_eng
+                            chat_history = st.session_state.gpt_web_chat_history_weblinks_eng
                             result = query_model({"query": user_input})
                             user_query = result['query']
                             result = result['result']
-                            st.session_state.chat_history_weblinks_eng.append((user_query, result))
+                            st.session_state.gpt_web_chat_history_weblinks_eng.append((user_query, result))
                             all_results += result
                             font_link_eng = '<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">'
                             font_family_eng = "'Roboto', sans-serif"
@@ -290,7 +268,7 @@ def launch_web_app_eng():
                                     <div class="bold-text"><bdi>{all_results}</bdi></div>
                                     """, unsafe_allow_html=True)
 
-                            st.session_state.messages_weblinks_eng.append({'role': 'assistant', 'content': all_results})
+                            st.session_state.gpt_web_messages_weblinks_eng.append({'role': 'assistant', 'content': all_results})
                             return user_input, result, user_query
 
             create_text_question()

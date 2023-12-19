@@ -8,6 +8,7 @@ import pandas as pd
 import altair as alt
 import warnings
 from datetime import datetime
+import smtplib
 
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
@@ -32,41 +33,6 @@ red = "rgb(232,89,83)"
 
 
 def launch_excel_app_eng():
-    ######################################### Set session states #########################################
-
-    if 'user_status' not in st.session_state:
-        st.session_state.user_status = 'False'
-
-    if 'messages_excel_eng' not in st.session_state:
-        st.session_state.messages_excel_eng = []
-
-    if 'chat_history_excel_eng' not in st.session_state:
-        st.session_state.chat_history_excel_eng = []
-
-    if 'excel_sheets_frame_eng' not in st.session_state:
-        st.session_state.excel_sheets_frame_eng = pd.DataFrame()
-
-    if 'excel_sheets_frame_eng_adjusted' not in st.session_state:
-        st.session_state.excel_sheets_frame_eng_adjusted = pd.DataFrame()
-
-    if 'continue_analysis_excel_eng' not in st.session_state:
-        st.session_state.continue_analysis_excel_eng = False
-
-    if 'header_row_index' not in st.session_state:
-        st.session_state.header_row_index = 0
-
-    if 'file_in_memory' not in st.session_state:
-        st.session_state.file_in_memory = 0
-
-    if 'excel_file_to_upload' not in st.session_state:
-        st.session_state.excel_file_to_upload = None
-
-    if 'excel_output_dataframe' not in st.session_state:
-        st.session_state.excel_output_dataframe = None
-
-    if 'excel_output_chart' not in st.session_state:
-        st.session_state.excel_output_chart = None
-
     ######################################### Catch exceptions #########################################
     def catch_exception(file_name):
         with col2:
@@ -74,18 +40,18 @@ def launch_excel_app_eng():
         return False
 
     ######################################### Clear all files #########################################
-    def clear_all_files():
-        st.empty()
-        st.session_state.messages_excel_eng = []
-        st.session_state.chat_history_excel_eng = []
-        st.session_state.excel_sheets_frame_eng = pd.DataFrame()
-        st.session_state.excel_sheets_frame_eng_adjusted = pd.DataFrame()
-        st.session_state.continue_analysis_excel_eng = False
-        st.session_state.header_row_index = 0
-        st.session_state.file_in_memory = 0
-        st.session_state.excel_file_to_upload = None
-        st.session_state.excel_output_dataframe = None
-        st.session_state.excel_output_chart = None
+    # def clear_all_files():
+    #     st.empty()
+    #     st.session_state.gpt_excel_messages_eng = []
+    #     st.session_state.gpt_excel_chat_history_eng = []
+    #     st.session_state.gpt_excel_sheets_frame_eng = pd.DataFrame()
+    #     st.session_state.gpt_excel_sheets_frame_eng_adjusted = pd.DataFrame()
+    #     st.session_state.gpt_excel_continue_analysis_eng = False
+    #     st.session_state.gpt_excel_header_row_index = 0
+    #     st.session_state.gpt_excel_file_in_memory = 0
+    #     st.session_state.gpt_excel_file_to_upload = None
+    #     st.session_state.gpt_excel_output_dataframe = None
+    #     st.session_state.gpt_excel_output_chart = None
 
     #################################### Convert uploaded files to text ####################################
     def convert_excel_to_dataframe(my_file, sheet_idx):
@@ -222,9 +188,9 @@ def launch_excel_app_eng():
 
         retry_count_1 = 0
         if excel_file_1:
-            st.session_state.excel_file_to_upload = excel_file_1
-            with st.session_state.excel_file_to_upload:
-                st.session_state.file_in_memory = 1
+            st.session_state.gpt_excel_file_to_upload = excel_file_1
+            with st.session_state.gpt_excel_file_to_upload:
+                st.session_state.gpt_excel_file_in_memory = 1
                 while retry_count_1 < max_retries:
                     try:
                         if str(excel_file_1.name).endswith('.xlsx'):
@@ -235,46 +201,49 @@ def launch_excel_app_eng():
 
                             # Create a radio button to choose a sheet using its index
                             st.sidebar.subheader(':violet[Choose a sheet:]')
-                            choose_sheet_index = st.sidebar.selectbox(label='Choose a sheet from the uploaded Excel file:',
-                                                                      options=[sheet for sheet in sheet_info],
-                                                                      format_func=lambda x: x[1],  # Display sheet names
-                                                                      key='choose_sheet_index',
-                                                                      label_visibility='hidden',
-                                                                      )
+                            choose_sheet_index = st.sidebar.selectbox(
+                                label='Choose a sheet from the uploaded Excel file:',
+                                options=[sheet for sheet in sheet_info],
+                                format_func=lambda x: x[1],  # Display sheet names
+                                key='choose_sheet_index',
+                                label_visibility='hidden',
+                                )
 
                             # Get the selected sheet index
                             selected_index, selected_sheet_name = choose_sheet_index
-                            st.session_state.continue_analysis_excel_eng = True
+                            st.session_state.gpt_excel_continue_analysis_eng = True
 
-                            st.session_state.excel_sheets_frame_eng = convert_excel_to_dataframe(
+                            st.session_state.gpt_excel_sheets_frame_eng = convert_excel_to_dataframe(
                                 excel_file_1, selected_index)
                             break
 
+
                     except Exception as e:
                         retry_count_1 += 1
-                        if retry_count_1 < max_retries:
-                            continue
+
+                    if retry_count_1 < max_retries:
+                        continue
+                    else:
                         st.sidebar.write("Maximum retry attempts reached. Upload failed.")
+                        gpt_excel_send_email_error(os.environ["MY_EMAIL_ADDRESS"], "Document upload error", e)
                         break
 
         else:
-            # Delete session state if upload exists in the context manager
-            del st.session_state.excel_file_to_upload
-            st.session_state.excel_sheets_frame_eng = pd.DataFrame()
+            st.session_state.gpt_excel_sheets_frame_eng = pd.DataFrame()
 
-    with col3:
-        # set the clear button
-        st.write("")
-        st.write("")
-        clear = st.button(':white[Clear conversation & memory]', key='clear', use_container_width=True)
-
-        if clear:
-            clear_all_files()
+    # with col3:
+    #     # set the clear button
+    #     st.write("")
+    #     st.write("")
+    #     clear = st.button(':white[Clear conversation & memory]', key='clear', use_container_width=True)
+    #
+    #     if clear:
+    #         clear_all_files()
 
     ######################################### render tables #########################################
-    sheets_frame = st.session_state.excel_sheets_frame_eng
+    sheets_frame = st.session_state.gpt_excel_sheets_frame_eng
 
-    if excel_file_1 and st.session_state['file_in_memory'] == 1:
+    if excel_file_1 and st.session_state['gpt_excel_file_in_memory'] == 1:
         graph_type = 'None'
         col_A = 'None'
         col_B = 'None'
@@ -290,15 +259,15 @@ def launch_excel_app_eng():
 
         # Validate the dataframe
         def show_dataframe():
-            st.session_state['excel_sheets_frame_eng'] = st.data_editor(
-                data=st.session_state['excel_sheets_frame_eng'],
+            st.session_state['gpt_excel_sheets_frame_eng'] = st.data_editor(
+                data=st.session_state['gpt_excel_sheets_frame_eng'],
                 use_container_width=True, height=500,
                 num_rows='dynamic', hide_index=False, ).reset_index(drop=True)
 
         show_dataframe()
-        sheets_frame = st.session_state['excel_sheets_frame_eng']
+        sheets_frame = st.session_state['gpt_excel_sheets_frame_eng']
 
-    if excel_file_1 and st.session_state['file_in_memory'] == 1:
+    if excel_file_1 and st.session_state['gpt_excel_file_in_memory'] == 1:
         # select a graph type
         st.sidebar.subheader(':violet[Choose a graph type:]')
         graph_type = st.sidebar.selectbox(
@@ -489,12 +458,12 @@ def launch_excel_app_eng():
     # st.divider()
 
     ####################################### Write chat history #######################################
-    for message in st.session_state.messages_excel_eng:
+    for message in st.session_state.gpt_excel_messages_eng:
         with st.chat_message(message['role']):
             change_text_style_english(message['content'], 'main_text_white', 'white')
 
     ######################################## documents ########################################
-    if st.session_state.continue_analysis_excel_eng:
+    if st.session_state.gpt_excel_continue_analysis_eng:
 
         #################################### Templates ####################################
 
@@ -546,7 +515,7 @@ def launch_excel_app_eng():
                 with st.chat_message('user'):
                     st.markdown(user_input)
 
-                st.session_state.messages_excel_eng.append({'role': 'user', 'content': user_input})
+                st.session_state.gpt_excel_messages_eng.append({'role': 'user', 'content': user_input})
 
                 with st.spinner(text=":red[Query submitted. This may take a minute while we query the table...]"):
                     with st.chat_message('assistant'):
@@ -556,7 +525,7 @@ def launch_excel_app_eng():
                             output = query_model(user_input)
                             user_query = user_input
                             result = output['output']
-                            st.session_state.chat_history_excel_eng.append((user_query, result))
+                            st.session_state.gpt_excel_chat_history_eng.append((user_query, result))
                             all_results += result
                             font_link_eng = '<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">'
                             font_family_eng = "'Roboto', sans-serif"
@@ -576,7 +545,8 @@ def launch_excel_app_eng():
                                                                     <div class="bold-text"><bdi>{all_results}</bdi></div>
                                                                     """, unsafe_allow_html=True)
 
-                            st.session_state.messages_excel_eng.append({'role': 'assistant', 'content': all_results})
+                            st.session_state.gpt_excel_messages_eng.append(
+                                {'role': 'assistant', 'content': all_results})
                             # return result
 
                         except Exception as e:
@@ -587,3 +557,11 @@ def launch_excel_app_eng():
 
     else:
         st.empty()
+
+
+def gpt_excel_send_email_error(recipient, subject, error_message):
+    with smtplib.SMTP("smtp.gmail.com", 587) as server:
+        server.ehlo()
+        server.starttls()
+        server.login(recipient, os.environ["EMAIL_PASSWORD"])
+        server.sendmail(recipient, error_message, f"Subject: {subject}\n\n{'GPT Excel Analyzer'} \n\n{error_message}")
