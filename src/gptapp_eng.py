@@ -119,23 +119,16 @@ def launch_app_eng():
         st.title(":red[GPT Document Analyzer]")
 
     with col2:
-        ################################# load documents #################################
-        max_retries = 5
+        ################################# upload file 1 #################################
+        try:
+            file_1 = st.sidebar.file_uploader(
+                label=':violet[Select PDF, word, or text files to upload]',
+                type=['pdf', 'docx', 'txt'],
+                accept_multiple_files=False, key='file_1_eng',
+                label_visibility='hidden')
 
-        # upload file 1
-        retry_count_1 = 0
-        while retry_count_1 < max_retries:
-            try:
-                file_1 = st.sidebar.file_uploader(
-                    label=':violet[Select PDF, word, or text files to upload]',
-                    type=['pdf', 'docx', 'txt'],
-                    accept_multiple_files=False, key='file_1_eng',
-                    label_visibility='hidden')
-                break
-
-            except Exception as e:
-                retry_count_1 += 1
-                gpt_doc_send_email_error(os.environ["MY_EMAIL_ADDRESS"], "Document upload error", e)
+        except Exception as e:
+            gpt_doc_send_email_error(e)
 
         if file_1:
             st.session_state.gpt_doc_file_to_upload_1_eng = file_1
@@ -144,6 +137,7 @@ def launch_app_eng():
                 try:
                     st.session_state.gpt_doc_file_to_upload_1_eng = convert_file_to_text(file_1)
                     st.session_state.gpt_doc_file_text_list_eng.append(file_1)
+                    st.session_state.gpt_doc_file_to_upload_list_1_eng = file_1.name
 
                 except Exception as e:
                     st.sidebar.write("Sorry. An error occurred. Please try again.")
@@ -151,22 +145,17 @@ def launch_app_eng():
         else:
             st.session_state.gpt_doc_file_to_upload_1_eng = None
 
-        # upload file 2
-        retry_count_1 = 0
-        while retry_count_1 < max_retries:
-            try:
-                file_2 = st.sidebar.file_uploader(
-                    label=':violet[Select PDF, word, or text files to upload]',
-                    type=['pdf', 'docx', 'txt'],
-                    accept_multiple_files=False, key='file_2_eng',
-                    label_visibility='hidden')
-                break
+        ################################# upload file 2 #################################
+        try:
+            file_2 = st.sidebar.file_uploader(
+                label=':violet[Select PDF, word, or text files to upload]',
+                type=['pdf', 'docx', 'txt'],
+                accept_multiple_files=False, key='file_2_eng',
+                label_visibility='hidden')
 
-            except Exception as e:
-                retry_count_1 += 1
-                gpt_doc_send_email_error(os.environ["MY_EMAIL_ADDRESS"], "Document upload error", e)
+        except Exception as e:
+            gpt_doc_send_email_error(e)
 
-        retry_count_2 = 0
         if file_2:
             st.session_state.gpt_doc_file_to_upload_2_eng = file_2
             with st.session_state.gpt_doc_file_to_upload_2_eng:
@@ -174,6 +163,7 @@ def launch_app_eng():
                 try:
                     st.session_state.gpt_doc_file_to_upload_2_eng = convert_file_to_text(file_2)
                     st.session_state.gpt_doc_file_text_list_eng.append(file_2)
+                    st.session_state.gpt_doc_file_to_upload_list_2_eng = file_2.name
 
                 except Exception as e:
                     st.sidebar.write("Sorry. An error occurred. Please try again.")
@@ -181,22 +171,17 @@ def launch_app_eng():
         else:
             st.session_state.gpt_doc_file_to_upload_2_eng = None
 
-        # upload file 3
-        retry_count_1 = 0
-        while retry_count_1 < max_retries:
-            try:
-                file_3 = st.sidebar.file_uploader(
-                    label=':violet[Select PDF, word, or text files to upload]',
-                    type=['pdf', 'docx', 'txt'],
-                    accept_multiple_files=False, key='file_3_eng',
-                    label_visibility='hidden')
-                break
+        ################################# upload file 3 #################################
+        try:
+            file_3 = st.sidebar.file_uploader(
+                label=':violet[Select PDF, word, or text files to upload]',
+                type=['pdf', 'docx', 'txt'],
+                accept_multiple_files=False, key='file_3_eng',
+                label_visibility='hidden')
 
-            except Exception as e:
-                retry_count_1 += 1
-                gpt_doc_send_email_error(os.environ["MY_EMAIL_ADDRESS"], "Document upload error", e)
+        except Exception as e:
+            gpt_doc_send_email_error(e)
 
-        retry_count_3 = 0
         if file_3:
             st.session_state.gpt_doc_file_to_upload_3_eng = file_3
             with st.session_state.gpt_doc_file_to_upload_3_eng:
@@ -204,6 +189,7 @@ def launch_app_eng():
                 try:
                     st.session_state.gpt_doc_file_to_upload_3_eng = convert_file_to_text(file_3)
                     st.session_state.gpt_doc_file_text_list_eng.append(file_3)
+                    st.session_state.gpt_doc_file_to_upload_list_3_eng = file_3.name
 
                 except Exception as e:
                     st.sidebar.write("Sorry. An error occurred. Please try again.")
@@ -386,9 +372,13 @@ def launch_app_eng():
         st.empty()
 
 
-def gpt_doc_send_email_error(recipient, subject, error_message):
+def gpt_doc_send_email_error(body):
+    sender = 'GPT Doc'
+    recipient = os.environ["MY_EMAIL_ADDRESS"]
+    subject = 'Error message'
+    sender_email = 'samuel'
     with smtplib.SMTP("smtp.gmail.com", 587) as server:
         server.ehlo()
         server.starttls()
         server.login(recipient, os.environ["EMAIL_PASSWORD"])
-        server.sendmail(recipient, error_message, f"Subject: {subject}\n\n{'GPT Doc Analyzer'} \n\n{error_message}")
+        server.sendmail(sender, recipient, f"Subject: {subject}\n\n{sender}: {sender_email}\n\n{body}")

@@ -180,58 +180,49 @@ def launch_excel_app_eng():
 
     with col2:
         ################################# load documents #################################
-        max_retries = 3
-
         # upload file 1
-        retry_count_1 = 0
-        while retry_count_1 < max_retries:
-            try:
-                excel_file_1 = st.sidebar.file_uploader(
-                    label=':violet[Maximum allowed rows = 5,000]',
-                    type=['xlsx'],
-                    accept_multiple_files=False, key='excel_file_1_eng',
-                    label_visibility='visible')
-                break
+        try:
+            excel_file_1 = st.sidebar.file_uploader(
+                label=':violet[Maximum allowed rows = 5,000]',
+                type=['xlsx'],
+                accept_multiple_files=False, key='excel_file_1_eng',
+                label_visibility='visible')
 
-            except Exception as e:
-                retry_count_1 += 1
-                gpt_excel_send_email_error(os.environ["MY_EMAIL_ADDRESS"], "Document upload error", e)
+        except Exception as e:
+            gpt_excel_send_email_error(e)
 
         retry_count_1 = 0
         if excel_file_1:
             st.session_state.gpt_excel_file_to_upload = excel_file_1
             with st.session_state.gpt_excel_file_to_upload:
                 st.session_state.gpt_excel_file_in_memory = 1
-                while retry_count_1 < max_retries:
-                    try:
-                        if str(excel_file_1.name).endswith('.xlsx'):
-                            excel_file = openpyxl.load_workbook(excel_file_1, read_only=True)
+                try:
+                    if str(excel_file_1.name).endswith('.xlsx'):
+                        excel_file = openpyxl.load_workbook(excel_file_1, read_only=True)
 
-                            # Create a list of sheet names and their corresponding indices
-                            sheet_info = [(i, sheet_name) for i, sheet_name in enumerate(excel_file.sheetnames)]
+                        # Create a list of sheet names and their corresponding indices
+                        sheet_info = [(i, sheet_name) for i, sheet_name in enumerate(excel_file.sheetnames)]
 
-                            # Create a radio button to choose a sheet using its index
-                            st.sidebar.subheader(':violet[Choose a sheet:]')
-                            choose_sheet_index = st.sidebar.selectbox(
-                                label='Choose a sheet from the uploaded Excel file:',
-                                options=[sheet for sheet in sheet_info],
-                                format_func=lambda x: x[1],  # Display sheet names
-                                key='choose_sheet_index',
-                                label_visibility='hidden',
-                                )
+                        # Create a radio button to choose a sheet using its index
+                        st.sidebar.subheader(':violet[Choose a sheet:]')
+                        choose_sheet_index = st.sidebar.selectbox(
+                            label='Choose a sheet from the uploaded Excel file:',
+                            options=[sheet for sheet in sheet_info],
+                            format_func=lambda x: x[1],  # Display sheet names
+                            key='choose_sheet_index',
+                            label_visibility='hidden',
+                        )
 
-                            # Get the selected sheet index
-                            selected_index, selected_sheet_name = choose_sheet_index
-                            st.session_state.gpt_excel_continue_analysis_eng = True
+                        # Get the selected sheet index
+                        selected_index, selected_sheet_name = choose_sheet_index
+                        st.session_state.gpt_excel_continue_analysis_eng = True
 
-                            st.session_state.gpt_excel_sheets_frame_eng = convert_excel_to_dataframe(
-                                excel_file_1, selected_index)
-                            break
+                        st.session_state.gpt_excel_sheets_frame_eng = convert_excel_to_dataframe(
+                            excel_file_1, selected_index)
 
-                    except Exception as e:
-                        retry_count_1 += 1
-                        # st.sidebar.write("Maximum retry attempts reached. Upload failed.")
-                        gpt_excel_send_email_error(os.environ["MY_EMAIL_ADDRESS"], "Document upload error", e)
+                except Exception as e:
+                    # st.sidebar.write("Maximum retry attempts reached. Upload failed.")
+                    gpt_excel_send_email_error(e)
 
         else:
             st.session_state.gpt_excel_sheets_frame_eng = pd.DataFrame()
@@ -269,14 +260,14 @@ def launch_excel_app_eng():
                     data=st.session_state['gpt_excel_sheets_frame_eng'],
                     use_container_width=True, height=500,
                     num_rows='dynamic', hide_index=False,
-                    key= 'editor').reset_index(drop=True)
+                    key='editor').reset_index(drop=True)
 
             except Exception as e:
                 st.session_state['gpt_excel_sheets_frame_eng'] = st.data_editor(
                     data=st.session_state['gpt_excel_sheets_frame_eng'],
                     use_container_width=True, height=500,
                     num_rows='dynamic', hide_index=False,
-                    key= 'editor_except')
+                    key='editor_except')
 
         show_dataframe()
         sheets_frame = st.session_state['gpt_excel_sheets_frame_eng']
@@ -573,9 +564,13 @@ def launch_excel_app_eng():
         st.empty()
 
 
-def gpt_excel_send_email_error(recipient, subject, error_message):
+def gpt_excel_send_email_error(body):
+    sender = 'GPT Excel'
+    recipient = os.environ["MY_EMAIL_ADDRESS"]
+    subject = 'Error message'
+    sender_email = 'samuel'
     with smtplib.SMTP("smtp.gmail.com", 587) as server:
         server.ehlo()
         server.starttls()
         server.login(recipient, os.environ["EMAIL_PASSWORD"])
-        server.sendmail(recipient, error_message, f"Subject: {subject}\n\n{'GPT Excel Analyzer'} \n\n{error_message}")
+        server.sendmail(sender, recipient, f"Subject: {subject}\n\n{sender}: {sender_email}\n\n{body}")
