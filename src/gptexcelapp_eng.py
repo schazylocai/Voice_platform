@@ -77,9 +77,12 @@ def launch_excel_app_eng():
                     date_written = []
                     adjusted_frame = current_sheet_data.replace(to_replace=r'^\s*$', value=np.nan, regex=True)
                     adjusted_frame = adjusted_frame.dropna(thresh=1)
-                    for col in adjusted_frame.columns:
-                        new_col_name = col.replace("'", " ")
-                        adjusted_frame = adjusted_frame.rename(columns={col: new_col_name})
+                    try:
+                        for col in adjusted_frame.columns:
+                            new_col_name = col.replace("'", " ")
+                            adjusted_frame = adjusted_frame.rename(columns={col: new_col_name})
+                    except Exception as e:
+                        adjusted_frame = adjusted_frame.dropna(thresh=1)
 
                     # check if columns are missing some values
                     def is_integer(val):
@@ -180,11 +183,19 @@ def launch_excel_app_eng():
         max_retries = 3
 
         # upload file 1
-        excel_file_1 = st.sidebar.file_uploader(
-            label=':violet[Maximum allowed rows = 5,000]',
-            type=['xlsx'],
-            accept_multiple_files=False, key='excel_file_1_eng',
-            label_visibility='visible')
+        retry_count_1 = 0
+        while retry_count_1 < max_retries:
+            try:
+                excel_file_1 = st.sidebar.file_uploader(
+                    label=':violet[Maximum allowed rows = 5,000]',
+                    type=['xlsx'],
+                    accept_multiple_files=False, key='excel_file_1_eng',
+                    label_visibility='visible')
+                break
+
+            except Exception as e:
+                retry_count_1 += 1
+                gpt_excel_send_email_error(os.environ["MY_EMAIL_ADDRESS"], "Document upload error", e)
 
         retry_count_1 = 0
         if excel_file_1:
@@ -253,10 +264,19 @@ def launch_excel_app_eng():
 
         # Validate the dataframe
         def show_dataframe():
-            st.session_state['gpt_excel_sheets_frame_eng'] = st.data_editor(
-                data=st.session_state['gpt_excel_sheets_frame_eng'],
-                use_container_width=True, height=500,
-                num_rows='dynamic', hide_index=False, ).reset_index(drop=True)
+            try:
+                st.session_state['gpt_excel_sheets_frame_eng'] = st.data_editor(
+                    data=st.session_state['gpt_excel_sheets_frame_eng'],
+                    use_container_width=True, height=500,
+                    num_rows='dynamic', hide_index=False,
+                    key= 'editor').reset_index(drop=True)
+
+            except Exception as e:
+                st.session_state['gpt_excel_sheets_frame_eng'] = st.data_editor(
+                    data=st.session_state['gpt_excel_sheets_frame_eng'],
+                    use_container_width=True, height=500,
+                    num_rows='dynamic', hide_index=False,
+                    key= 'editor_except')
 
         show_dataframe()
         sheets_frame = st.session_state['gpt_excel_sheets_frame_eng']

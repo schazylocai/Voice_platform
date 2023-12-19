@@ -123,77 +123,91 @@ def launch_app_eng():
         max_retries = 5
 
         # upload file 1
-        file_1 = st.sidebar.file_uploader(
-            label=':violet[Select PDF, word, or text'
-                  'files to upload]',
-            type=['pdf', 'docx', 'txt'],
-            accept_multiple_files=False, key='file_1_eng',
-            label_visibility='hidden')
-
         retry_count_1 = 0
+        while retry_count_1 < max_retries:
+            try:
+                file_1 = st.sidebar.file_uploader(
+                    label=':violet[Select PDF, word, or text files to upload]',
+                    type=['pdf', 'docx', 'txt'],
+                    accept_multiple_files=False, key='file_1_eng',
+                    label_visibility='hidden')
+                break
+
+            except Exception as e:
+                retry_count_1 += 1
+                gpt_doc_send_email_error(os.environ["MY_EMAIL_ADDRESS"], "Document upload error", e)
+
         if file_1:
             st.session_state.gpt_doc_file_to_upload_1_eng = file_1
             with st.session_state.gpt_doc_file_to_upload_1_eng:
-                while retry_count_1 < max_retries:
-                    try:
-                        st.session_state.gpt_doc_file_to_upload_1_eng = convert_file_to_text(file_1)
-                        st.session_state.gpt_doc_file_text_list_eng.append(file_1)
-                        break
 
-                    except Exception as e:
-                        retry_count_1 += 1
-                        # st.sidebar.write("Maximum retry attempts reached. Upload failed.")
-                        gpt_doc_send_email_error(os.environ["MY_EMAIL_ADDRESS"], "Document upload error", e)
+                try:
+                    st.session_state.gpt_doc_file_to_upload_1_eng = convert_file_to_text(file_1)
+                    st.session_state.gpt_doc_file_text_list_eng.append(file_1)
+
+                except Exception as e:
+                    st.sidebar.write("Sorry. An error occurred. Please try again.")
 
         else:
             st.session_state.gpt_doc_file_to_upload_1_eng = None
 
         # upload file 2
-        file_2 = st.sidebar.file_uploader(
-            label=':violet[Select PDF, word, or text files to upload]',
-            type=['pdf', 'docx', 'txt'],
-            accept_multiple_files=False, key='file_2_eng',
-            label_visibility='hidden')
+        retry_count_1 = 0
+        while retry_count_1 < max_retries:
+            try:
+                file_2 = st.sidebar.file_uploader(
+                    label=':violet[Select PDF, word, or text files to upload]',
+                    type=['pdf', 'docx', 'txt'],
+                    accept_multiple_files=False, key='file_2_eng',
+                    label_visibility='hidden')
+                break
+
+            except Exception as e:
+                retry_count_1 += 1
+                gpt_doc_send_email_error(os.environ["MY_EMAIL_ADDRESS"], "Document upload error", e)
 
         retry_count_2 = 0
         if file_2:
             st.session_state.gpt_doc_file_to_upload_2_eng = file_2
             with st.session_state.gpt_doc_file_to_upload_2_eng:
-                while retry_count_2 < max_retries:
-                    try:
-                        st.session_state.gpt_doc_file_to_upload_2_eng = convert_file_to_text(file_2)
-                        st.session_state.gpt_doc_file_text_list_eng.append(file_2)
-                        break
 
-                    except Exception as e:
-                        retry_count_1 += 1
-                        # st.sidebar.write("Maximum retry attempts reached. Upload failed.")
-                        gpt_doc_send_email_error(os.environ["MY_EMAIL_ADDRESS"], "Document upload error", e)
+                try:
+                    st.session_state.gpt_doc_file_to_upload_2_eng = convert_file_to_text(file_2)
+                    st.session_state.gpt_doc_file_text_list_eng.append(file_2)
+
+                except Exception as e:
+                    st.sidebar.write("Sorry. An error occurred. Please try again.")
 
         else:
             st.session_state.gpt_doc_file_to_upload_2_eng = None
 
         # upload file 3
-        file_3 = st.sidebar.file_uploader(
-            label=':violet[Select PDF, word, or text files to upload]',
-            type=['pdf', 'docx', 'txt'],
-            accept_multiple_files=False, key='file_3_eng',
-            label_visibility='hidden')
+        retry_count_1 = 0
+        while retry_count_1 < max_retries:
+            try:
+                file_3 = st.sidebar.file_uploader(
+                    label=':violet[Select PDF, word, or text files to upload]',
+                    type=['pdf', 'docx', 'txt'],
+                    accept_multiple_files=False, key='file_3_eng',
+                    label_visibility='hidden')
+                break
+
+            except Exception as e:
+                retry_count_1 += 1
+                gpt_doc_send_email_error(os.environ["MY_EMAIL_ADDRESS"], "Document upload error", e)
 
         retry_count_3 = 0
         if file_3:
             st.session_state.gpt_doc_file_to_upload_3_eng = file_3
             with st.session_state.gpt_doc_file_to_upload_3_eng:
-                while retry_count_3 < max_retries:
-                    try:
-                        st.session_state.gpt_doc_file_to_upload_3_eng = convert_file_to_text(file_3)
-                        st.session_state.gpt_doc_file_text_list_eng.append(file_3)
-                        break
 
-                    except Exception as e:
-                        retry_count_1 += 1
-                        # st.sidebar.write("Maximum retry attempts reached. Upload failed.")
-                        gpt_doc_send_email_error(os.environ["MY_EMAIL_ADDRESS"], "Document upload error", e)
+                try:
+                    st.session_state.gpt_doc_file_to_upload_3_eng = convert_file_to_text(file_3)
+                    st.session_state.gpt_doc_file_text_list_eng.append(file_3)
+
+                except Exception as e:
+                    st.sidebar.write("Sorry. An error occurred. Please try again.")
+
         else:
             st.session_state.gpt_doc_file_to_upload_3_eng = None
 
