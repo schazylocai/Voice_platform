@@ -60,7 +60,7 @@ def first_page():
 
     # Check if the cache folder exists
     if os.path.exists(cache_folder) and os.path.isdir(cache_folder):
-        # Get the current time
+        # Get the current time_
         current_time = datetime.datetime.now()
 
         # Define a time delta of 4 hours
