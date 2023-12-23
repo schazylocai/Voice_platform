@@ -39,9 +39,6 @@ def change_language_to_English():
     with col1:
         change_text_style_english("GPT Analyzer", 'title', red)
         st.write('')
-    # with col2:
-    #     st.subheader(
-    #         ':violet[☘️ You can now interact with any document, website, YouTube video, or Excel file...]')
 
     st.divider()
     write_english_About()
