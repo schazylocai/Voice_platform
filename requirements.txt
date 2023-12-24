@@ -50,5 +50,7 @@ pandas
 pydantic
 altair
 python-dotenv
-# azure.identity
-azure.keyvault.secrets
+azure-identity
+azure-keyvault-secrets
+azure-mgmt-resource
+azure-storage-blob
