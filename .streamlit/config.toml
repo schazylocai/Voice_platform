@@ -8,4 +8,5 @@ base="dark"
 [server]
 maxUploadSize = 50
 enableXsrfProtection = false
-enableCORS = true
+enableWebsocketCompression=false
+enableCORS = false
