@@ -9,6 +9,9 @@ video_url_web = "https://youtu.be/aVZyQoH1PT8"
 video_url_youtube = "https://youtu.be/fTfgycMftFk"
 video_url_excel = "https://youtu.be/j2grzjwLkmA"
 
+if 'user_status' not in st.session_state:
+    st.session_state.user_status = 'False'
+
 
 def write_english_About():
 

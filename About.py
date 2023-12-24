@@ -23,6 +23,9 @@ LANGCHAIN_PROJECT = os.environ['LANGCHAIN_PROJECT']
 st.set_page_config(layout="wide", initial_sidebar_state='expanded', page_icon="🔬", page_title='GPT Document Analyzer')
 connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
 
+if 'user_status' not in st.session_state:
+    st.session_state.user_status = 'False'
+
 # status = False
 valid_email = False
 violet = "rgb(169, 131, 247)"

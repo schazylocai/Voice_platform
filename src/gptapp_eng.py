@@ -26,6 +26,9 @@ strip_secret_key = os.environ['STRIPE_SECRET_KEY']
 stripe_api_key = os.environ['STRIPE_API_KEY']
 stripe.api_key = strip_secret_key
 
+if 'user_status' not in st.session_state:
+    st.session_state.user_status = 'False'
+
 max_files = 5
 final_result = {"question": "", "answer": ""}
 violet = "rgb(169, 131, 247)"
