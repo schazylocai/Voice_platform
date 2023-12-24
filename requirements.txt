@@ -24,4 +24,4 @@ pydantic==2.5.3
 altair==5.2.0
 python-dotenv==1.0.0
 azure.identity==1.15.0
-azure.keyvault.secrets==4.7.0
+# azure.keyvault.secrets==4.7.0
