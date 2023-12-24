@@ -9,6 +9,9 @@ st.set_page_config(layout="wide", initial_sidebar_state='expanded', page_icon="ð
 if 'user_status' not in st.session_state:
     st.session_state.user_status = 'False'
 
+if 'language' not in st.session_state:
+    st.session_state.language = 'English'
+
 violet = "rgb(169, 131, 247)"
 red = "rgb(232,89,83)"
 

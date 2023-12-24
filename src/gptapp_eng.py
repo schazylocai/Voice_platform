@@ -29,6 +29,9 @@ stripe.api_key = strip_secret_key
 if 'user_status' not in st.session_state:
     st.session_state.user_status = 'False'
 
+if 'language' not in st.session_state:
+    st.session_state.language = 'English'
+
 max_files = 5
 final_result = {"question": "", "answer": ""}
 violet = "rgb(169, 131, 247)"

@@ -12,6 +12,9 @@ video_url_excel = "https://youtu.be/j2grzjwLkmA"
 if 'user_status' not in st.session_state:
     st.session_state.user_status = 'False'
 
+if 'language' not in st.session_state:
+    st.session_state.language = 'English'
+
 
 def write_english_About():
 

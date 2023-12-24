@@ -26,6 +26,9 @@ connection_string = os.environ['AZURE_STORAGE_CONNECTION_STRING']
 if 'user_status' not in st.session_state:
     st.session_state.user_status = 'False'
 
+if 'language' not in st.session_state:
+    st.session_state.language = 'English'
+
 # status = False
 valid_email = False
 violet = "rgb(169, 131, 247)"
