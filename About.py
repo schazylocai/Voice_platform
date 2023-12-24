@@ -55,8 +55,6 @@ def change_language_to_English():
 def first_page():
     init_session()
     st.session_state['data']['clicked'] = True
-    # print('Session Key:', st.session_state['session_key'])
-    # print('Session Data:', st.session_state['data'])
 
     change_language_to_English()
     cache_folder = "cache"

@@ -27,6 +27,12 @@ def initialize_params():
     if 'session_key' not in st.session_state:
         st.session_state['session_key'] = str(uuid.uuid4())
 
+    if 'data' not in st.session_state:
+        st.session_state['data'] = {}
+
+    if 'clicked' not in st.session_state['data']:
+        st.session_state['data']['clicked'] = True
+
     ################### Set GPT Doc session states ###################
 
     if 'gpt_doc_file_text_list_eng' not in st.session_state:
