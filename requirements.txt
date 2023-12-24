@@ -1,27 +1,55 @@
-streamlit==1.29.0
-openai==1.6.1
-langchain==0.0.352
-langchain_experimental==0.0.47
-stripe==7.10.0
-pypdf2==3.0.1
-datetime==5.4
-tenacity==8.2.3
-docx2txt==0.8
-textract==1.6.5
-numpy==1.26.2
-validate_email==1.3
-scikit-learn==1.3.2
-tiktoken==0.5.2
-requests==2.31.0
-youtube-transcript-api==0.6.1
-yt-dlp==2023.11.16
-pydub==0.25.1
-pytube==15.0.0
-unstructured==0.11.6
-openpyxl==3.1.2
-pandas==2.1.4
-pydantic==2.5.3
-altair==5.2.0
-python-dotenv==1.0.0
+# streamlit==1.29.0
+# openai==1.6.1
+# langchain==0.0.352
+# langchain_experimental==0.0.47
+# stripe==7.10.0
+# pypdf2==3.0.1
+# datetime==5.4
+# tenacity==8.2.3
+# docx2txt==0.8
+# textract==1.6.5
+# numpy==1.26.2
+# validate_email==1.3
+# scikit-learn==1.3.2
+# tiktoken==0.5.2
+# requests==2.31.0
+# youtube-transcript-api==0.6.1
+# yt-dlp==2023.11.16
+# pydub==0.25.1
+# pytube==15.0.0
+# unstructured==0.11.6
+# openpyxl==3.1.2
+# pandas==2.1.4
+# pydantic==2.5.3
+# altair==5.2.0
+# python-dotenv==1.0.0
 # azure.identity==1.15.0
 # azure.keyvault.secrets==4.7.0
+
+streamlit
+openai
+langchain
+langchain_experimental
+stripe
+pypdf2
+datetime
+tenacity
+docx2txt
+textract
+numpy
+validate_email
+scikit-learn
+tiktoken
+requests
+youtube-transcript-api
+yt-dlp
+pydub
+pytube
+unstructured
+openpyxl
+pandas
+pydantic
+altair
+python-dotenv
+azure.identity
+azure.keyvault.secrets
