@@ -10,7 +10,7 @@ from src.Intro_page import send_email_eng
 
 from dotenv import load_dotenv
 
-load_dotenv()  # read local .env file
+load_dotenv('.env')  # read local .env file
 
 success_url = "https://gptdocanalyzer.com/"
 cancel_url = "https://gptdocanalyzer.com/"

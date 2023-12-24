@@ -10,7 +10,7 @@ from src.stripe_functions_english import check_customers_eng, subscribe_to_servi
     forgot_password_eng
 from src.sessions import initialize_params
 
-load_dotenv()  # read local .env file
+load_dotenv('.env')  # read local .env file
 
 tenant_id = os.getenv("AZURE_TENANT_ID", "default-tenant-id")
 open_ai = os.getenv("OPENAI_API_KEY")

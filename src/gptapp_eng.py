@@ -18,7 +18,7 @@ from langchain.vectorstores import SKLearnVectorStore
 from src.Change_Text_Style import change_text_style_english
 from langchain.storage import InMemoryStore
 
-load_dotenv()  # read local .env file
+load_dotenv('.env')  # read local .env file
 secret_key = os.environ['OPENAI_API_KEY']
 
 stripe_publishable_key = os.environ['STRIPE_PUBLISHABLE_KEY']
