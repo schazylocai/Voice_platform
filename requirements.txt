@@ -51,5 +51,4 @@ pydantic
 altair
 python-dotenv
 # azure.identity
-# azure.keyvault.secrets
-azure-cli
+azure.keyvault.secrets
