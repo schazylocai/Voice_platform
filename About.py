@@ -12,6 +12,9 @@ from src.sessions import initialize_params
 
 load_dotenv()  # read local .env file
 
+tenant_id = os.getenv("AZURE_TENANT_ID", "default-tenant-id")
+open_ai = os.getenv("OPENAI_API_KEY")
+
 LANGCHAIN_TRACING_V2 = os.environ['LANGCHAIN_TRACING_V2']
 LANGCHAIN_ENDPOINT = os.environ['LANGCHAIN_ENDPOINT']
 LANGCHAIN_API_KEY = os.environ['LANGCHAIN_API_KEY']
