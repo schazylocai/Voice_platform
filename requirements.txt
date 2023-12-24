@@ -25,7 +25,6 @@
 # python-dotenv==1.0.0
 # azure.identity==1.15.0
 # azure.keyvault.secrets==4.7.0
-
 streamlit
 openai
 langchain
@@ -51,5 +50,5 @@ pandas
 pydantic
 altair
 python-dotenv
-azure.identity
-azure.keyvault.secrets
+# azure.identity
+# azure.keyvault.secrets
