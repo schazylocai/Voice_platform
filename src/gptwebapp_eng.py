@@ -4,6 +4,9 @@ import streamlit as st
 import os
 from dotenv import load_dotenv
 import stripe
+import PyPDF2
+from urllib.request import urlopen
+import io
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import RetrievalQA
@@ -12,6 +15,7 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferMemory
 from langchain.vectorstores import SKLearnVectorStore
+from langchain.storage import InMemoryStore
 from langchain.document_loaders import AsyncHtmlLoader
 from langchain.document_transformers import BeautifulSoupTransformer
 from src.Change_Text_Style import change_text_style_english
@@ -70,25 +74,44 @@ def launch_web_app_eng():
                 robot_response = requests.get(robots_url)
                 if response.status_code == 200:
                     try:
-                        # Load HTML
-                        loader = AsyncHtmlLoader(url)
-                        html = loader.load()
-                        # Transform
-                        bs_transformer = BeautifulSoupTransformer()
-                        docs_transformed = bs_transformer.transform_documents(html, tags_to_extract=["div"])
-                        # Result
-                        pattern = r'([A-Z])'
-                        result = docs_transformed[0].page_content
-                        result = re.sub(pattern, r' \1', result)
-                        result = result.lower()
-                        result = f'Website {url} ======> {result}'
-                        if len(result) > 0:
-                            return result
+                        # check if the document is a pdf
+                        if url.lower().endswith('.pdf'):
+                            text_list_return = []
 
-                        st.subheader(":red[Couldn't extract any information from this website]")
-                        return []
+                            remoteFile = urlopen(url).read()
+                            memoryFile = io.BytesIO(remoteFile)
+
+                            pdf_reader = PyPDF2.PdfReader(memoryFile)
+                            text = "".join(page.extract_text() for page in pdf_reader.pages)
+                            if len(text) > 5:
+                                text = text.replace("<|endofprompt|>", "")
+                                text_list_return.append(text)
+                                return text_list_return
+
+                            else:
+                                st.write(f":red[pdf weblink is empty...]")
+                                return []
+                        else:
+                            # Load HTML
+                            loader = AsyncHtmlLoader(url)
+                            html = loader.load()
+                            # Transform
+                            bs_transformer = BeautifulSoupTransformer()
+                            docs_transformed = bs_transformer.transform_documents(html, tags_to_extract=["div"])
+                            # Result
+                            pattern = r'([A-Z])'
+                            result = docs_transformed[0].page_content
+                            result = re.sub(pattern, r' \1', result)
+                            result = result.lower()
+                            result = f'Website {url} ======> {result}'
+                            if len(result) > 0:
+                                return result
+
+                            st.subheader(":red[Couldn't extract any information from this website]")
+                            return []
 
                     except Exception as e:
+                        st.write(e)
                         return []
 
                 else:
@@ -141,11 +164,14 @@ def launch_web_app_eng():
     ################################## Create final text file to pass to LLM ##################################
     st.divider()
 
-    if st.session_state.gpt_web_weblink_1_eng:
-        with st.expander('Retrieved text from website'):
-            st.write(st.session_state.gpt_web_weblink_1_eng)
-
-    st.divider()
+    # if st.session_state.gpt_web_weblink_1_eng:
+    #     with st.expander('Retrieved text from website'):
+    #         try:
+    #             st.write(st.session_state.gpt_web_weblink_1_eng)
+    #         except:
+    #             pass
+    #
+    # st.divider()
 
     ####################################### Write chat history #######################################
     for message in st.session_state.gpt_web_messages_weblinks_eng:
@@ -173,8 +199,7 @@ def launch_web_app_eng():
 
                 vector_store = SKLearnVectorStore.from_texts(texts=chunks, embedding=embedding,
                                                              persist_path=None)
-                # vector_store.persist()
-                retriever = vector_store.as_retriever(search_kwargs={"k": 1})
+
                 st.session_state.gpt_web_continue_analysis_weblink_eng = True
 
         except Exception as e:
@@ -224,16 +249,28 @@ def launch_web_app_eng():
             prompt_weblinks = PromptTemplate(template=response_template,
                                              input_variables=["history", "context", "question"])
 
-            query_model = RetrievalQA.from_chain_type(
-                llm=llm,
-                chain_type="stuff",
-                return_source_documents=False,
-                retriever=retriever,
-                chain_type_kwargs={"verbose": False,
-                                   "prompt": prompt_weblinks,
-                                   "memory": ConversationBufferMemory(memory_key="history",
-                                                                      input_key="question",
-                                                                      return_messages=True)})
+            store = InMemoryStore()
+
+            # vector_store.persist()
+
+            def execute_model(user_input, k):
+
+                retriever = vector_store.as_retriever(search_kwargs={"k": k}, docstore=store)
+
+                query_model = RetrievalQA.from_chain_type(
+                    llm=llm,
+                    chain_type="stuff",
+                    return_source_documents=False,
+                    retriever=retriever,
+                    chain_type_kwargs={"verbose": False,
+                                       "prompt": prompt_weblinks,
+                                       "memory": ConversationBufferMemory(memory_key="history",
+                                                                          input_key="question",
+                                                                          return_messages=True)})
+
+                result = query_model({"query": user_input})
+
+                return result
 
             def create_text_question():
 
@@ -247,35 +284,52 @@ def launch_web_app_eng():
 
                     with st.spinner(
                             text=":red[Query submitted. This may take a minute while we query the documents...]"):
-                        with st.chat_message('assistant'):
-                            message_placeholder = st.empty()
-                            all_results = ''
-                            chat_history = st.session_state.gpt_web_chat_history_weblinks_eng
-                            result = query_model({"query": user_input})
-                            user_query = result['query']
-                            result = result['result']
-                            st.session_state.gpt_web_chat_history_weblinks_eng.append((user_query, result))
-                            all_results += result
-                            font_link_eng = '<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">'
-                            font_family_eng = "'Roboto', sans-serif"
-                            message_placeholder.markdown(
-                                f"""
-                                    {font_link_eng}
-                                    <style>
-                                        .bold-text {{
-                                            font-family: {font_family_eng};
-                                            font-size: 22px;
-                                            color: 'white;
-                                            text-align: left;
-                                            line-height: 1.8;
-                                            font-weight: 400;
-                                        }}
-                                    </style>
-                                    <div class="bold-text"><bdi>{all_results}</bdi></div>
-                                    """, unsafe_allow_html=True)
 
-                            st.session_state.gpt_web_messages_weblinks_eng.append({'role': 'assistant', 'content': all_results})
-                            return user_input, result, user_query
+                        with st.chat_message('assistant'):
+                            try:
+                                message_placeholder = st.empty()
+                                all_results = ''
+                                chat_history = st.session_state.gpt_web_chat_history_weblinks_eng
+
+                                user_query = None
+                                result = None
+
+                                for k in range(3, 0, -1):
+                                    try:
+                                        result = execute_model(user_input, k=k)
+                                        user_query = result['query']
+                                        result = result['result']
+                                        break
+                                    except Exception:
+                                        pass
+
+                                st.session_state.gpt_web_chat_history_weblinks_eng.append((user_query, result))
+                                all_results += result
+                                font_link_eng = '<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">'
+                                font_family_eng = "'Roboto', sans-serif"
+                                message_placeholder.markdown(
+                                    f"""
+                                        {font_link_eng}
+                                        <style>
+                                            .bold-text {{
+                                                font-family: {font_family_eng};
+                                                font-size: 22px;
+                                                color: 'white;
+                                                text-align: left;
+                                                line-height: 1.8;
+                                                font-weight: 400;
+                                            }}
+                                        </style>
+                                        <div class="bold-text"><bdi>{all_results}</bdi></div>
+                                        """, unsafe_allow_html=True)
+
+                                st.session_state.gpt_web_messages_weblinks_eng.append(
+                                    {'role': 'assistant', 'content': all_results})
+                                return user_input, result, user_query
+
+                            except Exception as e:
+                                st.write(":red[Couldn't process the request. Please try again!]")
+                                st.write(e)
 
             create_text_question()
 

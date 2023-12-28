@@ -255,14 +255,12 @@ def launch_app_eng():
                 chunks = text_splitter.split_text(text=str(text_list))
                 chunks = list(chunks)
 
-                llm = ChatOpenAI(temperature=0.6, model=st.session_state.ChatOpenAI)
+                llm = ChatOpenAI(temperature=0.5, model=st.session_state.ChatOpenAI)
                 embedding = OpenAIEmbeddings()
 
                 vector_store = SKLearnVectorStore.from_texts(texts=chunks, embedding=embedding,
                                                              persist_path=None)
-                store = InMemoryStore()
-                # vector_store.persist()
-                retriever = vector_store.as_retriever(search_kwargs={"k": 3}, docstore=store)
+
                 st.session_state.gpt_doc_continue_analysis_files_eng = True
 
         except Exception as e:
@@ -313,16 +311,27 @@ def launch_app_eng():
             prompt_files = PromptTemplate(template=response_template,
                                           input_variables=["history", "context", "question"])
 
-            query_model = RetrievalQA.from_chain_type(
-                llm=llm,
-                chain_type="stuff",
-                return_source_documents=False,
-                retriever=retriever,
-                chain_type_kwargs={"verbose": False,
-                                   "prompt": prompt_files,
-                                   "memory": ConversationBufferMemory(memory_key="history",
-                                                                      input_key="question",
-                                                                      return_messages=True)})
+            store = InMemoryStore()
+            # vector_store.persist()
+
+            def execute_model(user_input, k):
+
+                retriever = vector_store.as_retriever(search_kwargs={"k": k}, docstore=store)
+
+                query_model = RetrievalQA.from_chain_type(
+                    llm=llm,
+                    chain_type="stuff",
+                    return_source_documents=False,
+                    retriever=retriever,
+                    chain_type_kwargs={"verbose": False,
+                                       "prompt": prompt_files,
+                                       "memory": ConversationBufferMemory(memory_key="history",
+                                                                          input_key="question",
+                                                                          return_messages=True)})
+
+                result = query_model({"query": user_input})
+
+                return result
 
             def create_text_question():
 
@@ -341,9 +350,19 @@ def launch_app_eng():
                                 message_placeholder = st.empty()
                                 all_results = ''
                                 chat_history = st.session_state.gpt_doc_chat_history_files_eng
-                                result = query_model({"query": user_input})
-                                user_query = result['query']
-                                result = result['result']
+
+                                user_query = None
+                                result = None
+
+                                for k in range(5, 0, -1):
+                                    try:
+                                        result = execute_model(user_input, k=k)
+                                        user_query = result['query']
+                                        result = result['result']
+                                        break
+                                    except Exception:
+                                        pass
+
                                 st.session_state.gpt_doc_chat_history_files_eng.append((user_query, result))
                                 all_results += result
                                 font_link_eng = '<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">'
