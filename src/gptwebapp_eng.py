@@ -76,21 +76,24 @@ def launch_web_app_eng():
                     try:
                         # check if the document is a pdf
                         if url.lower().endswith('.pdf'):
-                            text_list_return = []
+                            try:
+                                text_list_return = []
 
-                            remoteFile = urlopen(url).read()
-                            memoryFile = io.BytesIO(remoteFile)
+                                remoteFile = urlopen(url).read()
+                                memoryFile = io.BytesIO(remoteFile)
 
-                            pdf_reader = PyPDF2.PdfReader(memoryFile)
-                            text = "".join(page.extract_text() for page in pdf_reader.pages)
-                            if len(text) > 5:
-                                text = text.replace("<|endofprompt|>", "")
-                                text_list_return.append(text)
-                                return text_list_return
+                                pdf_reader = PyPDF2.PdfReader(memoryFile)
+                                text = "".join(page.extract_text() for page in pdf_reader.pages)
+                                if len(text) > 5:
+                                    text = text.replace("<|endofprompt|>", "")
+                                    text_list_return.append(text)
+                                    return text_list_return
 
-                            else:
-                                st.write(f":red[pdf weblink is empty...]")
-                                return []
+                                else:
+                                    st.write(f":red[pdf weblink is empty...]")
+                                    return []
+                            except:
+                                pass
                         else:
                             # Load HTML
                             loader = AsyncHtmlLoader(url)
