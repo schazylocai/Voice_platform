@@ -23,8 +23,9 @@ pandas==2.1.4
 pydantic==2.5.3
 altair==5.2.0
 python-dotenv==1.0.0
-langchain==0.0.352
 openai
+langchain==0.0.352
+langchain_openai
 langchain-core==0.1.16
 langchain-community==0.0.16
 langchain-cli==0.0.21
