@@ -8,17 +8,18 @@ import PyPDF2
 from urllib.request import urlopen
 import io
 
+from src.Change_Text_Style import change_text_style_english
+
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.chains import RetrievalQA
-from langchain.chat_models import ChatOpenAI
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.prompts import PromptTemplate
-from langchain.memory import ConversationBufferMemory
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain.vectorstores import SKLearnVectorStore
-from langchain.storage import InMemoryStore
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough, RunnableLambda, RunnableParallel
+from langchain.memory import ConversationBufferMemory
+
 from langchain.document_loaders import AsyncHtmlLoader
 from langchain.document_transformers import BeautifulSoupTransformer
-from src.Change_Text_Style import change_text_style_english
 
 load_dotenv('.env')  # read local .env file
 secret_key = os.environ['OPENAI_API_KEY']
@@ -197,11 +198,13 @@ def launch_web_app_eng():
                 chunks = text_splitter.split_text(text=str(st.session_state.gpt_web_weblink_1_eng))
                 chunks = list(chunks)
 
-                llm = ChatOpenAI(temperature=0.6, model=st.session_state.ChatOpenAI)  # gpt-4 or gpt-3.5-turbo
+                llm = ChatOpenAI(temperature=0.6, model=st.session_state.ChatOpenAI)
                 embedding = OpenAIEmbeddings()
 
                 vector_store = SKLearnVectorStore.from_texts(texts=chunks, embedding=embedding,
                                                              persist_path=None)
+                # vector_store.persist()
+                memory_web = ConversationBufferMemory(llm=llm)
 
                 st.session_state.gpt_web_continue_analysis_weblink_eng = True
 
@@ -212,8 +215,6 @@ def launch_web_app_eng():
 
         ################################### weblinks ##################################
         if st.session_state.gpt_web_continue_analysis_weblink_eng:
-
-            ##################################### RetrievalQA from chain type #####################################
 
             response_template = """
                 • You will act as an English professional and a researcher.
@@ -249,90 +250,90 @@ def launch_web_app_eng():
                 Answer:
                 """
 
-            prompt_weblinks = PromptTemplate(template=response_template,
-                                             input_variables=["history", "context", "question"])
+            def execute_model(question, k):
 
-            store = InMemoryStore()
+                ############################################################################################
+                # Contextualize the chat
+                retriever = vector_store.as_retriever(search_kwargs={"k": k})
+                prompt = ChatPromptTemplate.from_template(response_template)
+                history = st.session_state.gpt_web_chat_history_weblinks_eng
+                chain_A = (
+                        {"context": retriever,
+                         "question": RunnablePassthrough(),
+                         "history": RunnablePassthrough()}
+                        | prompt
+                )
+                chain_B = (
+                        chain_A
+                        | llm
+                        | StrOutputParser()
+                )
 
-            # vector_store.persist()
+                with st.chat_message('assistant'):
+                    try:
+                        message_placeholder = st.empty()
+                        all_results = ''
 
-            def execute_model(user_input, k):
+                        for k in range(k, 0, -1):
+                            try:
+                                for res in chain_B.stream(question):
+                                    all_results += res
+                                    font_link_eng = (
+                                        '<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400'
+                                        ';700&display=swap" rel="stylesheet">')
+                                    font_family_eng = "'Roboto', sans-serif"
+                                    message_placeholder.markdown(
+                                        f"""
+                                                                    {font_link_eng}
+                                                                    <style>
+                                                                        .bold-text {{
+                                                                            font-family: {font_family_eng};
+                                                                            font-size: 22px;
+                                                                            color: 'white;
+                                                                            text-align: left;
+                                                                            line-height: 2.2;
+                                                                            font-weight: 400;
+                                                                        }}
+                                                                    </style>
+                                                                    <div class="bold-text"><bdi>{all_results}</bdi></div>
+                                                                    """, unsafe_allow_html=True)
+                                break
+                            except Exception:
+                                pass
 
-                retriever = vector_store.as_retriever(search_kwargs={"k": k}, docstore=store)
+                        st.session_state.gpt_web_messages_weblinks_eng.append(
+                            {'role': 'assistant', 'content': all_results})
 
-                query_model = RetrievalQA.from_chain_type(
-                    llm=llm,
-                    chain_type="stuff",
-                    return_source_documents=False,
-                    retriever=retriever,
-                    chain_type_kwargs={"verbose": False,
-                                       "prompt": prompt_weblinks,
-                                       "memory": ConversationBufferMemory(memory_key="history",
-                                                                          input_key="question",
-                                                                          return_messages=True)})
+                    except Exception as e:
+                        st.write(":red[Couldn't process the request. Please try again!]")
+                        st.write(e)
 
-                result = query_model({"query": user_input})
+                return all_results
 
-                return result
+            ############################################################################################
+            # Start the chat
+            all_history = [{}]
 
             def create_text_question():
 
                 user_input = st.chat_input('Start querying the weblinks here...',
                                            max_chars=500, key='chat_weblinks_eng')
+                all_results = ''
                 if user_input:
                     with st.chat_message('user'):
                         st.markdown(user_input)
 
                     st.session_state.gpt_web_messages_weblinks_eng.append({'role': 'user', 'content': user_input})
 
-                    with st.spinner(
-                            text=":red[Query submitted. This may take a minute while we query the documents...]"):
+                    with (st.spinner(
+                            text=":red[Query submitted. This may take a minute while we query the documents...]")):
+                        all_results = execute_model(user_input, k=5)
 
-                        with st.chat_message('assistant'):
-                            try:
-                                message_placeholder = st.empty()
-                                all_results = ''
-                                chat_history = st.session_state.gpt_web_chat_history_weblinks_eng
+                if all_results:
+                    memory_web.save_context(inputs={'input': user_input}, outputs={'output': all_results})
+                    st.session_state.gpt_web_chat_history_weblinks_eng = memory_web.load_memory_variables({})
 
-                                user_query = None
-                                result = None
-
-                                for k in range(3, 0, -1):
-                                    try:
-                                        result = execute_model(user_input, k=k)
-                                        user_query = result['query']
-                                        result = result['result']
-                                        break
-                                    except Exception:
-                                        pass
-
-                                st.session_state.gpt_web_chat_history_weblinks_eng.append((user_query, result))
-                                all_results += result
-                                font_link_eng = '<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">'
-                                font_family_eng = "'Roboto', sans-serif"
-                                message_placeholder.markdown(
-                                    f"""
-                                        {font_link_eng}
-                                        <style>
-                                            .bold-text {{
-                                                font-family: {font_family_eng};
-                                                font-size: 22px;
-                                                color: 'white;
-                                                text-align: left;
-                                                line-height: 1.8;
-                                                font-weight: 400;
-                                            }}
-                                        </style>
-                                        <div class="bold-text"><bdi>{all_results}</bdi></div>
-                                        """, unsafe_allow_html=True)
-
-                                st.session_state.gpt_web_messages_weblinks_eng.append(
-                                    {'role': 'assistant', 'content': all_results})
-                                return user_input, result, user_query
-
-                            except Exception as e:
-                                st.write(":red[Couldn't process the request. Please try again!]")
-                                st.write(e)
+                return user_input
 
             create_text_question()
 

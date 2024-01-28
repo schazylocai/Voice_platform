@@ -11,15 +11,15 @@ import requests
 import streamlit as st
 import stripe
 from dotenv import load_dotenv
-from langchain.chains import RetrievalQA
-from langchain.chat_models import ChatOpenAI
+
 from langchain.document_loaders import YoutubeLoader
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.memory import ConversationBufferMemory
-from langchain.prompts import PromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain.vectorstores import SKLearnVectorStore
-from langchain.storage import InMemoryStore
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough, RunnableLambda, RunnableParallel
+from langchain.memory import ConversationBufferMemory
 
 from src.Change_Text_Style import change_text_style_english
 
@@ -187,11 +187,13 @@ def launch_youtube_app_eng():
                                                                length_function=len)
                 youtube_chunks = text_splitter.split_text(st.session_state.gpt_youtube_content_eng)
 
-                youtube_llm = ChatOpenAI(temperature=0.5, model=st.session_state.ChatOpenAI)
+                llm = ChatOpenAI(temperature=0.5, model=st.session_state.ChatOpenAI)
                 embedding = OpenAIEmbeddings()
 
                 vector_store = SKLearnVectorStore.from_texts(youtube_chunks, embedding=embedding,
                                                              persist_path=None)
+                # vector_store.persist()
+                memory_youtube = ConversationBufferMemory(llm=llm)
 
                 st.session_state.gpt_youtube_continue_analysis_eng = True
 
@@ -239,87 +241,90 @@ def launch_youtube_app_eng():
                 Answer:
                 """
 
-            prompt_youtube = PromptTemplate(template=response_template,
-                                            input_variables=["history", "context", "question"])
+            def execute_model(question, k):
 
-            store = InMemoryStore()
-            # vector_store.persist()
+                ############################################################################################
+                # Contextualize the chat
+                retriever = vector_store.as_retriever(search_kwargs={"k": k})
+                prompt = ChatPromptTemplate.from_template(response_template)
+                history = st.session_state.gpt_youtube_chat_history_eng
+                chain_A = (
+                        {"context": retriever,
+                         "question": RunnablePassthrough(),
+                         "history": RunnablePassthrough()}
+                        | prompt
+                )
+                chain_B = (
+                        chain_A
+                        | llm
+                        | StrOutputParser()
+                )
 
-            def execute_model(user_input, k):
+                with st.chat_message('assistant'):
+                    try:
+                        message_placeholder = st.empty()
+                        all_results = ''
 
-                retriever = vector_store.as_retriever(search_kwargs={"k": k}, docstore=store)
+                        for k in range(k, 0, -1):
+                            try:
+                                for res in chain_B.stream(question):
+                                    all_results += res
+                                    font_link_eng = (
+                                        '<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400'
+                                        ';700&display=swap" rel="stylesheet">')
+                                    font_family_eng = "'Roboto', sans-serif"
+                                    message_placeholder.markdown(
+                                        f"""
+                                                                    {font_link_eng}
+                                                                    <style>
+                                                                        .bold-text {{
+                                                                            font-family: {font_family_eng};
+                                                                            font-size: 22px;
+                                                                            color: 'white;
+                                                                            text-align: left;
+                                                                            line-height: 2.2;
+                                                                            font-weight: 400;
+                                                                        }}
+                                                                    </style>
+                                                                    <div class="bold-text"><bdi>{all_results}</bdi></div>
+                                                                    """, unsafe_allow_html=True)
+                                break
+                            except Exception:
+                                pass
 
-                query_model = RetrievalQA.from_chain_type(
-                    llm=youtube_llm,
-                    chain_type="stuff",
-                    return_source_documents=False,
-                    retriever=retriever,
-                    chain_type_kwargs={"verbose": False,
-                                       "prompt": prompt_youtube,
-                                       "memory": ConversationBufferMemory(memory_key="history",
-                                                                          input_key="question",
-                                                                          return_messages=True)})
+                        st.session_state.gpt_youtube_messages_eng.append(
+                            {'role': 'assistant', 'content': all_results})
 
-                result = query_model({"query": user_input})
+                    except Exception as e:
+                        st.write(":red[Couldn't process the request. Please try again!]")
+                        st.write(e)
 
-                return result
+                return all_results
+
+            ############################################################################################
+            # Start the chat
+            all_history = [{}]
 
             def create_text_question():
 
                 user_input = st.chat_input('Start querying the video here...',
                                            max_chars=500, key='chat_youtube_eng')
+                all_results = ''
                 if user_input:
                     with st.chat_message('user'):
                         st.markdown(user_input)
 
                     st.session_state.gpt_youtube_messages_eng.append({'role': 'user', 'content': user_input})
 
-                    with st.spinner(
-                            text=":red[Query submitted. This may take a minute while we query the content...]"):
-                        with st.chat_message('assistant'):
-                            try:
-                                message_placeholder = st.empty()
-                                all_results = ''
-                                chat_history = st.session_state.gpt_youtube_chat_history_eng
+                    with (st.spinner(
+                            text=":red[Query submitted. This may take a minute while we query the content...]")):
+                        all_results = execute_model(user_input, k=5)
 
-                                user_query = None
-                                result = None
+                if all_results:
+                    memory_youtube.save_context(inputs={'input': user_input}, outputs={'output': all_results})
+                    st.session_state.gpt_youtube_chat_history_eng = memory_youtube.load_memory_variables({})
 
-                                for k in range(3, 0, -1):
-                                    try:
-                                        result = execute_model(user_input, k=k)
-                                        user_query = result['query']
-                                        result = result['result']
-                                        break
-                                    except Exception as e:
-                                        pass
-
-                                st.session_state.gpt_youtube_chat_history_eng.append((user_query, result))
-                                all_results += result
-                                font_link_eng = '<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">'
-                                font_family_eng = "'Roboto', sans-serif"
-                                message_placeholder.markdown(
-                                    f"""
-                                        {font_link_eng}
-                                        <style>
-                                            .bold-text {{
-                                                font-family: {font_family_eng};
-                                                font-size: 22px;
-                                                color: 'white;
-                                                text-align: left;
-                                                line-height: 1.8;
-                                                font-weight: 400;
-                                            }}
-                                        </style>
-                                        <div class="bold-text"><bdi>{all_results}</bdi></div>
-                                        """, unsafe_allow_html=True)
-
-                                st.session_state.gpt_youtube_messages_eng.append({'role': 'assistant', 'content': all_results})
-                                return user_input, result, user_query
-
-                            except Exception as e:
-                                st.write(":red[Couldn't process the request. Please try again!]")
-                                st.write(e)
+                return user_input
 
             create_text_question()
 

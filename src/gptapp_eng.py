@@ -16,8 +16,7 @@ from langchain.vectorstores import SKLearnVectorStore
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda, RunnableParallel
-from langchain.memory import ConversationSummaryMemory, ConversationBufferMemory
-from operator import itemgetter
+from langchain.memory import ConversationBufferMemory
 
 load_dotenv('.env')  # read local .env file
 secret_key = os.environ['OPENAI_API_KEY']
@@ -261,21 +260,20 @@ def launch_app_eng():
 
                 vector_store = SKLearnVectorStore.from_texts(texts=chunks, embedding=embedding,
                                                              persist_path=None)
-                # store = InMemoryStore()
                 # vector_store.persist()
-                memory = ConversationSummaryMemory(llm=llm)
+                memory_doc = ConversationBufferMemory(llm=llm)
 
                 st.session_state.gpt_doc_continue_analysis_files_eng = True
 
         except Exception as e:
             st.subheader(":red[An error occurred. Please delete the uploaded file, and then uploaded it again]")
             st.session_state.gpt_doc_continue_analysis_files_eng = False
-            st.markdown(e)
+            # st.markdown(e)
 
         #################################### documents ####################################
         if st.session_state.gpt_doc_continue_analysis_files_eng:
 
-            template = """
+            response_template = """
                 • You will act as an English professional and a researcher.
                 • Your task is to reply only in English even if the question is in another language.
                 • Your task is to read through research papers, documents, journals, manuals, and articles.
@@ -312,7 +310,7 @@ def launch_app_eng():
                 ############################################################################################
                 # Contextualize the chat
                 retriever = vector_store.as_retriever(search_kwargs={"k": k})
-                prompt = ChatPromptTemplate.from_template(template)
+                prompt = ChatPromptTemplate.from_template(response_template)
                 history = st.session_state.gpt_doc_chat_history_files_eng
                 chain_A = (
                         {"context": retriever,
@@ -387,8 +385,8 @@ def launch_app_eng():
                         all_results = execute_model(user_input, k=5)
 
                 if all_results:
-                    memory.save_context(inputs={'input': user_input}, outputs={'output': all_results})
-                    st.session_state.gpt_doc_chat_history_files_eng = memory.load_memory_variables({})
+                    memory_doc.save_context(inputs={'input': user_input}, outputs={'output': all_results})
+                    st.session_state.gpt_doc_chat_history_files_eng = memory_doc.load_memory_variables({})
 
                 return user_input
 
