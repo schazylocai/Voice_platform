@@ -8,15 +8,16 @@ import textract
 import tempfile
 import smtplib
 
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.chains import RetrievalQA
-from langchain.chat_models import ChatOpenAI
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.prompts import PromptTemplate
-from langchain.memory import ConversationBufferMemory
-from langchain.vectorstores import SKLearnVectorStore
 from src.Change_Text_Style import change_text_style_english
-from langchain.storage import InMemoryStore
+
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain.vectorstores import SKLearnVectorStore
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough, RunnableLambda, RunnableParallel
+from langchain.memory import ConversationSummaryMemory, ConversationBufferMemory
+from operator import itemgetter
 
 load_dotenv('.env')  # read local .env file
 secret_key = os.environ['OPENAI_API_KEY']
@@ -260,6 +261,9 @@ def launch_app_eng():
 
                 vector_store = SKLearnVectorStore.from_texts(texts=chunks, embedding=embedding,
                                                              persist_path=None)
+                # store = InMemoryStore()
+                # vector_store.persist()
+                memory = ConversationSummaryMemory(llm=llm)
 
                 st.session_state.gpt_doc_continue_analysis_files_eng = True
 
@@ -271,17 +275,14 @@ def launch_app_eng():
         #################################### documents ####################################
         if st.session_state.gpt_doc_continue_analysis_files_eng:
 
-            # RetrievalQA from chain type ##########
-
-            response_template = """
+            template = """
                 • You will act as an English professional and a researcher.
                 • Your task is to reply only in English even if the question is in another language.
                 • Your task is to read through research papers, documents, journals, manuals, and articles.
                 • You should be analytical, thoughtful, and reply in depth and details to any question.
-                • Before giving your answer, you should look through all the documents in the provided text.
-                • Always keep the History of the chat in your memory from the text stored in the variable chat_history
-                • If the user asks about a previous question, then you can look into the history using the text
-                  stored in the variable chat_history.
+                • Before giving your answer, you should search through all the documents in the provided text.
+                • Before you reply to any query, take a deep breath, break the task at hand into sub tasks.
+                • Once you have broken down the sub tasks, analyze each sub task and report.
                 • If you suspect bias in the answer, then highlight the concerned sentence or paragraph in quotation
                   marks and write: "It is highly likely that this sentence or paragraph is biased".
                   Explain why you think it is biased.
@@ -296,100 +297,100 @@ def launch_app_eng():
                 • Add references when possible related to questions from the given documents only, in bullet points,
                   each one separately, at the end of your answer.
                 
-                <ctx>
+                Answer the question based only on the following context:
+                --------
                 {context}
-                </ctx>
                 --------
-                <hs>
-                {history}
-                </hs>
+                history: {history}
                 --------
-                {question}
-                Answer:
+                Question: {question}
+                --------
                 """
 
-            prompt_files = PromptTemplate(template=response_template,
-                                          input_variables=["history", "context", "question"])
+            def execute_model(question, k):
 
-            store = InMemoryStore()
-            # vector_store.persist()
+                ############################################################################################
+                # Contextualize the chat
+                retriever = vector_store.as_retriever(search_kwargs={"k": k})
+                prompt = ChatPromptTemplate.from_template(template)
+                history = st.session_state.gpt_doc_chat_history_files_eng
+                chain_A = (
+                        {"context": retriever,
+                         "question": RunnablePassthrough(),
+                         "history": RunnablePassthrough()}
+                        | prompt
+                )
+                chain_B = (
+                        chain_A
+                        | llm
+                        | StrOutputParser()
+                )
 
-            def execute_model(user_input, k):
+                with st.chat_message('assistant'):
+                    try:
+                        message_placeholder = st.empty()
+                        all_results = ''
 
-                retriever = vector_store.as_retriever(search_kwargs={"k": k}, docstore=store)
+                        for k in range(k, 0, -1):
+                            try:
+                                for res in chain_B.stream(question):
+                                    all_results += res
+                                    font_link_eng = (
+                                        '<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400'
+                                        ';700&display=swap" rel="stylesheet">')
+                                    font_family_eng = "'Roboto', sans-serif"
+                                    message_placeholder.markdown(
+                                        f"""
+                                                                    {font_link_eng}
+                                                                    <style>
+                                                                        .bold-text {{
+                                                                            font-family: {font_family_eng};
+                                                                            font-size: 22px;
+                                                                            color: 'white;
+                                                                            text-align: left;
+                                                                            line-height: 2.2;
+                                                                            font-weight: 400;
+                                                                        }}
+                                                                    </style>
+                                                                    <div class="bold-text"><bdi>{all_results}</bdi></div>
+                                                                    """, unsafe_allow_html=True)
+                                break
+                            except Exception:
+                                pass
 
-                query_model = RetrievalQA.from_chain_type(
-                    llm=llm,
-                    chain_type="stuff",
-                    return_source_documents=False,
-                    retriever=retriever,
-                    chain_type_kwargs={"verbose": False,
-                                       "prompt": prompt_files,
-                                       "memory": ConversationBufferMemory(memory_key="history",
-                                                                          input_key="question",
-                                                                          return_messages=True)})
+                        st.session_state.gpt_doc_messages_files_eng.append(
+                            {'role': 'assistant', 'content': all_results})
 
-                result = query_model({"query": user_input})
+                    except Exception as e:
+                        st.write(":red[Couldn't process the request. Please try again!]")
+                        st.write(e)
 
-                return result
+                return all_results
+
+            ############################################################################################
+            # Start the chat
+            all_history = [{}]
 
             def create_text_question():
 
                 user_input = st.chat_input('Start querying the document here...',
                                            max_chars=500, key='chat_files_eng')
+                all_results = ''
                 if user_input:
                     with st.chat_message('user'):
                         st.markdown(user_input)
 
                     st.session_state.gpt_doc_messages_files_eng.append({'role': 'user', 'content': user_input})
 
-                    with st.spinner(
-                            text=":red[Query submitted. This may take a minute while we query the documents...]"):
-                        with st.chat_message('assistant'):
-                            try:
-                                message_placeholder = st.empty()
-                                all_results = ''
-                                chat_history = st.session_state.gpt_doc_chat_history_files_eng
+                    with (st.spinner(
+                            text=":red[Query submitted. This may take a minute while we query the documents...]")):
+                        all_results = execute_model(user_input, k=5)
 
-                                user_query = None
-                                result = None
+                if all_results:
+                    memory.save_context(inputs={'input': user_input}, outputs={'output': all_results})
+                    st.session_state.gpt_doc_chat_history_files_eng = memory.load_memory_variables({})
 
-                                for k in range(5, 0, -1):
-                                    try:
-                                        result = execute_model(user_input, k=k)
-                                        user_query = result['query']
-                                        result = result['result']
-                                        break
-                                    except Exception:
-                                        pass
-
-                                st.session_state.gpt_doc_chat_history_files_eng.append((user_query, result))
-                                all_results += result
-                                font_link_eng = '<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">'
-                                font_family_eng = "'Roboto', sans-serif"
-                                message_placeholder.markdown(
-                                    f"""
-                                        {font_link_eng}
-                                        <style>
-                                            .bold-text {{
-                                                font-family: {font_family_eng};
-                                                font-size: 22px;
-                                                color: 'white;
-                                                text-align: left;
-                                                line-height: 2.2;
-                                                font-weight: 400;
-                                            }}
-                                        </style>
-                                        <div class="bold-text"><bdi>{all_results}</bdi></div>
-                                        """, unsafe_allow_html=True)
-
-                                st.session_state.gpt_doc_messages_files_eng.append(
-                                    {'role': 'assistant', 'content': all_results})
-                                return user_input, result, user_query
-
-                            except Exception as e:
-                                st.write(":red[Couldn't process the request. Please try again!]")
-                                st.write(e)
+                return user_input
 
             create_text_question()
 

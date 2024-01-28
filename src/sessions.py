@@ -6,7 +6,7 @@ import pandas as pd
 def initialize_params():
     ##################### Define LLM Model ####################
 
-    llm_model = 'gpt-4-1106-preview'  # gpt-4 or gpt-3.5-turbo or gpt-3.5-turbo-16k or gpt-4-1106-preview
+    llm_model = 'gpt-4-0125-preview'  # gpt-4 or gpt-3.5-turbo or gpt-3.5-turbo-16k or gpt-4-0125-preview
 
     ################### Set default states ###################
 
