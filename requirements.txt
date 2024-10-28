@@ -1,6 +1,6 @@
 transformers
-torch
-torchaudio
+torch==2.5.0
+torchaudio==2.5.0
 streamlit
 pydub
 mutagen
