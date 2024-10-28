@@ -1,8 +1,9 @@
-streamlit
+transformers
 torch
 torchaudio
-transformers
-ffmpeg
+streamlit
 pydub
-ffmpeg-python
 mutagen
+ffprobe
+ffmpeg
+
