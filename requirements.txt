@@ -1,9 +1,8 @@
 transformers
-torch==2.5.0
-torchaudio==2.5.0
+torch
+torchaudio
 streamlit
 pydub
 mutagen
 ffprobe
 ffmpeg-python
-
