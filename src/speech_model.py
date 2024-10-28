@@ -6,6 +6,10 @@ import subprocess
 import time
 import os
 import json
+from fastapi import FastAPI, HTTPException, Request
+import jsonify
+
+app = FastAPI()
 
 # Caching the model and processor to load only once
 @st.cache_resource
@@ -51,9 +55,22 @@ def preprocess_audio(input_path, output_path):
         return False, f"Error processing audio: {str(e)}"
 
 # Streamlit UI
-def start_transcribing():
+@app.post("/transcribe")
+async def start_transcribing(request: Request):
+    data = await request.json()
+    file_path = data.get("file_path")
+    model_path = data.get("model_path")
+
+    if not file_path or not os.path.exists(file_path):
+        return {"error": "File path is invalid or file does not exist"}
+    if not model_path or not os.path.exists('/models/' + model_path):
+        return {"error": "Model path is invalid or does not exist"}
+
+    preprocessed_path = "/models/preprocessed_audio.wav"  # Temporary path for the processed audio
+
     st.title(":violet[Mira Speech to Text]")
     st.subheader(":violet[Upload an audio file to transcribe.]")
+    st.divider()
 
     uploaded_file = st.file_uploader("Choose an audio file",
                                      type=["wav", "mp3", "m4a"],
@@ -77,10 +94,10 @@ def start_transcribing():
 
         # Load model
         with st.spinner('Loading model...'):
-            processor, model = load_model()
+            processor, model = load_model(model_path)
 
         # Transcribe
-        audio_input, sampling_rate = torchaudio.load(output_path)
+        audio_input, sampling_rate = torchaudio.load(preprocessed_path)
         audio_input = audio_input.squeeze().numpy()
 
         if sampling_rate != 16000:
