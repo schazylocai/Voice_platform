@@ -3,5 +3,7 @@ torch
 torchaudio
 transformers
 ffmpeg
-ffprobe
+pydub
+ffmpeg-python
+
 
