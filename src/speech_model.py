@@ -52,10 +52,12 @@ def preprocess_audio(input_path, output_path):
 
 # Streamlit UI
 def start_transcribing():
-    st.title("Mira Speech to Text")
-    st.write("Upload an audio file to transcribe.")
+    st.title(":violet[Mira Speech to Text]")
+    st.subheader(":violet[Upload an audio file to transcribe.]")
 
-    uploaded_file = st.file_uploader("Choose an audio file", type=["wav", "mp3", "m4a"])
+    uploaded_file = st.file_uploader("Choose an audio file",
+                                     type=["wav", "mp3", "m4a"],
+                                     label_visibility='collapsed')
 
     if uploaded_file is not None:
         input_path = f"/tmp/{uploaded_file.name}"

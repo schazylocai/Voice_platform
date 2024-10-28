@@ -2,7 +2,4 @@ transformers
 torch
 torchaudio
 streamlit
-pydub
-mutagen
-ffprobe
 ffmpeg-python
