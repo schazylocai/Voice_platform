@@ -5,5 +5,5 @@ streamlit
 pydub
 mutagen
 ffprobe
-ffmpeg
+ffmpeg-python
 
