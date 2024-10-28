@@ -5,5 +5,4 @@ transformers
 ffmpeg
 pydub
 ffmpeg-python
-
-
+mutagen
